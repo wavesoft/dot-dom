@@ -1,6 +1,6 @@
 # .dom
 
-> A tiny (450 byte) template engine for embedded projects
+> A tiny (450 byte) virtual DOM template engine for embedded projects
 
 **.dom** borrows some principles from React.js, such as the *Virtual DOM* and
 the *Functional Components*, while trying to achieve minimal size footprint.
@@ -31,16 +31,16 @@ Rendering a very simple DOM structure.
     <th>.dom</th>
   </tr>
   <tr>
-    <td>
-<pre>
+    <td valign="top">
+<pre lang="javascript">
 ReactDOM.render(
   React.createElement('div', null, 'Hello world'),
   document.body
 );
 </pre>
     </td>
-    <td>
-<pre highlight="js">
+    <td valign="top">
+<pre lang="javascript">
 R(
   div('Hello world'),
   document.body
@@ -60,8 +60,8 @@ How to create a component on which you can pass properties.
     <th>.dom</th>
   </tr>
   <tr>
-    <td>
-<pre>
+    <td valign="top">
+<pre lang="javascript">
 class Hello extends React.Component {
   render() {
     return React.createElement(
@@ -78,8 +78,8 @@ ReactDOM.render(
 );
 </pre>
     </td>
-    <td>
-<pre highlight="js">
+    <td valign="top">
+<pre lang="javascript">
 function Hello(props) {
   return div(`Hello ${props.toWhat}`);
 }
@@ -103,8 +103,8 @@ Components can have their own state.
     <th>.dom</th>
   </tr>
   <tr>
-    <td>
-<pre>
+    <td valign="top">
+<pre lang="javascript">
 class Clickable extends React.Component {
   constructor() {
     super(...arguments);
@@ -135,8 +135,8 @@ ReactDOM.render(
 );
 </pre>
     </td>
-    <td>
-<pre highlight="js">
+    <td valign="top">
+<pre lang="javascript">
 function Clickable(props, state, setState) {
   const {clicks=0} = state;
 
@@ -161,3 +161,38 @@ R(
     </td>
   </tr>
 </table>
+
+## API Reference
+
+### `R( VNode, DOMElement )`
+
+```js
+R( div('Hello'), document.body )
+```
+
+Renders the given VNode tree to the given DOM element.
+
+### `H( tagName | function, [properties], [children ...])`
+
+```js
+H( 'tag' )
+H( 'tag', {prop: "value"})
+H( 'tag', H( 'child' ))
+H( 'tag', {prop: "value"}, H( 'child' ))
+H( Component, {prop: "value"} )
+```
+
+Creates a VNode element. If a string is passed as the first argument, it will
+create a HTML element. If a function is given, it will create a stateful
+component.
+
+Properties and children are optional and they can be ommitted.
+
+### `div( [properties], [children ...] )
+
+```js
+div( 'hello' )
+```
+
+A shorthand function for creating most of the commonly-used HTML tags. This
+behaves exactly like `H`, but with the tag name already populated.
