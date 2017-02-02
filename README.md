@@ -15,6 +15,12 @@ Just include `dotdom.min.js` to your project.
 <script src="dotdom.min.js" />
 ```
 
+Or include this snippet before your script:
+
+```js
+((a,b,c,d,e,f,g)=>{String.prototype[d]=1,a.H=f=(h,i={},...j)=>({[d]:1,E:h,P:i[d]&&j.unshift(i)&&{C:j}||(i.C=j)&&i}),a.R=g=(h,i,j,k=h.E,l=h.P)=>h.trim?i.appendChild(b.createTextNode(h)):k.call?(j=(m,n)=>n=g(k(l,m,o=>i.replaceChild(j(c.assign(m,o)),n)),i))({}):c.keys(l).reduce((m,n,o,p,q=l[n])=>('C'==n?q.map(r=>g(r,m)):'style'==n?c.assign(m[n],q):/^on/.exec(n)?m.addEventListener(n.substr(2),q):m.setAttribute(n,q))&&m||m,i.appendChild(b.createElement(k))),e.split('.').map(h=>a[h]=f.bind(a,h))})(window,document,Object,Symbol(),'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.select');
+```
+
 ## Examples
 
 If you already know React.js, the following examples can help you understand
