@@ -5,8 +5,7 @@
 **.dom** borrows some principles from React.js, such as the *Virtual DOM* and
 the *Functional Components*, while trying to achieve minimal size footprint.
 
-Of course, it's not a fully-fledged React alternative, rather a stripped-down
-version for use on tight space requirements.
+Of course, it's nothing even close to React, rather a tiny alternative with some functional relations to React, for use in super-tight space requirements (like an IoT web server).
 
 ## Installation
 
@@ -164,7 +163,7 @@ R(
 
 ## API Reference
 
-### `R( VNode, DOMElement )`
+### Render `R( VNode, DOMElement )`
 
 ```js
 R( div('Hello'), document.body )
@@ -172,7 +171,7 @@ R( div('Hello'), document.body )
 
 Renders the given VNode tree to the given DOM element.
 
-### `H( tagName | function, [properties], [children ...])`
+### Create Element `H( tagName | function, [properties], [children ...])`
 
 ```js
 H( 'tag' )
@@ -188,7 +187,7 @@ component.
 
 Properties and children are optional and they can be ommitted.
 
-### `div( [properties], [children ...] )
+### Tag Shorthand `tag( [properties], [children ...] )`
 
 ```js
 div( 'hello', span( 'world' ) )
@@ -197,3 +196,8 @@ div( 'click', a({href: '#'}, 'Here'), 'to continue')
 
 A shorthand function for creating most of the commonly-used HTML tags. This
 behaves exactly like `H`, but with the tag name already populated.
+
+## Caveats
+
+- **There is currently no proper child reconciliation algorithm.** This means that if you call `R()` on a DOM element for a second time you will end-up appending the new data.
+- **Since there is no reconciliation, you cannot perserve state of nested stateful components**. This means that if you nest two stateful components and the parent one changes state, the child will reset to it's default values. To mitigate this, use only one root stateful component and use plain components (passing down properties) for all the children
