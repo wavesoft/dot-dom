@@ -191,7 +191,8 @@ Properties and children are optional and they can be ommitted.
 ### `div( [properties], [children ...] )
 
 ```js
-div( 'hello' )
+div( 'hello', span( 'world' ) )
+div( 'click', a({href: '#'}, 'Here'), 'to continue')
 ```
 
 A shorthand function for creating most of the commonly-used HTML tags. This
