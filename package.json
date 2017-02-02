@@ -1,0 +1,28 @@
+{
+  "name": "dotdom",
+  "version": "0.1.0",
+  "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
+  "main": "dotdom.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/babili src/dotdom.js | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wavesoft/dotdom.git"
+  },
+  "keywords": [
+    "react",
+    "virtualdom",
+    "template"
+  ],
+  "author": "Ioannis Charalampidis",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/wavesoft/dotdom/issues"
+  },
+  "homepage": "https://github.com/wavesoft/dotdom#readme",
+  "devDependencies": {
+    "babili": "0.0.10"
+  }
+}
