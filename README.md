@@ -2,10 +2,7 @@
 
 > A tiny (511 byte) virtual DOM template engine for embedded projects
 
-**.dom** borrows some principles from React.js, such as the *Virtual DOM* and
-the *Functional Components*, while trying to achieve minimal size footprint.
-
-Of course, it's nothing even close to React, rather a tiny alternative with some functional relations to React, for use in super-tight space requirements (like an IoT web server).
+**.dom** borrows some concepts from React.js (such as the Virtual DOM) and tries to immitate them with the least possible code. Why would you consider even doing this? Because with such library you can create powerful GUIs in tight space environments, such as IoT devices.
 
 ## Installation
 
@@ -23,7 +20,7 @@ Alternatively you can just include the minified version of the library directly 
 
 ## Examples
 
-If you already know React.js, the following examples can help you understand
+If you already know React.js, the following examples can help you understand how
 the .dom primitives relate to React.
 
 #### 1. Plain DOM
@@ -57,7 +54,7 @@ R(
 
 #### 2. Simple component
 
-How to create a component on which you can pass properties.
+Creating a component on which you can pass properties.
 
 <table width="100%">
   <tr>
@@ -100,7 +97,7 @@ R(
 
 #### 3. Stateful component
 
-Components can have their own state.
+Creating components that can maintain their own state.
 
 <table width="100%">
   <tr>
@@ -175,7 +172,8 @@ R(
 R( div('Hello'), document.body )
 ```
 
-Renders the given VNode tree to the given DOM element.
+Renders the given VNode tree to the given DOM element. Further updates from
+stateful components will only occur on their immediate children.
 
 ### Create Element `H( tagName | function, [properties], [children ...])`
 
@@ -202,6 +200,11 @@ div( 'click', a({href: '#'}, 'Here'), 'to continue')
 
 A shorthand function for creating most of the commonly-used HTML tags. This
 behaves exactly like `H`, but with the tag name already populated.
+
+The following tags are available as shorthand methods:
+
+> a, b, button, div, form, h1, h2, h3, h4, i, img, input, label, li, ol,
+> option, p, select, span, table, td, th, tr, ul
 
 ## Caveats
 
