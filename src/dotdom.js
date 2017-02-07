@@ -1,4 +1,4 @@
-((global, document, Object, vnodeFlag, expandTags, createElement, render) => {
+((global, document, Object, vnodeFlag, expandTags, createElement, render, global_state={}) => {
 
   // Make all strings considered child nodes
   String.prototype[vnodeFlag] = 1;
@@ -27,7 +27,7 @@
    * @param {DOMElement} - The HTML DOM element
    * @returns {DOMElement} - The rendered DOM element
    */
-  global.R = render = (vnode, dom, _render, _element=vnode.E, _props=vnode.P) =>
+  global.R = render = (vnode, dom, _path='', _update, _element=vnode.E, _props=vnode.P) =>
 
     vnode.trim                                                        // Strings have a `.trim` function
 
@@ -40,31 +40,51 @@
 
                                                                       // ** Stateful Render **
 
-    ? (_render = (state, _instance) =>                                // Create a heper function that will be called
-                                                                      // when the component has changed.
+    ? (_update = (                                                    // Create a helper function that will be called
+                                                                      // when the component is updated.
 
-        _instance = render(                                           // Keep a reference to the DOM element mounted in
-                                                                      // order to be able to remove it on update
+          state = [{}],                                               // Default falue if the global state is missing
 
-          _element(                                                   // Call the component function passing down:
-            _props,                                                   // 1) Properties
-            state,                                                    // 2) State
-            (newState) =>                                             // 3) setState(newState) function
-                dom.replaceChild(                                     // We trigger a new render cycle, replacing
-                  _render(                                            // the old DOM element with the render result.
+          _state =
+            state[1] == _element                                      // If the global state holds stale information
+            ? state[0]                                                // about the component we are rendering, then
+            : (global_state[_path] = [{}])[0],                        // reset the state object
 
-                    Object.assign(                                    // We pass down to the render function the updated
-                      state,                                          // state.
+          _instance                                                   // Local variable for the mounted DOM instance
+        ) =>
+        _instance = render(                                           // In the update function we render the new DOM
+                                                                      // element and we keep track of it
+
+          _element(                                                   // We call the component function to create the
+                                                                      // new virtual DOM, passing the following props:
+            _props,                                                   // - The properties of the component
+            _state,                                                   // - The current state of the component
+            newState => {                                              // - The `setState` function
+
+              dom.replaceChild(                                       // The setState function replaces the previous
+                                                                      // DOM instance with the re-render of the
+                                                                      // component, by calling the update function
+                _update(
+                  global_state[_path] = [                             // We also update the global state for the
+                                                                      // component path, ensuring that we keep:
+                    Object.assign(                                    // - The new state
+                      _state,
                       newState
-                    )
-
-                  ),
-                  _instance
-                )
+                    ),
+                    _element                                          // - The component function, to use it for
+                                                                      //   stale detection (check above)
+                  ]
+                ),
+                _instance
+              )
+              console.log(global_state);
+            }
           ),
-          dom
+          dom,
+          _path
         )
-      )({})                                                           // Initial call of the render cycle
+      )(global_state[_path])                                          // We pass the current state of this component
+                                                                      // that will default to `[{}, undefined]`
 
                                                                       // ** Native Render **
 
@@ -81,10 +101,11 @@
           (
             key == 'C' ?                                              // ## Children ##
 
-              _value.map((child) =>                                   // DOM VNodes are iterated through
+              _value.map((child,i) =>                                 // DOM VNodes are iterated through
                   render(
                     child,
-                    instance
+                    instance,
+                    _path+'.'+i
                   )
                 )
 
@@ -135,4 +156,4 @@
         global[dom] = createElement.bind(global, dom)
     )
 
-})(window, document, Object, Symbol(), 'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.select');
+})(window, document, Object, Symbol(), 'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option');

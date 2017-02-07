@@ -1,6 +1,6 @@
 # .dom
 
-> A tiny (450 byte) virtual DOM template engine for embedded projects
+> A tiny (511 byte) virtual DOM template engine for embedded projects
 
 **.dom** borrows some principles from React.js, such as the *Virtual DOM* and
 the *Functional Components*, while trying to achieve minimal size footprint.
@@ -9,16 +9,16 @@ Of course, it's nothing even close to React, rather a tiny alternative with some
 
 ## Installation
 
-For minimum footprint, include `dotdom.min.js.gz` (450b) to your project.
+For minimum footprint, include `dotdom.min.js.gz` (511b) to your project.
 
 ```html
 <script src="dotdom.min.js.gz" />
 ```
 
-Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (616b):
+Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (716b):
 
 ```js
-((a,b,c,d,e,f,g)=>{String.prototype[d]=1,a.H=f=(h,i={},...j)=>({[d]:1,E:h,P:i[d]&&j.unshift(i)&&{C:j}||(i.C=j)&&i}),a.R=g=(h,i,j,k=h.E,l=h.P)=>h.trim?i.appendChild(b.createTextNode(h)):k.call?(j=(m,n)=>n=g(k(l,m,o=>i.replaceChild(j(c.assign(m,o)),n)),i))({}):c.keys(l).reduce((m,n,o,p,q=l[n])=>('C'==n?q.map(r=>g(r,m)):'style'==n?c.assign(m[n],q):/^on/.exec(n)?m.addEventListener(n.substr(2),q):m.setAttribute(n,q))&&m||m,i.appendChild(b.createElement(k))),e.split('.').map(h=>a[h]=f.bind(a,h))})(window,document,Object,Symbol(),'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.select');
+((a,b,c,d,e,f,g,h={})=>{String.prototype[d]=1,a.H=f=(j,k={},...l)=>({[d]:1,E:j,P:k[d]&&l.unshift(k)&&{C:l}||(k.C=l)&&k}),a.R=g=(j,k,l='',m,n=j.E,o=j.P)=>j.trim?k.appendChild(b.createTextNode(j)):n.call?(m=(p=[{}],q=p[1]==n?p[0]:(h[l]=[{}])[0],r)=>r=g(n(o,q,s=>{k.replaceChild(m(h[l]=[c.assign(q,s),n]),r),console.log(h)}),k,l))(h[l]):c.keys(o).reduce((p,q,r,s,t=o[q])=>('C'==q?t.map((u,v)=>g(u,p,l+'.'+v)):'style'==q?c.assign(p[q],t):/^on/.exec(q)?p.addEventListener(q.substr(2),t):p.setAttribute(q,t))&&p||p,k.appendChild(b.createElement(n))),e.split('.').map(j=>a[j]=f.bind(a,j))})(window,document,Object,Symbol(),'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option');
 ```
 
 ## Examples
@@ -205,5 +205,4 @@ behaves exactly like `H`, but with the tag name already populated.
 
 ## Caveats
 
-- **There is currently no proper child reconciliation algorithm.** This means that if you call `R()` on a DOM element for a second time you will end-up appending the new data.
-- **Since there is no reconciliation, you cannot perserve state of nested stateful components**. This means that if you nest two stateful components and the parent one changes state, the child will reset to it's default values. To mitigate this, use only one root stateful component and use plain components (passing down properties) for all the children
+- **There is currently no proper child reconciliation algorithm.** This means that if you call `R()` on a DOM element for a second time you will end-up appending the new data. Also, this means that most of the DOM is re-created on every `setState`, so use it with caution.
