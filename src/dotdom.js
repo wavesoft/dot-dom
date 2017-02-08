@@ -1,4 +1,4 @@
-((global, document, Object, vnodeFlag, expandTags, createElement, render, global_state={}) => {
+((global, document, Object, vnodeFlag, createElement, render, global_state={}) => {
 
   // Make all strings considered child nodes
   String.prototype[vnodeFlag] = 1;
@@ -59,7 +59,7 @@
                                                                       // new virtual DOM, passing the following props:
             _props,                                                   // - The properties of the component
             _state,                                                   // - The current state of the component
-            newState => {                                              // - The `setState` function
+            newState =>                                               // - The `setState` function
 
               dom.replaceChild(                                       // The setState function replaces the previous
                                                                       // DOM instance with the re-render of the
@@ -77,8 +77,6 @@
                 ),
                 _instance
               )
-              console.log(global_state);
-            }
           ),
           dom,
           _path
@@ -149,11 +147,11 @@
   /**
    * Expand some of the default tags
    */
-  expandTags
+  'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'
     .split('.')
     .map(
       (dom) =>
         global[dom] = createElement.bind(global, dom)
     )
 
-})(window, document, Object, Symbol(), 'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option');
+})(window, document, Object, Symbol());

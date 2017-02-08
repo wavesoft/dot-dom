@@ -1,12 +1,12 @@
 # .dom
 
-> A tiny (511 byte) virtual DOM template engine for embedded projects
+> A tiny (500 byte) virtual DOM template engine for embedded projects
 
 **.dom** borrows some concepts from React.js (such as the Virtual DOM) and tries to immitate them with the least possible code. Why would you consider even doing this? Because with such library you can create powerful GUIs in tight space environments, such as IoT devices.
 
 ## Installation
 
-For minimum footprint, include `dotdom.min.js.gz` (511b) to your project.
+For minimum footprint, include `dotdom.min.js.gz` (500b) to your project.
 
 ```html
 <script src="dotdom.min.js.gz" />
