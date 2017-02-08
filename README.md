@@ -1,4 +1,5 @@
-# .dom
+# .dom [![Build Status](https://travis-ci.org/wavesoft/dotdom.svg?branch=master)](https://travis-ci.org/wavesoft/dotdom)
+
 
 > A tiny (455 byte) virtual DOM template engine for embedded projects
 
