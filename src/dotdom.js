@@ -139,8 +139,20 @@
   'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'
     .split('.')
     .map(
-      (dom) =>
-        global[dom] = createElement.bind(global, dom)
+      (dom) =>                                                        // We are creating a proxy object for every
+        global[dom] = new Proxy(                                      // tag in order to be able to customize the
+                                                                      // class name via a shorthand.
+
+          createElement.bind(global, dom),                            // The proxied object is the createElement
+          {                                                           // function bound to the tag name
+            get: (targetFn, className, _instance) =>
+              (...args) => (
+                (_instance=targetFn(...args))                         // We first create the Virtual DOM instance
+                  .P.className = className,                           // and we then update the `className` property
+                _instance
+              )
+          }
+        )
     )
 
 })(window, document, Object, Symbol());
