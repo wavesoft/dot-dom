@@ -4,7 +4,7 @@
   "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
   "main": "dotdom.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/.bin/jest",
     "build": "./node_modules/.bin/babili src/dotdom.js | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
   },
   "repository": {
@@ -23,6 +23,12 @@
   },
   "homepage": "https://github.com/wavesoft/dotdom#readme",
   "devDependencies": {
-    "babili": "0.0.10"
+    "babel-core": "^6.22.1",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-register": "^6.22.0",
+    "babili": "0.0.10",
+    "jest": "^18.1.0",
+    "mock-browser": "^0.92.12",
+    "watch": "^1.0.1"
   }
 }
