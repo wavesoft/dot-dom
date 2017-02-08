@@ -3,7 +3,7 @@
 > A tiny (510 byte) virtual DOM template engine for embedded projects
 
 
-**.dom** borrows some concepts from React.js (such as the re-usable Components and the Virtual DOM) and tries to replicate them with the smallest possible footprint.
+**.dom** borrows some concepts from React.js (such as the re-usable Components and the Virtual DOM) and tries to replicate them with the smallest possible footprint, exploiting the ES6 javascript features.
 
 Why? Because with such library you can create powerful GUIs in tight space environments, such as IoT devices, where saving even an extra byte actually matters!
 
@@ -20,6 +20,8 @@ Alternatively you can just include the minified version of the library directly 
 ```js
 ((a,b,c,d,e,f,g,h,j)=>{String.prototype[d]=1,a.H=g=(k,l={},...m)=>({[d]:1,E:k,P:l[d]&&m.unshift(l)&&{C:m}||(l.C=m)&&l}),a.R=h=(k,l,m='',n,o=k.E)=>k.trim?l.appendChild(b.createTextNode(k)):o.call?(n=(p=[{}],q=p[1]==o?p[0]:(e[m]=[{}])[0],r)=>r=h(o(k.P,q,s=>l.replaceChild(n(e[m]=[c.assign(q,s),o]),r)),l,m))(e[m]):c.keys(k.P).reduce((p,q,r,s,t=k.P[q])=>('C'==q?t.map((u,v)=>h(u,p,m+'.'+v)):'style'==q?c.assign(p[q],t):p[q]=t,p),l.appendChild(b.createElement(o))),j=k=>new Proxy(k,{get:(l,m,n)=>j((...o)=>((n=l(...o)).P.className=[n.P.className]+' '+m,n))}),'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'.split('.').map(k=>a[k]=j(g.bind(a,k)))})(window,document,Object,Symbol(),{});
 ```
+
+## Support
 
 ## Examples
 
@@ -226,3 +228,12 @@ This is the same as calling `div({className: 'className'})` and the function int
 ## Caveats
 
 - **There is currently no proper child reconciliation algorithm.** This means that if you call `R()` on a DOM element for a second time you will end-up appending the new data. Also, this means that most of the DOM is re-created on every `setState`, so use it with caution.
+
+## Contribution
+
+Are you interested in contributing to **.dom**? You are more than welcome! Just be sure to follow the guidelines:
+
+1. *Always explain your code with a comment* : Since you will most probably going to do some extreme javascript corner cases in order to be able to squeeze your logic.
+2. *All comments should start on column 70 and wrap after column 100* : In order to perserve code-style consistency.
+3. *The GZipped result should __never__ be bigger than 512 bytes* : Since that's the whole purpose of the library. If you are adding a completely new feature, consider sacraficing another one, or try to reduce scope, in order to keep the balance.
+
