@@ -1,4 +1,4 @@
-((global, document, Object, vnodeFlag, expandTags, createElement, render, global_state={}) => {
+((global, document, Object, vnodeFlag, global_state, expandTags, createElement, render, wrapClassProxy) => {
 
   // Make all strings considered child nodes
   String.prototype[vnodeFlag] = 1;
@@ -27,7 +27,7 @@
    * @param {DOMElement} - The HTML DOM element
    * @returns {DOMElement} - The rendered DOM element
    */
-  global.R = render = (vnode, dom, _path='', _update, _element=vnode.E, _props=vnode.P) =>
+  global.R = render = (vnode, dom, _path='', _update, _element=vnode.E) =>
 
     vnode.trim                                                        // Strings have a `.trim` function
 
@@ -59,7 +59,7 @@
 
           _element(                                                   // We call the component function to create the
                                                                       // new virtual DOM, passing the following props:
-            _props,                                                   // - The properties of the component
+            vnode.P,                                                  // - The properties of the component
             _state,                                                   // - The current state of the component
             newState =>                                               // - The `setState` function
               dom.replaceChild(                                       // The setState function replaces the previous
@@ -87,7 +87,7 @@
 
                                                                       // ** Native Render **
 
-    : Object.keys(_props)                                             // We are going to apply the properties by
+    : Object.keys(vnode.P)                                            // We are going to apply the properties by
                                                                       // iterating on each property individually
       .reduce(
         (
@@ -95,8 +95,8 @@
           key,                                                        // The property to apply
           index,                                                      // Not used
           array,                                                      // Not used
-          _value=_props[key]                                          // Local reference to the property value
-        ) =>
+          _value=vnode.P[key]                                         // Local reference to the property value
+        ) => (
           (
             key == 'C' ?                                              // ## Children ##
 
@@ -121,8 +121,9 @@
 
             : (instance[key] = _value)
 
-          ) && instance || instance                                   // Make sure to *always* return the instance
-
+          )
+          , instance                                                  // Make sure to *always* return the instance
+        )
       ,                                                               // We are passing to the reduce function a new
                                                                       // child mounted to the DOM element
 
@@ -134,25 +135,40 @@
       )
 
   /**
+   * Helper function that wraps a function into a className
+   * specialization throguh
+   */
+  wrapClassProxy = (wrapFn) =>
+    new Proxy(                                                        // We are creating a proxy object for every
+                                                                      // tag in order to be able to customize the
+                                                                      // class name via a shorthand
+      wrapFn,
+      {
+        get: (targetFn, className, _instance) =>
+          wrapClassProxy(
+            (...args) => (
+              (_instance=targetFn(...args))                           // We first create the Virtual DOM instance
+                                                                      // by calling the constructor (chain)
+
+                .P.className =                                        // And then we assign the class name,
+                  [_instance.P.className] + ' ' + className,          // concatenating to the previous value
+
+              _instance                                               // And finally we return the instance
+            )
+          )
+      }
+    )
+
+  /**
    * Expand some of the default tags
    */
   'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'
     .split('.')
     .map(
-      (dom) =>                                                        // We are creating a proxy object for every
-        global[dom] = new Proxy(                                      // tag in order to be able to customize the
-                                                                      // class name via a shorthand.
-
-          createElement.bind(global, dom),                            // The proxied object is the createElement
-          {                                                           // function bound to the tag name
-            get: (targetFn, className, _instance) =>
-              (...args) => (
-                (_instance=targetFn(...args))                         // We first create the Virtual DOM instance
-                  .P.className = className,                           // and we then update the `className` property
-                _instance
-              )
-          }
+      (dom) =>
+        global[dom] = wrapClassProxy(
+          createElement.bind(global, dom)                             // The proxied object is the createElement
         )
     )
 
-})(window, document, Object, Symbol());
+})(window, document, Object, Symbol(), {});
