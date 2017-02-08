@@ -1,4 +1,4 @@
-((global, document, Object, vnodeFlag, createElement, render, global_state={}) => {
+((global, document, Object, vnodeFlag, expandTags, createElement, render, global_state={}) => {
 
   // Make all strings considered child nodes
   String.prototype[vnodeFlag] = 1;
@@ -51,7 +51,9 @@
             : (global_state[_path] = [{}])[0],                        // reset the state object
 
           _instance                                                   // Local variable for the mounted DOM instance
+
         ) =>
+
         _instance = render(                                           // In the update function we render the new DOM
                                                                       // element and we keep track of it
 
@@ -60,7 +62,6 @@
             _props,                                                   // - The properties of the component
             _state,                                                   // - The current state of the component
             newState =>                                               // - The `setState` function
-
               dom.replaceChild(                                       // The setState function replaces the previous
                                                                       // DOM instance with the re-render of the
                                                                       // component, by calling the update function
@@ -118,19 +119,7 @@
 
             /* OR */
 
-            : /^on/.exec(key) ?                                       // ## Callbacks ##
-
-              instance.addEventListener(                              // Properties starting with `on` are registered
-                key.substr(2),                                        // as event listeners to the DOM instance
-                _value
-              )
-
-            /* OR */
-
-            : instance.setAttribute(                                  // ## Attributes ##
-                key,                                                  // Any other properties are assigned as attributes
-                _value
-              )
+            : (instance[key] = _value)
 
           ) && instance || instance                                   // Make sure to *always* return the instance
 
