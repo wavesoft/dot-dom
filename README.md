@@ -1,21 +1,21 @@
 # .dom
 
-> A tiny (500 byte) virtual DOM template engine for embedded projects
+> A tiny (455 byte) virtual DOM template engine for embedded projects
 
 **.dom** borrows some concepts from React.js (such as the Virtual DOM) and tries to immitate them with the least possible code. Why would you consider even doing this? Because with such library you can create powerful GUIs in tight space environments, such as IoT devices.
 
 ## Installation
 
-For minimum footprint, include `dotdom.min.js.gz` (500b) to your project.
+For minimum footprint, include `dotdom.min.js.gz` (455b) to your project.
 
 ```html
 <script src="dotdom.min.js.gz" />
 ```
 
-Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (716b):
+Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (636b):
 
 ```js
-((a,b,c,d,e,f,g,h={})=>{String.prototype[d]=1,a.H=f=(j,k={},...l)=>({[d]:1,E:j,P:k[d]&&l.unshift(k)&&{C:l}||(k.C=l)&&k}),a.R=g=(j,k,l='',m,n=j.E,o=j.P)=>j.trim?k.appendChild(b.createTextNode(j)):n.call?(m=(p=[{}],q=p[1]==n?p[0]:(h[l]=[{}])[0],r)=>r=g(n(o,q,s=>{k.replaceChild(m(h[l]=[c.assign(q,s),n]),r),console.log(h)}),k,l))(h[l]):c.keys(o).reduce((p,q,r,s,t=o[q])=>('C'==q?t.map((u,v)=>g(u,p,l+'.'+v)):'style'==q?c.assign(p[q],t):/^on/.exec(q)?p.addEventListener(q.substr(2),t):p.setAttribute(q,t))&&p||p,k.appendChild(b.createElement(n))),e.split('.').map(j=>a[j]=f.bind(a,j))})(window,document,Object,Symbol(),'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option');
+((a,b,c,d,e,f,g,h={})=>{String.prototype[d]=1,a.H=f=(j,k={},...l)=>({[d]:1,E:j,P:k[d]&&l.unshift(k)&&{C:l}||(k.C=l)&&k}),a.R=g=(j,k,l='',m,n=j.E,o=j.P)=>j.trim?k.appendChild(b.createTextNode(j)):n.call?(m=(p=[{}],q=p[1]==n?p[0]:(h[l]=[{}])[0],r)=>r=g(n(o,q,s=>k.replaceChild(m(h[l]=[c.assign(q,s),n]),r)),k,l))(h[l]):c.keys(o).reduce((p,q,r,s,t=o[q])=>('C'==q?t.map((u,v)=>g(u,p,l+'.'+v)):'style'==q?c.assign(p[q],t):p[q]=t)&&p||p,k.appendChild(b.createElement(n))),'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'.split('.').map(j=>a[j]=f.bind(a,j))})(window,document,Object,Symbol());
 ```
 
 ## Examples
