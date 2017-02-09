@@ -1,6 +1,15 @@
 require('../dotdom');
 const dd = window;
 
+const EXPOSED_FULL_TAGS = [
+  'a', 'b', 'button', 'i', 'span', 'div', 'p', 'h1', 'h2', 'h3', 'h4', 'table',
+  'tr', 'td', 'th', 'ul', 'ol', 'li', 'form', 'label', 'select', 'option'
+];
+
+const EXPOSED_SHORT_TAGS = [
+  'img', 'input'
+];
+
 describe('.dom', function () {
 
   describe('Functionality', function () {
@@ -418,6 +427,67 @@ describe('.dom', function () {
         );
       });
 
+    });
+
+    describe('Tag Shorthands', function () {
+      EXPOSED_FULL_TAGS.forEach((tag) => {
+        it(`should expose tag '${tag}'`, function () {
+          const dom = document.createElement('div');
+          const vdom = dd[tag]();
+
+          dd.R(vdom, dom)
+
+          expect(dom.innerHTML).toEqual(
+            `<${tag}></${tag}>`
+          );
+        });
+      })
+
+      EXPOSED_SHORT_TAGS.forEach((tag) => {
+        it(`should expose tag '${tag}'`, function () {
+          const dom = document.createElement('div');
+          const vdom = dd[tag]();
+
+          dd.R(vdom, dom)
+
+          expect(dom.innerHTML).toEqual(
+            `<${tag}>`
+          );
+        });
+      })
+
+      it('should expand className shorthands', function () {
+        const dom = document.createElement('div');
+        const vdom = dd.div.class1();
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div class=" class1"></div>'
+        );
+      })
+
+      it('should expand multiple className shorthands', function () {
+        const dom = document.createElement('div');
+        const vdom = dd.div.class1.class2.class3();
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div class=" class1 class2 class3"></div>'
+        );
+      })
+
+      it('should append className shorthands on className props', function () {
+        const dom = document.createElement('div');
+        const vdom = dd.div.class1.class2.class3({className: 'foo'});
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div class="foo class1 class2 class3"></div>'
+        );
+      })
     });
   });
 
