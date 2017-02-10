@@ -10,6 +10,8 @@
 
 Why? Because with such library you can create powerful GUIs in tight space environments, such as IoT devices, where saving even an extra byte actually matters!
 
+[Try it in codepen.io](https://codepen.io/anon/pen/Kargex?editors=0010#0)
+
 ## Installation
 
 For minimum footprint, include `dotdom.min.js.gz` (510b) to your project.
