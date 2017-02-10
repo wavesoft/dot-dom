@@ -43,7 +43,7 @@
     ? (_update = (                                                    // Create a helper function that will be called
                                                                       // when the component is updated.
 
-          state = [{}],                                               // Default falue if the global state is missing
+          state = [{}],                                               // Default value if the global state is missing
 
           _state =
             state[1] == _element                                      // If the global state holds stale information
@@ -136,7 +136,7 @@
 
   /**
    * Helper function that wraps a function into a className
-   * specialization throguh
+   * specialization through
    */
   wrapClassProxy = (wrapFn) =>
     new Proxy(                                                        // We are creating a proxy object for every
