@@ -3,7 +3,74 @@ const dd = window;
 
 describe('.dom', function () {
 
-  describe('Functionality', function () {
+  describe('#H', function () {
+    it('should create vnode without arguments', function () {
+      const vdom = dd.H('div');
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({C: []});
+    });
+
+    it('should create vnode with props', function () {
+      const vdom = dd.H('div', {foo: 'bar'});
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({foo: 'bar', C: []});
+    });
+
+    it('should create vnode with props and children', function () {
+      const cdom = dd.H('div');
+      const vdom = dd.H('div', {foo: 'bar'}, cdom);
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        foo: 'bar',
+        C: [ cdom ]
+      });
+    });
+
+    it('should create vnode with props and mixed children', function () {
+      const cdom = dd.H('div');
+      const vdom = dd.H('div', {foo: 'bar'}, 'foo', cdom);
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        foo: 'bar',
+        C: [ 'foo', cdom ]
+      });
+    });
+
+    it('should create vnode with props and string children', function () {
+      const vdom = dd.H('div', {foo: 'bar'}, 'foo');
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        foo: 'bar',
+        C: [ 'foo' ]
+      });
+    });
+
+    it('should create vnode with only child', function () {
+      const vdom = dd.H('div', 'foo');
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        C: [ 'foo' ]
+      });
+    });
+
+    it('should create vnode with only mixed children', function () {
+      const cdom = dd.H('div');
+      const vdom = dd.H('div', cdom, 'foo');
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        C: [ cdom, 'foo' ]
+      });
+    });
+  });
+
+  describe('#R', function () {
     describe('DOM Manipulation', function () {
 
       it('should render simple DOM', function () {
@@ -235,7 +302,6 @@ describe('.dom', function () {
         );
 
         const event = new window.MouseEvent('click');
-        console.log(dom.innerHTML);
 
         dom.firstChild.childNodes[0].dispatchEvent(event);
         expect(dom.innerHTML).toEqual(
@@ -329,7 +395,7 @@ describe('.dom', function () {
         );
       });
 
-      it('should discard child state when it\'s type change', function () {
+      it('should discard child state when it\'s type changes', function () {
         const dom = document.createElement('div');
         const ComponentA = function(props, {clicks=0}, setState) {
           return dd.H('button', {

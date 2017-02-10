@@ -62,7 +62,8 @@
               ) &&
               render(
                 vnodes,
-                dom
+                dom,
+                _npath
               )
           ));
 
@@ -77,7 +78,7 @@
               ? dom.replaceChild(
                   _new_dom,
                   _child
-                ) && _child
+                ) && _new_dom
               : _child
             : dom.appendChild(
                 _new_dom
