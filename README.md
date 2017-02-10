@@ -18,10 +18,10 @@ For minimum footprint, include `dotdom.min.js.gz` (510b) to your project.
 <script src="dotdom.min.js.gz" />
 ```
 
-Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (731b):
+Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (729b):
 
 ```js
-((a,b,c,d,e,f,g,h,j)=>{String.prototype[d]=1,a.H=g=(k,l={},...m)=>({[d]:1,E:k,P:l[d]&&m.unshift(l)&&{C:m}||(l.C=m)&&l}),a.R=h=(k,l,m='',n,o=k.E)=>k.trim?l.appendChild(b.createTextNode(k)):o.call?(n=(p=[{}],q=p[1]==o?p[0]:(e[m]=[{}])[0],r)=>r=h(o(k.P,q,s=>l.replaceChild(n(e[m]=[c.assign(q,s),o]),r)),l,m))(e[m]):c.keys(k.P).reduce((p,q,r,s,t=k.P[q])=>('C'==q?t.map((u,v)=>h(u,p,m+'.'+v)):'style'==q?c.assign(p[q],t):p[q]=t,p),l.appendChild(b.createElement(o))),j=k=>new Proxy(k,{get:(l,m,n)=>j((...o)=>((n=l(...o)).P.className=[n.P.className]+' '+m,n))}),'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'.split('.').map(k=>a[k]=j(g.bind(a,k)))})(window,document,Object,Symbol(),{});
+((a,b,c,d,e,f,g,h)=>{String.prototype[d]=1,a.H=f=(j,k={},...l)=>({[d]:1,E:j,P:k[d]&&l.unshift(k)&&{C:l}||(k.C=l)&&k}),a.R=g=(j,k,l='',m,n=j.E)=>j.trim?k.appendChild(b.createTextNode(j)):n.call?(m=(o=[{}],p=o[1]==n?o[0]:(e[l]=[{}])[0],q)=>q=g(n(j.P,p,r=>k.replaceChild(m(e[l]=[c.assign(p,r),n]),q)),k,l))(e[l]):c.keys(j.P).reduce((o,p,q,r,s=j.P[p])=>('C'==p?s.map((t,u)=>g(t,o,l+'.'+u)):'style'==p?c.assign(o[p],s):o[p]=s,o),k.appendChild(b.createElement(n))),h=j=>new Proxy(j,{get:(k,l,m)=>h((...n)=>((m=k(...n)).P.className=[m.P.className]+' '+l,m))}),'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'.split('.').map(j=>a[j]=h(f.bind(a,j)))})(window,document,Object,Symbol(),{});
 ```
 
 ## Examples

@@ -1,4 +1,4 @@
-((global, document, Object, vnodeFlag, global_state, expandTags, createElement, render, wrapClassProxy) => {
+((global, document, Object, vnodeFlag, global_state, createElement, render, wrapClassProxy) => {
 
   // Make all strings considered child nodes
   String.prototype[vnodeFlag] = 1;
