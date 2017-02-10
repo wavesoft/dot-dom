@@ -68,6 +68,17 @@ describe('.dom', function () {
         C: [ cdom, 'foo' ]
       });
     });
+
+    it('should create vnode with spreaded children', function () {
+      const cdom = dd.H('div');
+      const spread = [ 'a', 'b' ];
+      const vdom = dd.H('div', cdom, 'foo', ...spread);
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        C: [ cdom, 'foo', 'a', 'b' ]
+      });
+    });
   });
 
   describe('#R', function () {
