@@ -228,7 +228,10 @@ This is the same as calling `div({className: 'className'})` and the function int
 
 ## Caveats
 
-- **There is currently no proper child reconciliation algorithm.** This means that if you call `R()` on a DOM element for a second time you will end-up appending the new data. Also, this means that most of the DOM is re-created on every `setState`, so use it with caution.
+- **There is currently no proper child reconciliation algorithm.** This means:
+  - The DOM is re-created on every `setState`, so use it with caution.
+  - If you call `R()` on a DOM element for a second time you will end-up appending the new data.
+  - You cannot change classes. You can only replace the element with a new one, with a different class. Unfortunately this means no CSS transitions.
 
 ## Contribution
 
