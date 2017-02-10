@@ -1,4 +1,4 @@
-((global, document, Object, vnodeFlag, global_state, createElement, render, wrapClassProxy) => {
+((global, document, Object, vnodeFlag, globalState, createElement, render, wrapClassProxy) => {
 
   // Make all strings considered child nodes
   String.prototype[vnodeFlag] = 1;
@@ -6,7 +6,7 @@
   /**
    * Create a VNode element
    */
-  global.H = createElement = (element, props={}, ...children) => ({
+  createElement = (element, props={}, ...children) => ({
     [vnodeFlag]: 1,                                                   // The vnodeFlag symbol is used by the code
                                                                       // in the 'P' property to check if the `props`
                                                                       // argument is not an object, but a renderable
@@ -21,122 +21,107 @@
   })
 
   /**
-   * Render the given VNode structure given to the DOM element given
-   *
-   * @param {VNode} - A VNode instance, created with `createElement`
-   * @param {DOMElement} - The HTML DOM element
-   * @returns {DOMElement} - The rendered DOM element
+   * Render a VNode in the DOM
    */
-  global.R = render = (vnode, dom, _path='', _update, _element=vnode.E) =>
+  global.R = render = (
+    vnodes,                                                           // The vnode tree to render
+    dom,
 
-    vnode.trim                                                        // Strings have a `.trim` function
+    _npath='',
+    _children=dom.childNodes,
+    _c=0
 
-    ? dom.appendChild(                                                // ** String Node **
-        document.createTextNode(vnode)
-      )
+  ) => {
+    (vnodes.map ? vnodes : [vnodes]).map(
+      (
+        vnode,
+        index,
 
-    : _element.call                                                   // If element is a functional component, it
-                                                                      // will have the 'call' property defined.
+        _unused1,
+        _path=_npath+'.'+index,
+        _path_state=globalState[_path] || [{}, vnode.E],
+        _state=(
+          globalState[_path] =
+            _path_state[1] != vnode.E
+            ? [{}, vnode.E]
+            : _path_state
+        ),
+        _child=_children[_c++],
+        _new_dom
 
-                                                                      // ** Stateful Render **
+      ) => {
 
-    ? (_update = (                                                    // Create a helper function that will be called
-                                                                      // when the component is updated.
-
-          state = [{}],                                               // Default value if the global state is missing
-
-          _state =
-            state[1] == _element                                      // If the global state holds stale information
-            ? state[0]                                                // about the component we are rendering, then
-            : (global_state[_path] = [{}])[0],                        // reset the state object
-
-          _instance                                                   // Local variable for the mounted DOM instance
-
-        ) =>
-
-        _instance = render(                                           // In the update function we render the new DOM
-                                                                      // element and we keep track of it
-
-          _element(                                                   // We call the component function to create the
-                                                                      // new virtual DOM, passing the following props:
-            vnode.P,                                                  // - The properties of the component
-            _state,                                                   // - The current state of the component
-            newState =>                                               // - The `setState` function
-              dom.replaceChild(                                       // The setState function replaces the previous
-                                                                      // DOM instance with the re-render of the
-                                                                      // component, by calling the update function
-                _update(
-                  global_state[_path] = [                             // We also update the global state for the
-                                                                      // component path, ensuring that we keep:
-                    Object.assign(                                    // - The new state
-                      _state,
-                      newState
-                    ),
-                    _element                                          // - The component function, to use it for
-                                                                      //   stale detection (check above)
-                  ]
-                ),
-                _instance
+        vnode.E && vnode.E.call &&
+          (vnode = vnode.E(
+            vnode.P,
+            _state[0],
+            (newState) =>
+              Object.assign(
+                _state[0],
+                newState
+              ) &&
+              render(
+                vnodes,
+                dom
               )
-          ),
-          dom,
-          _path
-        )
-      )(global_state[_path])                                          // We pass the current state of this component
-                                                                      // that will default to `[{}, undefined]`
+          ));
 
-                                                                      // ** Native Render **
+        _new_dom =
+          vnode.trim
+            ? document.createTextNode(vnode)
+            : document.createElement(vnode.E);
 
-    : Object.keys(vnode.P)                                            // We are going to apply the properties by
-                                                                      // iterating on each property individually
-      .reduce(
-        (
-          instance,                                                   // Reference to the new DOM element
-          key,                                                        // The property to apply
-          index,                                                      // Not used
-          array,                                                      // Not used
-          _value=vnode.P[key]                                         // Local reference to the property value
-        ) => (
-          (
-            key == 'C' ?                                              // ## Children ##
+        (_new_dom =
+          _child
+            ? (_child.E != vnode.E && _child.data != vnode)
+              ? dom.replaceChild(
+                  _new_dom,
+                  _child
+                ) && _child
+              : _child
+            : dom.appendChild(
+                _new_dom
+              )
+        ).E = vnode.E;
 
-              _value.map((child,i) =>                                 // DOM VNodes are iterated through
-                  render(
-                    child,
-                    instance,
-                    _path+'.'+i
+        vnode.trim
+          ? _new_dom.data = vnode
+          : Object.keys(vnode.P).map(
+              (
+                key,
+
+                _unused2,
+                _unused3,
+                _value=vnode.P[key]
+
+              ) =>
+
+                key == 'style' ?
+
+                  Object.assign(
+                    _new_dom[key],
+                    _value
                   )
-                )
 
-            /* OR */
+                : (key != 'C' &&
 
-            : key == 'style' ?                                        // ## Style ##
+                  (_new_dom[key] = _value))
 
-              Object.assign(                                          // Style property is applied recursively to the
-                instance[key],                                        // CSS style of the element instance.
-                _value
-              )
-
-            /* OR */
-
-            : (instance[key] = _value)
-
-          )
-          , instance                                                  // Make sure to *always* return the instance
-        )
-      ,                                                               // We are passing to the reduce function a new
-                                                                      // child mounted to the DOM element
-
-        dom.appendChild(                                              // We are appending to the `dom` argument a new
-          document.createElement(
-            _element
-          )
-        )
-      )
+            ) &&
+            render(
+              vnode.P.C,
+              _new_dom,
+              _path
+            )
+      }
+    )
+    while (_children[_c])
+      dom.removeChild(_children[_c])
+  }
 
   /**
-   * Helper function that wraps a function into a className
-   * specialization through
+   * Helper function that wraps an element shorthand function with a proxy
+   * that can be used to append class names to the instance.
    */
   wrapClassProxy = (wrapFn) =>
     new Proxy(                                                        // We are creating a proxy object for every
@@ -160,15 +145,46 @@
     )
 
   /**
-   * Expand some of the default tags
+   * Make a proxy around the createElement function that can either
+   * be used as a function, or as a proxied method for creating elements.
    */
-  'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'
-    .split('.')
-    .map(
-      (dom) =>
-        global[dom] = wrapClassProxy(
-          createElement.bind(global, dom)                             // The proxied object is the createElement
+  global.H = new Proxy(
+    createElement,
+    {
+      get: (_unused4, tagName) =>
+        wrapClassProxy(
+          createElement.bind(global, tagName)
         )
-    )
+    }
+  )
 
 })(window, document, Object, Symbol(), {});
+
+// const {div, button} = H;
+
+// const Counter = (_, {counter=0}, setState) => {
+//   // setTimeout(
+//   //   () => {
+//   //     setState({counter: counter+1})
+//   //   },
+//   //   1000
+//   // );
+
+//   return button(
+//     {
+//       onclick() {
+//         setState({counter: counter+1})
+//       }
+//     },
+//     `Ticked ${counter} times`
+//   );
+// }
+
+// const App = () =>
+//   div(
+//     div('Some data'),
+//     H(Counter),
+//     H(Counter)
+//   )
+
+// R(H(App), document.body)
