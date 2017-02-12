@@ -184,7 +184,7 @@ describe('.dom', function () {
 
     });
 
-    describe('DOM Immutability', function () {
+    describe('Reconciliation', function () {
       it('should not replace DOM if tag & props are the same', function () {
         const dom = document.createElement('div');
         const vdom1 = dd.H('div');
@@ -239,6 +239,34 @@ describe('.dom', function () {
         const c2 = dom.firstChild;
 
         expect(c1).toBe(c2);
+      });
+
+      it('should add new DOM elements keeping the old ones intact', function () {
+        const dom = document.createElement('div');
+        const vdom1 = [dd.H('div')];
+        const vdom2 = [dd.H('div'), dd.H('span')];
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+        expect(dom.children.length).toEqual(1);
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+        expect(dom.children.length).toEqual(2);
+
+        expect(c1).toBe(c2);
+      });
+
+      it('should remove excess DOM elements', function () {
+        const dom = document.createElement('div');
+        const vdom1 = [dd.H('div'), dd.H('span')];
+        const vdom2 = [dd.H('div')];
+
+        dd.R(vdom1, dom)
+        expect(dom.children.length).toEqual(2);
+
+        dd.R(vdom2, dom)
+        expect(dom.children.length).toEqual(1);
       });
     });
 
