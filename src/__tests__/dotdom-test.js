@@ -1,18 +1,77 @@
 require('../dotdom');
 const dd = window;
 
-const EXPOSED_FULL_TAGS = [
-  'a', 'b', 'button', 'i', 'span', 'div', 'p', 'h1', 'h2', 'h3', 'h4', 'table',
-  'tr', 'td', 'th', 'ul', 'ol', 'li', 'form', 'label', 'select', 'option'
-];
-
-const EXPOSED_SHORT_TAGS = [
-  'img', 'input'
-];
-
 describe('.dom', function () {
 
-  describe('Functionality', function () {
+  describe('#H', function () {
+    it('should create vnode without arguments', function () {
+      const vdom = dd.H('div');
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({C: []});
+    });
+
+    it('should create vnode with props', function () {
+      const vdom = dd.H('div', {foo: 'bar'});
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({foo: 'bar', C: []});
+    });
+
+    it('should create vnode with props and children', function () {
+      const cdom = dd.H('div');
+      const vdom = dd.H('div', {foo: 'bar'}, cdom);
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        foo: 'bar',
+        C: [ cdom ]
+      });
+    });
+
+    it('should create vnode with props and mixed children', function () {
+      const cdom = dd.H('div');
+      const vdom = dd.H('div', {foo: 'bar'}, 'foo', cdom);
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        foo: 'bar',
+        C: [ 'foo', cdom ]
+      });
+    });
+
+    it('should create vnode with props and string children', function () {
+      const vdom = dd.H('div', {foo: 'bar'}, 'foo');
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        foo: 'bar',
+        C: [ 'foo' ]
+      });
+    });
+
+    it('should create vnode with only child', function () {
+      const vdom = dd.H('div', 'foo');
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        C: [ 'foo' ]
+      });
+    });
+
+    it('should create vnode with only mixed children', function () {
+      const cdom = dd.H('div');
+      const vdom = dd.H('div', cdom, 'foo');
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        C: [ cdom, 'foo' ]
+      });
+    });
+
+  });
+
+  describe('#R', function () {
     describe('DOM Manipulation', function () {
 
       it('should render simple DOM', function () {
@@ -123,7 +182,94 @@ describe('.dom', function () {
         );
       });
 
-    })
+    });
+
+    describe('Reconciliation', function () {
+      it('should not replace DOM if tag & props are the same', function () {
+        const dom = document.createElement('div');
+        const vdom1 = dd.H('div');
+        const vdom2 = dd.H('div');
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+
+        expect(c1).toBe(c2);
+      });
+
+      it('should replace DOM if tag has changed', function () {
+        const dom = document.createElement('div');
+        const vdom1 = dd.H('div');
+        const vdom2 = dd.H('span');
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+
+        expect(c1).not.toBe(c2);
+      });
+
+      it('should not replace DOM if props have changed', function () {
+        const dom = document.createElement('div');
+        const vdom1 = dd.H('div', {foo: 1});
+        const vdom2 = dd.H('div', {foo: 2});
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+
+        expect(c1).toBe(c2);
+      });
+
+      it('should not replace DOM if only children have changed', function () {
+        const dom = document.createElement('div');
+        const vdom1 = dd.H('div', dd.H('span', 'foo'));
+        const vdom2 = dd.H('div', dd.H('span', 'bar'));
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+
+        expect(c1).toBe(c2);
+      });
+
+      it('should add new DOM elements keeping the old ones intact', function () {
+        const dom = document.createElement('div');
+        const vdom1 = [dd.H('div')];
+        const vdom2 = [dd.H('div'), dd.H('span')];
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+        expect(dom.children.length).toEqual(1);
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+        expect(dom.children.length).toEqual(2);
+
+        expect(c1).toBe(c2);
+      });
+
+      it('should remove excess DOM elements', function () {
+        const dom = document.createElement('div');
+        const vdom1 = [dd.H('div'), dd.H('span')];
+        const vdom2 = [dd.H('div')];
+
+        dd.R(vdom1, dom)
+        expect(dom.children.length).toEqual(2);
+
+        dd.R(vdom2, dom)
+        expect(dom.children.length).toEqual(1);
+      });
+    });
+
     describe('Components', function () {
       it('should render simple component', function () {
         const dom = document.createElement('div');
@@ -337,7 +483,7 @@ describe('.dom', function () {
         );
       });
 
-      it('should discard child state when it\'s type change', function () {
+      it('should discard child state when it\'s type changes', function () {
         const dom = document.createElement('div');
         const ComponentA = function(props, {clicks=0}, setState) {
           return dd.H('button', {
@@ -378,7 +524,8 @@ describe('.dom', function () {
               }
             },
             dd.H('div', `${clicks} clicks`),
-            ...children
+            children[0],
+            children[1]
           )
         }
         const vdom = dd.H(HostComponent);
@@ -430,35 +577,23 @@ describe('.dom', function () {
     });
 
     describe('Tag Shorthands', function () {
-      EXPOSED_FULL_TAGS.forEach((tag) => {
-        it(`should expose tag '${tag}'`, function () {
-          const dom = document.createElement('div');
-          const vdom = dd[tag]();
 
-          dd.R(vdom, dom)
+      it(`should dynamically create tag shorthands`, function () {
+        const dom = document.createElement('div');
+        const {div} = dd.H;
+        const vdom = div();
 
-          expect(dom.innerHTML).toEqual(
-            `<${tag}></${tag}>`
-          );
-        });
-      })
+        dd.R(vdom, dom)
 
-      EXPOSED_SHORT_TAGS.forEach((tag) => {
-        it(`should expose tag '${tag}'`, function () {
-          const dom = document.createElement('div');
-          const vdom = dd[tag]();
-
-          dd.R(vdom, dom)
-
-          expect(dom.innerHTML).toEqual(
-            `<${tag}>`
-          );
-        });
-      })
+        expect(dom.innerHTML).toEqual(
+          `<div></div>`
+        );
+      });
 
       it('should expand className shorthands', function () {
         const dom = document.createElement('div');
-        const vdom = dd.div.class1();
+        const {div} = dd.H;
+        const vdom = div.class1();
 
         dd.R(vdom, dom)
 
@@ -469,7 +604,8 @@ describe('.dom', function () {
 
       it('should expand multiple className shorthands', function () {
         const dom = document.createElement('div');
-        const vdom = dd.div.class1.class2.class3();
+        const {div} = dd.H;
+        const vdom = div.class1.class2.class3();
 
         dd.R(vdom, dom)
 
@@ -480,7 +616,8 @@ describe('.dom', function () {
 
       it('should append className shorthands on className props', function () {
         const dom = document.createElement('div');
-        const vdom = dd.div.class1.class2.class3({className: 'foo'});
+        const {div} = dd.H;
+        const vdom = div.class1.class2.class3({className: 'foo'});
 
         dd.R(vdom, dom)
 

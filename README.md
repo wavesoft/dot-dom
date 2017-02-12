@@ -10,7 +10,7 @@
 
 Why? Because with such library you can create powerful GUIs in tight space environments, such as IoT devices, where saving even an extra byte actually matters!
 
-[Try it in codepen.io](https://codepen.io/anon/pen/Kargex?editors=0010#0)
+[Try it in codepen.io](https://codepen.io/anon/pen/YNdNwv?editors=0010)
 
 ## Installation
 
@@ -20,10 +20,10 @@ For minimum footprint, include `dotdom.min.js.gz` (510b) to your project.
 <script src="dotdom.min.js.gz" />
 ```
 
-Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (729b):
+Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (755b):
 
 ```js
-((a,b,c,d,e,f,g,h)=>{String.prototype[d]=1,a.H=f=(j,k={},...l)=>({[d]:1,E:j,P:k[d]&&l.unshift(k)&&{C:l}||(k.C=l)&&k}),a.R=g=(j,k,l='',m,n=j.E)=>j.trim?k.appendChild(b.createTextNode(j)):n.call?(m=(o=[{}],p=o[1]==n?o[0]:(e[l]=[{}])[0],q)=>q=g(n(j.P,p,r=>k.replaceChild(m(e[l]=[c.assign(p,r),n]),q)),k,l))(e[l]):c.keys(j.P).reduce((o,p,q,r,s=j.P[p])=>('C'==p?s.map((t,u)=>g(t,o,l+'.'+u)):'style'==p?c.assign(o[p],s):o[p]=s,o),k.appendChild(b.createElement(n))),h=j=>new Proxy(j,{get:(k,l,m)=>h((...n)=>((m=k(...n)).P.className=[m.P.className]+' '+l,m))}),'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'.split('.').map(j=>a[j]=h(f.bind(a,j)))})(window,document,Object,Symbol(),{});
+((a,b,c,d,e,f,g,h)=>{String.prototype[d]=1,f=(i,j={},...k)=>({[d]:1,E:i,P:j[d]&&k.unshift(j)&&{C:k}||(j.C=k)&&j}),a.R=g=(i,j,k='',l=j.childNodes,m=0)=>{for((i.map?i:[i]).map((n,o,p,q=k+'.'+o,r=e[q]||[{},n.E],s=e[q]=r[1]==n.E?r:[{},n.E],t=l[m++],u)=>{n.E&&n.E.call&&(n=n.E(n.P,s[0],v=>c.assign(s[0],v)&&g(i,j,k))),u=n.trim?b.createTextNode(n):b.createElement(n.E),(u=t?t.E!=n.E&&t.data!=n?j.replaceChild(u,t)&&u:t:j.appendChild(u)).E=n.E,n.trim?u.data=n:c.keys(n.P).map((v,w,x,y=n.P[v])=>'style'==v?c.assign(u[v],y):'C'!=v&&(u[v]=y))&&g(n.P.C,u,q)});l[m];)j.removeChild(l[m])},h=i=>new Proxy(i,{get:(j,k,l)=>h((...m)=>((l=j(...m)).P.className=[l.P.className]+' '+k,l))}),a.H=new Proxy(f,{get:(i,j)=>h(f.bind(a,j))})})(window,document,Object,Symbol(),{});
 ```
 
 ## Examples
@@ -52,7 +52,7 @@ ReactDOM.render(
     <td valign="top">
 <pre lang="javascript">
 R(
-  div('Hello world'),
+  H('div', 'Hello world'),
   document.body
 )
 </pre>
@@ -91,7 +91,7 @@ ReactDOM.render(
     <td valign="top">
 <pre lang="javascript">
 function Hello(props) {
-  return div(`Hello ${props.toWhat}`);
+  return H('div', `Hello ${props.toWhat}`);
 }
 
 R(
@@ -127,7 +127,7 @@ class Clickable extends React.Component {
     const {clicks} = this.state;
 
     return React.createElement(
-      'buton', {
+      'button', {
         onClick() {
           this.setState({clicks: clicks+1})
         }
@@ -150,7 +150,7 @@ ReactDOM.render(
 function Clickable(props, state, setState) {
   const {clicks=0} = state;
 
-  return button(
+  return H('button',
     {
       onclick() {
         setState({clicks: clicks+1})
@@ -161,7 +161,7 @@ function Clickable(props, state, setState) {
 }
 
 R(
-  div(
+  H('div',
     H(Clickable),
     H(Clickable)
   ),
@@ -177,7 +177,7 @@ R(
 ### Render `R( VNode, DOMElement )`
 
 ```js
-R( div('Hello'), document.body )
+R( H('div', 'Hello'), document.body )
 ```
 
 Renders the given VNode tree to the given DOM element. Further updates from
@@ -197,26 +197,32 @@ Creates a VNode element. If a string is passed as the first argument, it will
 create a HTML element. If a function is given, it will create a stateful
 component.
 
-Properties and children are optional and they can be ommitted.
+Properties and children are optional and they can be omitted.
 
 ### Tag Shorthand `tag( [properties], [children ...] )`
 
 ```js
+const {div, span, a} = H;
+
 div( 'hello', span( 'world' ) )
 div( 'click', a({href: '#'}, 'Here'), 'to continue')
 ```
 
-A shorthand function for creating most of the commonly-used HTML tags. This
-behaves exactly like `H`, but with the tag name already populated.
+A shorthand function can be extracted as a property from the `H` function. Such
+shorthands behave exactly like `H`, but with the tag name already populated.
 
-The following tags are available as shorthand methods:
+It's recommended to use a deconstructuring assignment in the beginning of your
+script in order to help javascript minifiers further optimize the result:
 
-> a, b, button, div, form, h1, h2, h3, h4, i, img, input, label, li, ol,
-> option, p, select, span, table, td, th, tr, ul
+```
+const {div, span, a, button} = H;
+```
 
 ### Tag + Class Shorthand `tag.class( [properties], [children ...] )`
 
 ```js
+const {h1, span, p} = H;
+
 h1.short( 'short header', span.strong( 'strong text' ) )
 button.primary({onclick: handleClick}, 'Primary Action')
 p.bold.italic( twitterPost )
@@ -230,16 +236,23 @@ This is the same as calling `div({className: 'className'})` and the function int
 
 ## Caveats
 
-- **There is currently no proper child reconciliation algorithm.** This means:
-  - The DOM is re-created on every `setState`, so use it with caution.
-  - If you call `R()` on a DOM element for a second time you will end-up appending the new data.
-  - You cannot change classes. You can only replace the element with a new one, with a different class. Unfortunately this means no CSS transitions.
+* You cannot trigger an update with a property removal. You **must** set the new property to an empty value instead. For example:
+
+  ```js
+  // Wrong
+  R(div({className: 'foo'}), document.body);
+  R(div({}), document.body);
+
+  // Correct
+  R(div({className: 'foo'}), document.body);
+  R(div({className: ''}), document.body);
+  ```
 
 ## Contribution
 
 Are you interested in contributing to **.dom**? You are more than welcome! Just be sure to follow the guidelines:
 
 1. *Always explain your code with a comment* : Since you will most probably going to do some extreme javascript corner cases in order to be able to squeeze your logic.
-2. *All comments should start on column 70 and wrap after column 100* : In order to perserve code-style consistency.
+2. *All comments should start on column 70 and wrap after column 120* : In order to perserve code-style consistency.
 3. *The GZipped result should __never__ be bigger than 512 bytes* : Since that's the whole purpose of the library. If you are adding a completely new feature, consider sacraficing another one, or try to reduce scope, in order to keep the balance.
 

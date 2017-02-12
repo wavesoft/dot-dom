@@ -1,12 +1,37 @@
-((global, document, Object, vnodeFlag, global_state, createElement, render, wrapClassProxy) => {
+/**
+ * .dom - A Tiny VDom Template Engine
+ *
+ * Copyright 2017 Ioannis Charalampidis (wavesoft)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+((global, document, Object, vnodeFlag, globalState, createElement, render, wrapClassProxy) => {
 
-  // Make all strings considered child nodes
+  /**
+   * Put the `vnodeFlag` to all strings in order to be considered as virtual
+   * dom nodes.
+   */
   String.prototype[vnodeFlag] = 1;
 
   /**
    * Create a VNode element
+   *
+   * @param {String|Function} eleent - The tag name or the component to render
+   * @param {Object} [props] - The object properties
+   * @param {Array} [children] - The child VNode elements
+   * @returns {VNode} Returns a virtual DOM instance
    */
-  global.H = createElement = (element, props={}, ...children) => ({
+  createElement = (element, props={}, ...children) => ({
     [vnodeFlag]: 1,                                                   // The vnodeFlag symbol is used by the code
                                                                       // in the 'P' property to check if the `props`
                                                                       // argument is not an object, but a renderable
@@ -21,134 +46,156 @@
   })
 
   /**
-   * Render the given VNode structure given to the DOM element given
+   * Render a VNode in the DOM
    *
-   * @param {VNode} - A VNode instance, created with `createElement`
-   * @param {DOMElement} - The HTML DOM element
-   * @returns {DOMElement} - The rendered DOM element
+   * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
+   * @param {HTLDomElement}
    */
-  global.R = render = (vnode, dom, _path='', _update, _element=vnode.E) =>
+  global.R = render = (
+    vnodes,                                                           // 1. The vnode tree to render
+    dom,                                                              // 2. The DOMElement where to render into
 
-    vnode.trim                                                        // Strings have a `.trim` function
+    _npath='',                                                        // a. The current state path
+    _children=dom.childNodes,                                         // b. Shorthand for accessing the children
+    _c=0                                                              // c. Counter for processed children
 
-    ? dom.appendChild(                                                // ** String Node **
-        document.createTextNode(vnode)
-      )
+  ) => {
+    (vnodes.map ? vnodes : [vnodes]).map(                             // Cast `vnodes` to array if nor already
 
-    : _element.call                                                   // If element is a functional component, it
-                                                                      // will have the 'call' property defined.
+                                                                      // In this `map` loop we ensure that the DOM
+                                                                      // elements correspond to the correct virtual
+                                                                      // node elements.
+      (
+        vnode,                                                        // 1. We handle the vnode from the array
+        index,                                                        // 2. And the index
 
-                                                                      // ** Stateful Render **
+        _unused1,                                                     // We don't handle the array, but we need the
+                                                                      // placeholder for the local variables after
 
-    ? (_update = (                                                    // Create a helper function that will be called
-                                                                      // when the component is updated.
+        _path=_npath+'.'+index,                                       // a. The state path of this vnode
+        _path_state=globalState[_path] || [{}, vnode.E],              // b. Get the state record for this path
+        _state=(                                                      // c. Update and get the state record
+          globalState[_path] =                                        //    The record is an the following format:
+            _path_state[1] != vnode.E                                 //  [ {state object},
+            ? [{}, vnode.E]                                           //    'vnode element' ]
+            : _path_state                                             //    The second component is needed in order to
+        ),                                                            //    reset the state if the component has changed
+        _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
+        _new_dom                                                      // e. The new DOM element placeholder
 
-          state = [{}],                                               // Default value if the global state is missing
+      ) => {
 
-          _state =
-            state[1] == _element                                      // If the global state holds stale information
-            ? state[0]                                                // about the component we are rendering, then
-            : (global_state[_path] = [{}])[0],                        // reset the state object
+        /* Expand functional Components */
 
-          _instance                                                   // Local variable for the mounted DOM instance
+        vnode.E && vnode.E.call &&                                    // If the vnode is a functional component, expand
+          (vnode = vnode.E(                                           // it and replace the current vnode variable.
 
-        ) =>
+            vnode.P,                                                  // 1. The component properties
+            _state[0],                                                // 2. The stateful component state
+            (newState) =>                                             // 3. The setState function
 
-        _instance = render(                                           // In the update function we render the new DOM
-                                                                      // element and we keep track of it
+              Object.assign(                                          // First we update the state part of the record
+                _state[0],                                            // Note: When we defined the variable we kept the
+                newState                                              //       reference to the record array
+              ) &&
 
-          _element(                                                   // We call the component function to create the
-                                                                      // new virtual DOM, passing the following props:
-            vnode.P,                                                  // - The properties of the component
-            _state,                                                   // - The current state of the component
-            newState =>                                               // - The `setState` function
-              dom.replaceChild(                                       // The setState function replaces the previous
-                                                                      // DOM instance with the re-render of the
-                                                                      // component, by calling the update function
-                _update(
-                  global_state[_path] = [                             // We also update the global state for the
-                                                                      // component path, ensuring that we keep:
-                    Object.assign(                                    // - The new state
-                      _state,
-                      newState
-                    ),
-                    _element                                          // - The component function, to use it for
-                                                                      //   stale detection (check above)
-                  ]
-                ),
-                _instance
+              render(                                                 // We then trigger the same render cycle that will
+                vnodes,                                               // update the DOM
+                dom,
+                _npath
               )
-          ),
-          dom,
-          _path
-        )
-      )(global_state[_path])                                          // We pass the current state of this component
-                                                                      // that will default to `[{}, undefined]`
 
-                                                                      // ** Native Render **
+          ));
 
-    : Object.keys(vnode.P)                                            // We are going to apply the properties by
-                                                                      // iterating on each property individually
-      .reduce(
-        (
-          instance,                                                   // Reference to the new DOM element
-          key,                                                        // The property to apply
-          index,                                                      // Not used
-          array,                                                      // Not used
-          _value=vnode.P[key]                                         // Local reference to the property value
-        ) => (
-          (
-            key == 'C' ?                                              // ## Children ##
+        /* Create new DOM element */
 
-              _value.map((child,i) =>                                 // DOM VNodes are iterated through
-                  render(
-                    child,
-                    instance,
-                    _path+'.'+i
+        _new_dom =                                                    // We prepare the new DOM element in advance in
+          vnode.trim                                                  // order to spare a few comparison bytes
+            ? document.createTextNode(vnode)
+            : document.createElement(vnode.E);
+
+
+        /* Keep or replace the previous DOM element */
+
+        (_new_dom =
+          _child                                                      // If we have a previous child we first check if
+            ? (_child.E != vnode.E && _child.data != vnode)           // the VNode element or the text are the same
+
+              ? dom.replaceChild(                                     // - If not, we replace the old element with the
+                  _new_dom,                                           //   new one.
+                  _child
+                ) && _new_dom                                         //   ... and we make sure we return the new DOM
+
+              : _child                                                // - If it's the same, we keep the old child
+
+            : dom.appendChild(                                        // If we don't have a previous child, just append
+                _new_dom
+              )
+        ).E = vnode.E;                                                // We keep the vnode element to the .E property in
+                                                                      // order for the above comparison to work.
+
+        /* Update Element */
+
+        vnode.trim
+          ? _new_dom.data = vnode                                     // - String nodes update only the text
+          : Object.keys(vnode.P).map(                                 // - Element nodes have properties
+              (
+                key,                                                  // 1. The property name
+
+                _unused2,                                             // 2. Index is unused
+                _unused3,                                             // 3. Array is unused
+
+                _value=vnode.P[key]                                   // a. We cache the property value
+
+              ) =>
+
+                key == 'style' ?                                      // The 'style' property is an object and must be
+                                                                      // applied recursively.
+                  Object.assign(
+                    _new_dom[key],                                    // '[key]' is shorter than '.style'
+                    _value
                   )
-                )
 
-            /* OR */
+                : (key != 'C' &&                                      // 'C' is the children, so we skip it
 
-            : key == 'style' ?                                        // ## Style ##
+                  (_new_dom[key] = _value))                           // All properties are applied directly to DOM
+                                                                      // instance. This includes `onXXX` event handlers.
 
-              Object.assign(                                          // Style property is applied recursively to the
-                instance[key],                                        // CSS style of the element instance.
-                _value
-              )
+            ) &&
+            render(                                                   // Only if we have an element (and not  text node)
+              vnode.P.C,                                              // we recursively continue rendering into it's
+              _new_dom,                                               // child nodes.
+              _path
+            )
+      }
+    );
 
-            /* OR */
+    /* Remove extraneous nodes */
 
-            : (instance[key] = _value)
-
-          )
-          , instance                                                  // Make sure to *always* return the instance
-        )
-      ,                                                               // We are passing to the reduce function a new
-                                                                      // child mounted to the DOM element
-
-        dom.appendChild(                                              // We are appending to the `dom` argument a new
-          document.createElement(
-            _element
-          )
-        )
-      )
+    while (_children[_c])                                             // The _c property keeps track of the number of
+      dom.removeChild(_children[_c])                                  // elements in the VDom. If there are more child
+  }                                                                   // nodes in the DOM, we remove them.
 
   /**
-   * Helper function that wraps a function into a className
-   * specialization through
+   * Helper function that wraps an element shorthand function with a proxy
+   * that can be used to append class names to the instance.
+   *
+   * The result is wrapped with the same function, creating a chainable mechanism
+   * for appending classes.
+   *
+   * @param {function} factoryFn - The factory function to call for creating vnode
    */
-  wrapClassProxy = (wrapFn) =>
-    new Proxy(                                                        // We are creating a proxy object for every
-                                                                      // tag in order to be able to customize the
-                                                                      // class name via a shorthand
-      wrapFn,
+  wrapClassProxy = (factoryFn) =>
+    new Proxy(                                                        // We are creating a proxy object for every tag in
+                                                                      // order to be able to customize the class name
+                                                                      // via a shorthand call.
+      factoryFn,
       {
         get: (targetFn, className, _instance) =>
           wrapClassProxy(
             (...args) => (
-              (_instance=targetFn(...args))                           // We first create the Virtual DOM instance
-                                                                      // by calling the constructor (chain)
+              (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
+                                                                      // calling the wrapped factory function
 
                 .P.className =                                        // And then we assign the class name,
                   [_instance.P.className] + ' ' + className,          // concatenating to the previous value
@@ -160,15 +207,18 @@
     )
 
   /**
-   * Expand some of the default tags
+   * Expose as `H` a proxy around the createElement function that can either be used
+   * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
+   * virtual DOM elements.
    */
-  'a.b.button.i.span.div.img.p.h1.h2.h3.h4.table.tr.td.th.ul.ol.li.form.input.label.select.option'
-    .split('.')
-    .map(
-      (dom) =>
-        global[dom] = wrapClassProxy(
-          createElement.bind(global, dom)                             // The proxied object is the createElement
+  global.H = new Proxy(
+    createElement,
+    {
+      get: (_unused4, tagName) =>
+        wrapClassProxy(
+          createElement.bind(global, tagName)
         )
-    )
+    }
+  )
 
 })(window, document, Object, Symbol(), {});
