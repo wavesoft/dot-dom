@@ -69,16 +69,6 @@ describe('.dom', function () {
       });
     });
 
-    it('should create vnode with spreaded children', function () {
-      const cdom = dd.H('div');
-      const spread = [ 'a', 'b' ];
-      const vdom = dd.H('div', cdom, 'foo', ...spread);
-
-      expect(vdom.E).toEqual('div');
-      expect(vdom.P).toEqual({
-        C: [ cdom, 'foo', 'a', 'b' ]
-      });
-    });
   });
 
   describe('#R', function () {
@@ -192,7 +182,66 @@ describe('.dom', function () {
         );
       });
 
-    })
+    });
+
+    describe('DOM Immutability', function () {
+      it('should not replace DOM if tag & props are the same', function () {
+        const dom = document.createElement('div');
+        const vdom1 = dd.H('div');
+        const vdom2 = dd.H('div');
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+
+        expect(c1).toBe(c2);
+      });
+
+      it('should replace DOM if tag has changed', function () {
+        const dom = document.createElement('div');
+        const vdom1 = dd.H('div');
+        const vdom2 = dd.H('span');
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+
+        expect(c1).not.toBe(c2);
+      });
+
+      it('should not replace DOM if props have changed', function () {
+        const dom = document.createElement('div');
+        const vdom1 = dd.H('div', {foo: 1});
+        const vdom2 = dd.H('div', {foo: 2});
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+
+        expect(c1).toBe(c2);
+      });
+
+      it('should not replace DOM if only children have changed', function () {
+        const dom = document.createElement('div');
+        const vdom1 = dd.H('div', dd.H('span', 'foo'));
+        const vdom2 = dd.H('div', dd.H('span', 'bar'));
+
+        dd.R(vdom1, dom)
+        const c1 = dom.firstChild;
+
+        dd.R(vdom2, dom)
+        const c2 = dom.firstChild;
+
+        expect(c1).toBe(c2);
+      });
+    });
+
     describe('Components', function () {
       it('should render simple component', function () {
         const dom = document.createElement('div');
@@ -447,7 +496,8 @@ describe('.dom', function () {
               }
             },
             dd.H('div', `${clicks} clicks`),
-            ...children
+            children[0],
+            children[1]
           )
         }
         const vdom = dd.H(HostComponent);
