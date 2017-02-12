@@ -1,5 +1,6 @@
 /**
  * .dom - A Tiny VDom Template Engine
+ *
  * Copyright 2017 Ioannis Charalampidis (wavesoft)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,8 +41,8 @@
                                                                       // first argument
 
     P: props[vnodeFlag]                                               // If the props argument is a renderable VNode,
-        ? children.unshift(props) && {C: children}                    // ... prepend it to the children
-        : (props.C = children) && props                               // ... otherwise append 'C' to the property
+        && children.unshift(props) && {C: children}                   // ... prepend it to the children
+        || (props.C = children) && props                              // ... otherwise append 'C' to the property
   })
 
   /**
