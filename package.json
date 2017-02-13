@@ -1,5 +1,5 @@
 {
-  "name": "dotdom",
+  "name": "dot-dom",
   "version": "0.2.0",
   "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
   "main": "dotdom.min.js",
