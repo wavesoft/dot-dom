@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 ((global, document, Object, vnodeFlag, globalState, createElement, render, wrapClassProxy) => {
 
   /**
@@ -41,8 +42,11 @@
                                                                       // first argument
 
     P: props[vnodeFlag]                                               // If the props argument is a renderable VNode,
-        && children.unshift(props) && {C: children}                   // ... prepend it to the children
-        || (props.C = children) && props                              // ... otherwise append 'C' to the property
+        ? children.unshift(props) && {C: children}                    // ... prepend it to the children
+        : (props.C = children) && props,                              // ... otherwise append 'C' to the property
+
+    U: createElement                                                  // 'U' holds the unmount callback
+
   })
 
   /**
@@ -72,7 +76,7 @@
         _unused1,                                                     // We don't handle the array, but we need the
                                                                       // placeholder for the local variables after
 
-        _path=_npath+'.'+index,                                       // a. The state path of this vnode
+        _path=_npath+' '+index,                                       // a. The state path of this vnode
         _path_state=globalState[_path] || [{}, vnode.E],              // b. Get the state record for this path
         _state=(                                                      // c. Update and get the state record
           globalState[_path] =                                        //    The record is an the following format:
@@ -92,6 +96,7 @@
 
             vnode.P,                                                  // 1. The component properties
             _state[0],                                                // 2. The stateful component state
+
             (newState) =>                                             // 3. The setState function
 
               Object.assign(                                          // First we update the state part of the record
@@ -103,7 +108,10 @@
                 vnodes,                                               // update the DOM
                 dom,
                 _npath
-              )
+              ),
+
+            (unmountCallback) =>
+              vnode.U = unmountCallback
 
           ));
 
@@ -121,16 +129,20 @@
           _child                                                      // If we have a previous child we first check if
             ? (_child.E != vnode.E && _child.data != vnode)           // the VNode element or the text are the same
 
-              ? dom.replaceChild(                                     // - If not, we replace the old element with the
-                  _new_dom,                                           //   new one.
-                  _child
-                ) && _new_dom                                         //   ... and we make sure we return the new DOM
-
+              ? (
+                  dom.replaceChild(                                   // - If not, we replace the old element with the
+                    _new_dom,                                         //   new one.
+                    _child
+                  ),
+                  vnode.U(),
+                  _new_dom                                            //   ... and we make sure we return the new DOM
+                )
               : _child                                                // - If it's the same, we keep the old child
 
             : dom.appendChild(                                        // If we don't have a previous child, just append
                 _new_dom
               )
+
         ).E = vnode.E;                                                // We keep the vnode element to the .E property in
                                                                       // order for the above comparison to work.
 
@@ -140,25 +152,19 @@
           ? _new_dom.data = vnode                                     // - String nodes update only the text
           : Object.keys(vnode.P).map(                                 // - Element nodes have properties
               (
-                key,                                                  // 1. The property name
-
-                _unused2,                                             // 2. Index is unused
-                _unused3,                                             // 3. Array is unused
-
-                _value=vnode.P[key]                                   // a. We cache the property value
-
+                key                                                   // 1. The property name
               ) =>
 
                 key == 'style' ?                                      // The 'style' property is an object and must be
                                                                       // applied recursively.
                   Object.assign(
                     _new_dom[key],                                    // '[key]' is shorter than '.style'
-                    _value
+                    vnode.P[key]
                   )
 
                 : (key != 'C' &&                                      // 'C' is the children, so we skip it
 
-                  (_new_dom[key] = _value))                           // All properties are applied directly to DOM
+                  (_new_dom[key] = vnode.P[key]))                     // All properties are applied directly to DOM
                                                                       // instance. This includes `onXXX` event handlers.
 
             ) &&
