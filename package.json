@@ -2,7 +2,7 @@
   "name": "dotdom",
   "version": "0.1.1",
   "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
-  "main": "dotdom.js",
+  "main": "dotdom.min.js",
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "build": "./node_modules/.bin/babili src/dotdom.js | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
