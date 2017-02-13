@@ -54,9 +54,12 @@ module.exports = window;
 
     P: props[vnodeFlag]                                               // If the props argument is a renderable VNode,
         ? {C: [].concat(props, ...children)}                          // ... prepend it to the children
-        : (props.C = [].concat(...children)) && props                 // ... otherwise append 'C' to the property
+        : (props.C = [].concat(...children)) && props,                // ... otherwise append 'C' to the property
                                                                       // the .concat ensures that arrays of children
                                                                       // will be flattened into a single array.
+
+    U: createElement                                                  // 'U' holds the unmount callback
+
   })
 
   /**
@@ -86,7 +89,7 @@ module.exports = window;
         _unused1,                                                     // We don't handle the array, but we need the
                                                                       // placeholder for the local variables after
 
-        _path=_npath+'.'+index,                                       // a. The state path of this vnode
+        _path=_npath+' '+index,                                       // a. The state path of this vnode
         _path_state=globalState[_path] || [{}, vnode.E],              // b. Get the state record for this path
         _state=(                                                      // c. Update and get the state record
           globalState[_path] =                                        //    The record is an the following format:
@@ -106,6 +109,7 @@ module.exports = window;
 
             vnode.P,                                                  // 1. The component properties
             _state[0],                                                // 2. The stateful component state
+
             (newState) =>                                             // 3. The setState function
 
               Object.assign(                                          // First we update the state part of the record
@@ -117,7 +121,10 @@ module.exports = window;
                 vnodes,                                               // update the DOM
                 dom,
                 _npath
-              )
+              ),
+
+            (unmountCallback) =>
+              vnode.U = unmountCallback
 
           ));
 
@@ -135,16 +142,20 @@ module.exports = window;
           _child                                                      // If we have a previous child we first check if
             ? (_child.E != vnode.E && _child.data != vnode)           // the VNode element or the text are the same
 
-              ? dom.replaceChild(                                     // - If not, we replace the old element with the
-                  _new_dom,                                           //   new one.
-                  _child
-                ) && _new_dom                                         //   ... and we make sure we return the new DOM
-
+              ? (
+                  dom.replaceChild(                                   // - If not, we replace the old element with the
+                    _new_dom,                                         //   new one.
+                    _child
+                  ),
+                  vnode.U(),
+                  _new_dom                                            //   ... and we make sure we return the new DOM
+                )
               : _child                                                // - If it's the same, we keep the old child
 
             : dom.appendChild(                                        // If we don't have a previous child, just append
                 _new_dom
               )
+
         ).E = vnode.E;                                                // We keep the vnode element to the .E property in
                                                                       // order for the above comparison to work.
 
