@@ -27,7 +27,7 @@ module.exports = window;
 
 /* END NPM-GLUE */
 
-((global, document, Object, globalState, createElement, render, wrapClassProxy) => {
+((global, document, Object, createElement, render, wrapClassProxy) => {
 
   /**
    * Put the `vnodeFlag` to all strings in order to be considered as virtual
@@ -89,9 +89,9 @@ module.exports = window;
                                                                       // placeholder for the local variables after
 
         _path=_npath+' '+index,                                       // a. The state path of this vnode
-        _path_state=globalState[_path] || [{}, vnode.E],              // b. Get the state record for this path
+        _path_state=global[_path] || [{}, vnode.E],              // b. Get the state record for this path
         _state=(                                                      // c. Update and get the state record
-          globalState[_path] =                                        //    The record is an the following format:
+          global[_path] =                                        //    The record is an the following format:
             _path_state[1] != vnode.E                                 //  [ {state object},
             ? [{}, vnode.E]                                           //    'vnode element' ]
             : _path_state                                             //    The second component is needed in order to
@@ -237,4 +237,4 @@ module.exports = window;
     }
   )
 
-})(window, document, Object, {});
+})(window, document, Object);
