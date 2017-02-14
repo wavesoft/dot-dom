@@ -27,13 +27,13 @@ module.exports = window;
 
 /* END NPM-GLUE */
 
-((global, document, Object, vnodeFlag, globalState, createElement, render, wrapClassProxy) => {
+((global, document, Object, globalState, createElement, render, wrapClassProxy) => {
 
   /**
    * Put the `vnodeFlag` to all strings in order to be considered as virtual
    * dom nodes.
    */
-  String.prototype[vnodeFlag] = 1;
+  String.prototype.σ = 1;
 
   /**
    * Create a VNode element
@@ -44,15 +44,14 @@ module.exports = window;
    * @returns {VNode} Returns a virtual DOM instance
    */
   createElement = (element, props={}, ...children) => ({
-    [vnodeFlag]: 1,                                                   // The vnodeFlag symbol is used by the code
+    σ: 1,                                                             // The vnodeFlag symbol is used by the code
                                                                       // in the 'P' property to check if the `props`
                                                                       // argument is not an object, but a renderable
                                                                       // VNode child
 
     E: element,                                                       // 'E' holds the name or function passed as
                                                                       // first argument
-
-    P: props[vnodeFlag]                                               // If the props argument is a renderable VNode,
+    P: props.σ                                                        // If the props argument is a renderable VNode,
         ? {C: [].concat(props, ...children)}                          // ... prepend it to the children
         : (props.C = [].concat(...children)) && props,                // ... otherwise append 'C' to the property
                                                                       // the .concat ensures that arrays of children
@@ -147,7 +146,6 @@ module.exports = window;
                     _new_dom,                                         //   new one.
                     _child
                   ),
-                  vnode.U(),
                   _new_dom                                            //   ... and we make sure we return the new DOM
                 )
               : _child                                                // - If it's the same, we keep the old child
@@ -158,7 +156,6 @@ module.exports = window;
 
         ).E = vnode.E;                                                // We keep the vnode element to the .E property in
                                                                       // order for the above comparison to work.
-
         /* Update Element */
 
         vnode.trim
@@ -184,7 +181,8 @@ module.exports = window;
               vnode.P.C,                                              // we recursively continue rendering into it's
               _new_dom,                                               // child nodes.
               _path
-            )
+            ) ||
+            vnode.U(_child, _new_dom)                                 // Trigger the lifecycle method
       }
     );
 
@@ -239,4 +237,4 @@ module.exports = window;
     }
   )
 
-})(window, document, Object, Symbol(), {});
+})(window, document, Object, {});
