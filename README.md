@@ -1,4 +1,4 @@
-# .dom [![Build Status](https://travis-ci.org/wavesoft/dot-dom.svg?branch=master)](https://travis-ci.org/wavesoft/dot-dom)
+# .dom [![Build Status](https://travis-ci.org/wavesoft/dot-dom.svg?branch=master)](https://travis-ci.org/wavesoft/dot-dom) [![Try it in codepen.io](https://img.shields.io/badge/Try%20it-codepen.io-blue.svg)](https://codepen.io/anon/pen/YNdNwv?editors=0010)
 
 > A tiny (510 byte) virtual DOM template engine for embedded projects
 
@@ -10,7 +10,18 @@
 
 Why? Because with such library you can create powerful GUIs in tight space environments, such as IoT devices, where saving even an extra byte actually matters!
 
-[Try it in codepen.io](https://codepen.io/anon/pen/YNdNwv?editors=0010)
+### Features
+
+* _Tiny by design_ : The library should never exceed the 512 bytes in size. The goal is not to have yet another template engine, but to have as many features as possible in 512 bytes. If a new feature is needed, an other must be sacraficed or the scope must be reduced.  
+
+* _Built for the future_ : The library is heavily exploiting the ES6 specifications, meaning that it's **not** supported by older borwsers. Currently it's supported by the 70% of the browsers in the market, but expect this to be 90% within the next year.
+
+* _Declarative_ : Describe your HTML DOM in a structured, natural manner, helping you create powerful yet readable user interfaces.
+
+* _Component-Oriented_ : Just like React.js, **.dom** promotes the use of functional components.
+
+* _"Write less" accelerators_ : The library API is designed specifically to have short function names and accelerators, allowing you to describe your views with less code.
+
 
 ## Installation
 
@@ -252,7 +263,34 @@ This is the same as calling `div({className: 'className'})` and the function int
 
 Are you interested in contributing to **.dom**? You are more than welcome! Just be sure to follow the guidelines:
 
-1. *Always explain your code with a comment* : Since you will most probably going to do some extreme javascript corner cases in order to be able to squeeze your logic.
-2. *All comments should start on column 70 and wrap after column 120* : In order to perserve code-style consistency.
-3. *The GZipped result should __never__ be bigger than 512 bytes* : Since that's the whole purpose of the library. If you are adding a completely new feature, consider sacraficing another one, or try to reduce scope, in order to keep the balance.
+1. Install a local development environment (you will need node.js **6.x** or later)
 
+  ```
+  npm install
+  ```
+
+2. **Always** run the following when you think you are ready for a pull request:
+
+  ```
+  npm test && npm run build && ls -l dotdom.min.js.gz
+  ```
+
+3. If tests pass and the size of `dotdom.min.js.gz` is smaller than or equal to 512 bytes, create a pull request. Otherwise reduce your scope or think of another implementation in order to bring it back down to 512 bytes.
+
+4. Make sure to properly comments your code, since you will most probably have to do some extreme javascript hacking. The gudeliens are the following:
+
+  ```js
+  /**
+   * Functions are commented as JSDoc blocks
+   *
+   * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
+   * ...
+   */
+  global.R = render = (
+    vnodes,                                                           // Flat-code comments start on column 70 and
+    dom,                                                              // wrap after column 120.
+    
+    /* Logical separations can be commented like this */
+    
+    ...
+  ```
