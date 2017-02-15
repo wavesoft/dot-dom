@@ -253,6 +253,74 @@ describe('.dom', function () {
 
     });
 
+    describe('Lifecycle Method', function () {
+
+      it('should be called with the correct arguments when mounted', function () {
+        const dom = document.createElement('div');
+        const updateHandler = jest.fn();
+        const SampleComponent = (props, state, setState, onUpdate) => {
+          onUpdate(updateHandler);
+          return dd.H(props.tag);
+        };
+
+        const vdom1 = dd.H(SampleComponent, {tag: 'div'});
+        dd.R(vdom1, dom)
+
+        const dom1 = dom.firstChild;
+
+        expect(updateHandler.mock.calls).toEqual([
+          [dom1, undefined]
+        ])
+      });
+
+      it('should be called with the correct arguments when updated', function () {
+        const dom = document.createElement('div');
+        const updateHandler = jest.fn();
+        const SampleComponent = (props, state, setState, onUpdate) => {
+          onUpdate(updateHandler);
+          return dd.H(props.tag);
+        };
+
+        const vdom1 = dd.H(SampleComponent, {tag: 'div'});
+        dd.R(vdom1, dom)
+
+        const dom1 = dom.firstChild;
+
+        const vdom2 = dd.H(SampleComponent, {tag: 'span'});
+        dd.R(vdom2, dom)
+
+        const dom2 = dom.firstChild;
+
+        expect(updateHandler.mock.calls).toEqual([
+          [dom1, undefined],
+          [dom2, dom1]
+        ])
+      });
+
+      it('should be called with the correct arguments when unmounted', function () {
+        const dom = document.createElement('div');
+        const updateHandler = jest.fn();
+        const SampleComponent = (props, state, setState, onUpdate) => {
+          onUpdate(updateHandler);
+          return dd.H(props.tag);
+        };
+
+        const vdom1 = dd.H(SampleComponent, {tag: 'div'});
+        dd.R(vdom1, dom)
+
+        const dom1 = dom.firstChild;
+
+        const vdom2 = dd.H('span');
+        dd.R(vdom2, dom)
+
+        expect(updateHandler.mock.calls).toEqual([
+          [dom1, undefined],
+          [undefined, dom1]
+        ])
+      });
+
+    });
+
     describe('Reconciliation', function () {
       it('should not replace DOM if tag & props are the same', function () {
         const dom = document.createElement('div');
