@@ -140,25 +140,20 @@
           ? _new_dom.data = vnode                                     // - String nodes update only the text
           : Object.keys(vnode.P).map(                                 // - Element nodes have properties
               (
-                key,                                                  // 1. The property name
-
-                _unused2,                                             // 2. Index is unused
-                _unused3,                                             // 3. Array is unused
-
-                _value=vnode.P[key]                                   // a. We cache the property value
-
+                key                                                   // 1. The property name
               ) =>
 
                 key == 'style' ?                                      // The 'style' property is an object and must be
                                                                       // applied recursively.
                   Object.assign(
                     _new_dom[key],                                    // '[key]' is shorter than '.style'
-                    _value
+                    vnode.P[key]
                   )
 
                 : (key != 'C' &&                                      // 'C' is the children, so we skip it
 
-                  (_new_dom[key] = _value))                           // All properties are applied directly to DOM
+                  _new_dom[key] !== vnode.P[key] &&                   // All properties are applied directly to DOM, as
+                  (_new_dom[key] = vnode.P[key]))                     // long as they are different than ther value in the
                                                                       // instance. This includes `onXXX` event handlers.
 
             ) &&
