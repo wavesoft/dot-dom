@@ -152,9 +152,7 @@
                     vnode.P[key]
                   )
 
-                : (key != 'C' &&                                      // 'C' is the children, so we skip it
-
-                  _new_dom[key] !== vnode.P[key] &&                   // All properties are applied directly to DOM, as
+                : (_new_dom[key] !== vnode.P[key] &&                   // All properties are applied directly to DOM, as
                   (_new_dom[key] = vnode.P[key]))                     // long as they are different than ther value in the
                                                                       // instance. This includes `onXXX` event handlers.
 
@@ -211,8 +209,8 @@
   global.H = new Proxy(
     createElement,
     {
-      get: (_unused4, tagName) =>
-        wrapClassProxy(
+      get: (targetFn, tagName) =>
+        targetFn[tagName] || wrapClassProxy(
           createElement.bind(global, tagName)
         )
     }
