@@ -7,14 +7,14 @@ describe('.dom', function () {
     it('should create vnode without arguments', function () {
       const vdom = dd.H('div');
 
-      expect(vdom.E).toEqual('div');
+      expect(vdom.$).toEqual('div');
       expect(vdom.P).toEqual({C: []});
     });
 
     it('should create vnode with props', function () {
       const vdom = dd.H('div', {foo: 'bar'});
 
-      expect(vdom.E).toEqual('div');
+      expect(vdom.$).toEqual('div');
       expect(vdom.P).toEqual({foo: 'bar', C: []});
     });
 
@@ -22,7 +22,7 @@ describe('.dom', function () {
       const cdom = dd.H('div');
       const vdom = dd.H('div', {foo: 'bar'}, cdom);
 
-      expect(vdom.E).toEqual('div');
+      expect(vdom.$).toEqual('div');
       expect(vdom.P).toEqual({
         foo: 'bar',
         C: [ cdom ]
@@ -33,7 +33,7 @@ describe('.dom', function () {
       const cdom = dd.H('div');
       const vdom = dd.H('div', {foo: 'bar'}, 'foo', cdom);
 
-      expect(vdom.E).toEqual('div');
+      expect(vdom.$).toEqual('div');
       expect(vdom.P).toEqual({
         foo: 'bar',
         C: [ 'foo', cdom ]
@@ -43,7 +43,7 @@ describe('.dom', function () {
     it('should create vnode with props and string children', function () {
       const vdom = dd.H('div', {foo: 'bar'}, 'foo');
 
-      expect(vdom.E).toEqual('div');
+      expect(vdom.$).toEqual('div');
       expect(vdom.P).toEqual({
         foo: 'bar',
         C: [ 'foo' ]
@@ -53,7 +53,7 @@ describe('.dom', function () {
     it('should create vnode with only child', function () {
       const vdom = dd.H('div', 'foo');
 
-      expect(vdom.E).toEqual('div');
+      expect(vdom.$).toEqual('div');
       expect(vdom.P).toEqual({
         C: [ 'foo' ]
       });
@@ -63,7 +63,7 @@ describe('.dom', function () {
       const cdom = dd.H('div');
       const vdom = dd.H('div', cdom, 'foo');
 
-      expect(vdom.E).toEqual('div');
+      expect(vdom.$).toEqual('div');
       expect(vdom.P).toEqual({
         C: [ cdom, 'foo' ]
       });
