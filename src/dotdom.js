@@ -49,11 +49,9 @@ module.exports = window;
 
     P: props.$                                                        // If the props argument is a renderable VNode,
         ? {C: [].concat(props, ...children)}                          // ... prepend it to the children
-        : (props.C = [].concat(...children)) && props,                // ... otherwise append 'C' to the property
+        : (props.C = [].concat(...children)) && props                 // ... otherwise append 'C' to the property
                                                                       // the .concat ensures that arrays of children
                                                                       // will be flattened into a single array.
-
-    U: createElement                                                  // 'U' holds the unmount callback
 
   })
 
@@ -93,8 +91,9 @@ module.exports = window;
             : _path_state                                             //    The second component is needed in order to
         ),                                                            //    reset the state if the component has changed
         _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
-        _new_dom                                                      // e. The new DOM element placeholder
-
+        _new_dom,                                                     // e. The new DOM element placeholder
+        _onupdate_callback=() => 0                                    // f. A callback that can be defined by the component
+                                                                      //    function in order to receive update events.
       ) => {
 
         /* Expand functional Components */
@@ -118,9 +117,9 @@ module.exports = window;
                 _npath
               ),
 
-            (unmountCallback) =>
-              vnode.U = unmountCallback
-
+            (unmountCallback) =>                                      // 4. The `onUpdate` function that defines the
+              _onupdate_callback = unmountCallback                    //    callback to be fired when the component DOM
+                                                                      //    is updated.
           ));
 
         /* Create new DOM element */
@@ -178,7 +177,7 @@ module.exports = window;
               _new_dom,                                               // child nodes.
               _path
             ) ||
-            vnode.U(_child, _new_dom)                                 // Trigger the lifecycle method
+            _onupdate_callback(_new_dom, _child)                      // Call the onUpdate lifecycle method
       }
     );
 
