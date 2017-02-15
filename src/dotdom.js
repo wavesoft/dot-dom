@@ -30,10 +30,10 @@ module.exports = window;
 ((global, document, Object, createElement, wrapClassProxy, render) => {
 
   /**
-   * Put the `ª` symbol to all strings in order to be considered as virtual
+   * Put the `$` symbol to all strings in order to be considered as virtual
    * DOM nodes.
    */
-  String.prototype.ª = 1;
+  String.prototype.$ = 1;
 
   /**
    * Create a VNode element
@@ -44,15 +44,10 @@ module.exports = window;
    * @returns {VNode} Returns a virtual DOM instance
    */
   createElement = (element, props={}, ...children) => ({
-    ª: 1,                                                             // The ª symbol is used by the code
-                                                                      // in the 'P' property to check if the `props`
-                                                                      // argument is not an object, but a renderable
-                                                                      // VNode child
-
-    E: element,                                                       // 'E' holds the name or function passed as
+    $: element,                                                       // 'E' holds the name or function passed as
                                                                       // first argument
 
-    P: props.ª                                                        // If the props argument is a renderable VNode,
+    P: props.$                                                        // If the props argument is a renderable VNode,
         ? {C: [].concat(props, ...children)}                          // ... prepend it to the children
         : (props.C = [].concat(...children)) && props,                // ... otherwise append 'C' to the property
                                                                       // the .concat ensures that arrays of children
@@ -90,11 +85,11 @@ module.exports = window;
                                                                       // placeholder for the local variables after
 
         _path=_npath+' '+index,                                       // a. The state path of this vnode
-        _path_state=wrapClassProxy[_path] || [{}, vnode.E],           // b. Get the state record for this path
+        _path_state=wrapClassProxy[_path] || [{}, vnode.$],           // b. Get the state record for this path
         _state=(                                                      // c. Update and get the state record
           wrapClassProxy[_path] =                                     //    The record is an the following format:
-            _path_state[1] != vnode.E                                 //  [ {state object},
-            ? [{}, vnode.E]                                           //    'vnode element' ]
+            _path_state[1] != vnode.$                                 //  [ {state object},
+            ? [{}, vnode.$]                                           //    'vnode element' ]
             : _path_state                                             //    The second component is needed in order to
         ),                                                            //    reset the state if the component has changed
         _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
@@ -104,8 +99,8 @@ module.exports = window;
 
         /* Expand functional Components */
 
-        vnode.E && vnode.E.call &&                                    // If the vnode is a functional component, expand
-          (vnode = vnode.E(                                           // it and replace the current vnode variable.
+        vnode.$ && vnode.$.call &&                                    // If the vnode is a functional component, expand
+          (vnode = vnode.$(                                           // it and replace the current vnode variable.
 
             vnode.P,                                                  // 1. The component properties
             _state[0],                                                // 2. The stateful component state
@@ -133,14 +128,14 @@ module.exports = window;
         _new_dom =                                                    // We prepare the new DOM element in advance in
           vnode.trim                                                  // order to spare a few comparison bytes
             ? document.createTextNode(vnode)
-            : document.createElement(vnode.E);
+            : document.createElement(vnode.$);
 
 
         /* Keep or replace the previous DOM element */
 
         (_new_dom =
           _child                                                      // If we have a previous child we first check if
-            ? (_child.E != vnode.E && _child.data != vnode)           // the VNode element or the text are the same
+            ? (_child.$ != vnode.$ && _child.data != vnode)           // the VNode element or the text are the same
 
               ? (
                   dom.replaceChild(                                   // - If not, we replace the old element with the
@@ -155,7 +150,7 @@ module.exports = window;
                 _new_dom
               )
 
-        ).E = vnode.E;                                                // We keep the vnode element to the .E property in
+        ).$ = vnode.$;                                                // We keep the vnode element to the .$ property in
                                                                       // order for the above comparison to work.
         /* Update Element */
 
