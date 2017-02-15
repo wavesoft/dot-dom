@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-((global, document, Object, createElement, render, wrapClassProxy) => {
+((global, document, Object, createElement, wrapClassProxy, render) => {
 
   /**
    * Put the `vnodeFlag` to all strings in order to be considered as virtual
    * dom nodes.
    */
-  String.prototype.σ = 1;
+  String.prototype.ª = 1;
 
   /**
    * Create a VNode element
@@ -33,7 +33,7 @@
    * @returns {VNode} Returns a virtual DOM instance
    */
   createElement = (element, props={}, ...children) => ({
-    σ: 1,                                                             // The vnodeFlag symbol is used by the code
+    ª: 1,                                                             // The vnodeFlag symbol is used by the code
                                                                       // in the 'P' property to check if the `props`
                                                                       // argument is not an object, but a renderable
                                                                       // VNode child
@@ -41,7 +41,7 @@
     E: element,                                                       // 'E' holds the name or function passed as
                                                                       // first argument
 
-    P: props.σ                                                        // If the props argument is a renderable VNode,
+    P: props.ª                                                        // If the props argument is a renderable VNode,
         ? {C: [].concat(props,children)}                              // ... prepend it to the children
         : (props.C = [].concat(children)) && props,                   // ... otherwise append 'C' to the property
 
@@ -77,9 +77,9 @@
                                                                       // placeholder for the local variables after
 
         _path=_npath+' '+index,                                       // a. The state path of this vnode
-        _path_state=global[_path] || [{}, vnode.E],              // b. Get the state record for this path
+        _path_state=wrapClassProxy[_path] || [{}, vnode.E],           // b. Get the state record for this path
         _state=(                                                      // c. Update and get the state record
-          global[_path] =                                        //    The record is an the following format:
+          wrapClassProxy[_path] =                                     //    The record is an the following format:
             _path_state[1] != vnode.E                                 //  [ {state object},
             ? [{}, vnode.E]                                           //    'vnode element' ]
             : _path_state                                             //    The second component is needed in order to
