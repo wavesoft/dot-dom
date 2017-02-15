@@ -29,6 +29,19 @@ describe('.dom', function () {
       });
     });
 
+    it('should create vnode with props and children as array', function () {
+      const cdom1 = dd.H('div');
+      const cdom2 = dd.H('div');
+      const cdom3 = dd.H('div');
+      const vdom = dd.H('div', {foo: 'bar'}, cdom1, [cdom2, cdom3]);
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        foo: 'bar',
+        C: [ cdom1, cdom2, cdom3 ]
+      });
+    });
+
     it('should create vnode with props and mixed children', function () {
       const cdom = dd.H('div');
       const vdom = dd.H('div', {foo: 'bar'}, 'foo', cdom);
@@ -56,6 +69,24 @@ describe('.dom', function () {
       expect(vdom.E).toEqual('div');
       expect(vdom.P).toEqual({
         C: [ 'foo' ]
+      });
+    });
+
+    it('should create vnode with children', function () {
+      const vdom = dd.H('div', 'foo', 'bar', 'baz');
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        C: [ 'foo', 'bar', 'baz' ]
+      });
+    });
+
+    it('should create vnode with children in arrays', function () {
+      const vdom = dd.H('div', 'foo', ['bar', 'baz']);
+
+      expect(vdom.E).toEqual('div');
+      expect(vdom.P).toEqual({
+        C: [ 'foo', 'bar', 'baz' ]
       });
     });
 

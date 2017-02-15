@@ -41,8 +41,10 @@
                                                                       // first argument
 
     P: props[vnodeFlag]                                               // If the props argument is a renderable VNode,
-        && children.unshift(props) && {C: children}                   // ... prepend it to the children
-        || (props.C = children) && props                              // ... otherwise append 'C' to the property
+        ? {C: [].concat(props, ...children)}                          // ... prepend it to the children
+        : (props.C = [].concat(...children)) && props                 // ... otherwise append 'C' to the property
+                                                                      // the .concat ensures that arrays of children
+                                                                      // will be flattened into a single array.
   })
 
   /**
