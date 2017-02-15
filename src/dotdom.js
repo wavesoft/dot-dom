@@ -30,8 +30,8 @@ module.exports = window;
 ((global, document, Object, createElement, wrapClassProxy, render) => {
 
   /**
-   * Put the `vnodeFlag` to all strings in order to be considered as virtual
-   * dom nodes.
+   * Put the `ª` symbol to all strings in order to be considered as virtual
+   * DOM nodes.
    */
   String.prototype.ª = 1;
 
@@ -44,7 +44,7 @@ module.exports = window;
    * @returns {VNode} Returns a virtual DOM instance
    */
   createElement = (element, props={}, ...children) => ({
-    ª: 1,                                                             // The vnodeFlag symbol is used by the code
+    ª: 1,                                                             // The ª symbol is used by the code
                                                                       // in the 'P' property to check if the `props`
                                                                       // argument is not an object, but a renderable
                                                                       // VNode child
