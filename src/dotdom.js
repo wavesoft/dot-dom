@@ -140,16 +140,11 @@ module.exports = window;
                     _new_dom,                                         //   new one.
                     _child
                   ),
-                  _onupdate_callback(_new_dom),                       //   ... call the mount lifecycle method
                   _new_dom                                            //   ... and we make sure we return the new DOM
                 )
               : _child                                                // - If it's the same, we keep the old child
 
-            : (
-                dom.appendChild(                                      // mount lifecycle method and append
-                  _new_dom
-                ),
-                _onupdate_callback(_new_dom),                         // If we don't have a previous child, just call the
+            : dom.appendChild(                                        // mount lifecycle method and append
                 _new_dom
               )
 
@@ -180,7 +175,8 @@ module.exports = window;
               vnode.P.C,                                              // we recursively continue rendering into it's
               _new_dom,                                               // child nodes.
               _path
-            )
+            ) ||
+            _onupdate_callback(_new_dom, _child)
       }
     );
 
