@@ -86,7 +86,7 @@ module.exports = window;
         ),                                                            //    reset the state if the component has changed
         _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
         _new_dom,                                                     // e. The new DOM element placeholder
-        _onupdate_callback=() => 0                                    // f. A callback that can be defined by the component
+        _onupdate_callback=E => E                                     // f. A callback that can be defined by the component
                                                                       //    function in order to receive update events.
       ) => {
 
@@ -132,7 +132,7 @@ module.exports = window;
             ? (_child.$ != vnode.$ && _child.data != vnode)           // the VNode element or the text are the same
 
               ? (
-                  _child.U(),
+                  _child.U && _child.U(),
                   dom.replaceChild(                                   // - If not, we replace the old element with the
                     _new_dom,                                         //   new one.
                     _child
@@ -184,7 +184,7 @@ module.exports = window;
     /* Remove extraneous nodes */
 
     while (_children[_c]) {                                           // The _c property keeps track of the number of
-      _children[_c].U();                                              // elements in the VDom. If there are more child
+      _children[_c].U && _children[_c].U();                           // elements in the VDom. If there are more child
       dom.removeChild(_children[_c])                                  // nodes in the DOM, we remove them.
     }
   }
