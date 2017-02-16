@@ -30,12 +30,6 @@ module.exports = window;
 ((global, document, Object, createElement, wrapClassProxy, render) => {
 
   /**
-   * Put the `$` symbol to all strings in order to be considered as virtual
-   * DOM nodes.
-   */
-  String.prototype.$ = 1;
-
-  /**
    * Create a VNode element
    *
    * @param {String|Function} element - The tag name or the component to render
@@ -47,7 +41,7 @@ module.exports = window;
     $: element,                                                       // 'E' holds the name or function passed as
                                                                       // first argument
 
-    P: props.$                                                        // If the props argument is a renderable VNode,
+    P: (props.$ || props.trim)                                        // If the props argument is a renderable VNode,
         ? {C: [].concat(props, ...children)}                          // ... prepend it to the children
         : (props.C = [].concat(...children)) && props                 // ... otherwise append 'C' to the property
                                                                       // the .concat ensures that arrays of children
@@ -124,10 +118,11 @@ module.exports = window;
 
         /* Create new DOM element */
 
-        _new_dom =                                                    // We prepare the new DOM element in advance in
+        (_new_dom =                                                   // We prepare the new DOM element in advance in
           vnode.trim                                                  // order to spare a few comparison bytes
             ? document.createTextNode(vnode)
-            : document.createElement(vnode.$);
+            : document.createElement(vnode.$)
+        ).U = _onupdate_callback;
 
 
         /* Keep or replace the previous DOM element */
@@ -137,15 +132,21 @@ module.exports = window;
             ? (_child.$ != vnode.$ && _child.data != vnode)           // the VNode element or the text are the same
 
               ? (
+                  _child.U(),
                   dom.replaceChild(                                   // - If not, we replace the old element with the
                     _new_dom,                                         //   new one.
                     _child
                   ),
+                  _onupdate_callback(_new_dom),                       //   ... call the mount lifecycle method
                   _new_dom                                            //   ... and we make sure we return the new DOM
                 )
               : _child                                                // - If it's the same, we keep the old child
 
-            : dom.appendChild(                                        // If we don't have a previous child, just append
+            : (
+                dom.appendChild(                                      // mount lifecycle method and append
+                  _new_dom
+                ),
+                _onupdate_callback(_new_dom),                         // If we don't have a previous child, just call the
                 _new_dom
               )
 
@@ -167,7 +168,7 @@ module.exports = window;
                     vnode.P[key]
                   )
 
-                : (_new_dom[key] !== vnode.P[key] &&                   // All properties are applied directly to DOM, as
+                : (_new_dom[key] !== vnode.P[key] &&                  // All properties are applied directly to DOM, as
                   (_new_dom[key] = vnode.P[key]))                     // long as they are different than ther value in the
                                                                       // instance. This includes `onXXX` event handlers.
 
@@ -176,16 +177,17 @@ module.exports = window;
               vnode.P.C,                                              // we recursively continue rendering into it's
               _new_dom,                                               // child nodes.
               _path
-            ) ||
-            _onupdate_callback(_new_dom, _child)                      // Call the onUpdate lifecycle method
+            )
       }
     );
 
     /* Remove extraneous nodes */
 
-    while (_children[_c])                                             // The _c property keeps track of the number of
-      dom.removeChild(_children[_c])                                  // elements in the VDom. If there are more child
-  }                                                                   // nodes in the DOM, we remove them.
+    while (_children[_c]) {                                           // The _c property keeps track of the number of
+      _children[_c].U();                                              // elements in the VDom. If there are more child
+      dom.removeChild(_children[_c])                                  // nodes in the DOM, we remove them.
+    }
+  }
 
   /**
    * Helper function that wraps an element shorthand function with a proxy
