@@ -256,7 +256,7 @@ describe('.dom', function () {
 
     describe('Lifecycle Method', function () {
 
-      it('should be called with the correct arguments when mounted', function () {
+      it('should be called correctly when mounted', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, onUpdate) => {
@@ -271,11 +271,11 @@ describe('.dom', function () {
 
         expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          [dom1]
+          [dom1, undefined]
         ])
       });
 
-      it('should be called with the correct arguments when updated', function () {
+      it('should be called correctly when updated', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, onUpdate) => {
@@ -295,13 +295,13 @@ describe('.dom', function () {
 
         expect(updateHandler.mock.calls.length).toEqual(3)
         expect(updateHandler.mock.calls).toEqual([
-          [dom1],
+          [dom1, undefined],
           [],
-          [dom2]
+          [dom2, dom1]
         ])
       });
 
-      it('should not be called when DOM is not replaced', function () {
+      it('should be called correctly when props change', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, onUpdate) => {
@@ -319,13 +319,14 @@ describe('.dom', function () {
 
         const dom2 = dom.firstChild;
 
-        expect(updateHandler.mock.calls.length).toEqual(1)
+        expect(updateHandler.mock.calls.length).toEqual(2)
         expect(updateHandler.mock.calls).toEqual([
-          [dom1]
+          [dom1, undefined],
+          [dom1, dom1]
         ])
       });
 
-      it('should be called with the correct arguments when replaced', function () {
+      it('should be called correctly when replaced', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, onUpdate) => {
@@ -343,12 +344,12 @@ describe('.dom', function () {
 
         expect(updateHandler.mock.calls.length).toEqual(2)
         expect(updateHandler.mock.calls).toEqual([
-          [dom1],
+          [dom1, undefined],
           []
         ])
       });
 
-      it('should be called with the correct arguments when removed', function () {
+      it('should be called correctly when removed', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, onUpdate) => {
@@ -365,7 +366,7 @@ describe('.dom', function () {
 
         expect(updateHandler.mock.calls.length).toEqual(2)
         expect(updateHandler.mock.calls).toEqual([
-          [dom1],
+          [dom1, undefined],
           []
         ])
       });
