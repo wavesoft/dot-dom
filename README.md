@@ -1,6 +1,6 @@
 # .dom [![Build Status](https://travis-ci.org/wavesoft/dot-dom.svg?branch=master)](https://travis-ci.org/wavesoft/dot-dom) [![Try it in codepen.io](https://img.shields.io/badge/Try%20it-codepen.io-blue.svg)](https://codepen.io/anon/pen/YNdNwv?editors=0010)
 
-> A tiny (510 byte) virtual DOM template engine for embedded projects
+> A tiny (511 byte) virtual DOM template engine for embedded projects
 
 | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/edge.png" alt="IE / Edge" width="16px" height="16px" /> IE / Edge | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/firefox.png" alt="Firefox" width="16px" height="16px" /> Firefox | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome.png" alt="Chrome" width="16px" height="16px" /> Chrome | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari.png" alt="Safari" width="16px" height="16px" /> Safari | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/opera.png" alt="Opera" width="16px" height="16px" /> Opera | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari-ios.png" alt="iOS Safari" width="16px" height="16px" /> iOS Safari | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome-android.png" alt="Chrome for Android" width="16px" height="16px" /> Chrome for Android |
 | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
@@ -12,7 +12,7 @@ Why? Because with such library you can create powerful GUIs in tight space envir
 
 ### Features
 
-* _Tiny by design_ : The library should never exceed the 512 bytes in size. The goal is not to have yet another template engine, but to have as many features as possible in 512 bytes. If a new feature is needed, an other must be sacraficed or the scope must be reduced.  
+* _Tiny by design_ : The library should never exceed the 512 bytes in size. The goal is not to have yet another template engine, but to have as many features as possible in 512 bytes. If a new feature is needed, an other must be sacraficed or the scope must be reduced.
 
 * _Built for the future_ : The library is heavily exploiting the ES6 specifications, meaning that it's **not** supported by older borwsers. Currently it's supported by the 70% of the browsers in the market, but expect this to be 90% within the next year.
 
@@ -25,16 +25,16 @@ Why? Because with such library you can create powerful GUIs in tight space envir
 
 ## Installation
 
-For minimum footprint, include `dotdom.min.js.gz` (510b) to your project.
+For minimum footprint, include `dotdom.min.js.gz` (511b) to your project.
 
 ```html
 <script src="dotdom.min.js.gz" />
 ```
 
-Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (755b):
+Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (779b):
 
 ```js
-((a,b,c,d,e,f,g,h)=>{String.prototype[d]=1,f=(i,j={},...k)=>({[d]:1,E:i,P:j[d]&&k.unshift(j)&&{C:k}||(j.C=k)&&j}),a.R=g=(i,j,k='',l=j.childNodes,m=0)=>{for((i.map?i:[i]).map((n,o,p,q=k+'.'+o,r=e[q]||[{},n.E],s=e[q]=r[1]==n.E?r:[{},n.E],t=l[m++],u)=>{n.E&&n.E.call&&(n=n.E(n.P,s[0],v=>c.assign(s[0],v)&&g(i,j,k))),u=n.trim?b.createTextNode(n):b.createElement(n.E),(u=t?t.E!=n.E&&t.data!=n?j.replaceChild(u,t)&&u:t:j.appendChild(u)).E=n.E,n.trim?u.data=n:c.keys(n.P).map((v,w,x,y=n.P[v])=>'style'==v?c.assign(u[v],y):'C'!=v&&(u[v]=y))&&g(n.P.C,u,q)});l[m];)j.removeChild(l[m])},h=i=>new Proxy(i,{get:(j,k,l)=>h((...m)=>((l=j(...m)).P.className=[l.P.className]+' '+k,l))}),a.H=new Proxy(f,{get:(i,j)=>h(f.bind(a,j))})})(window,document,Object,Symbol(),{});
+((a,b,c,d,e,f,g,h)=>{String.prototype[d]=1,f=(i,j={},...k)=>({[d]:1,E:i,P:j[d]?{C:[].concat(j,...k)}:(j.C=[].concat(...k))&&j}),a.R=g=(i,j,k='',l=j.childNodes,m=0)=>{for((i.map?i:[i]).map((n,o,p,q=k+'.'+o,r=e[q]||[{},n.E],s=e[q]=r[1]==n.E?r:[{},n.E],t=l[m++],u)=>{n.E&&n.E.call&&(n=n.E(n.P,s[0],v=>c.assign(s[0],v)&&g(i,j,k))),u=n.trim?b.createTextNode(n):b.createElement(n.E),(u=t?t.E!=n.E&&t.data!=n?j.replaceChild(u,t)&&u:t:j.appendChild(u)).E=n.E,n.trim?u.data=n:c.keys(n.P).map((v)=>'style'==v?c.assign(u[v],n.P[v]):u[v]!==n.P[v]&&(u[v]=n.P[v]))&&g(n.P.C,u,q)});l[m];)j.removeChild(l[m])},h=i=>new Proxy(i,{get:(j,k,l)=>h((...m)=>((l=j(...m)).P.className=[l.P.className]+' '+k,l))}),a.H=new Proxy(f,{get:(i,j)=>i[j]||h(f.bind(a,j))})})(window,document,Object,Symbol(),{});
 ```
 
 ## Examples
@@ -210,6 +210,29 @@ component.
 
 Properties and children are optional and they can be omitted.
 
+#### Functional Components
+
+Instead of a tag name you can provide a function that returns a Virtual DOM
+according to some higher-level logic. Such function have the following signature:
+
+```js
+const Component = (props, state, setState) {
+
+  // Return your Virtual DOM
+  return div( ... )
+}
+```
+
+The `props` property contains the properties object as given when the component
+was created.
+
+The `state` is initialized to an empty object `{}` and it's updated by calling
+the `setState({ newState })` method. The latter will also trigger an update to
+the component and it's children.
+
+You can also assign properties to the `state` object directly if you don't want
+to cause an update.
+
 ### Tag Shorthand `tag( [properties], [children ...] )`
 
 ```js
@@ -289,8 +312,8 @@ Are you interested in contributing to **.dom**? You are more than welcome! Just 
   global.R = render = (
     vnodes,                                                           // Flat-code comments start on column 70 and
     dom,                                                              // wrap after column 120.
-    
+
     /* Logical separations can be commented like this */
-    
+
     ...
   ```
