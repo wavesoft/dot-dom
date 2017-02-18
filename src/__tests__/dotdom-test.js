@@ -11,14 +11,14 @@ describe('.dom', function () {
         const vdom = dd.H('div');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({C: []});
+        expect(vdom.a).toEqual({c: []});
       });
 
       it('should create vnode with props', function () {
         const vdom = dd.H('div', {foo: 'bar'});
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({foo: 'bar', C: []});
+        expect(vdom.a).toEqual({foo: 'bar', c: []});
       });
 
       it('should create vnode with props and children', function () {
@@ -26,9 +26,9 @@ describe('.dom', function () {
         const vdom = dd.H('div', {foo: 'bar'}, cdom);
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
+        expect(vdom.a).toEqual({
           foo: 'bar',
-          C: [ cdom ]
+          c: [ cdom ]
         });
       });
 
@@ -39,9 +39,9 @@ describe('.dom', function () {
         const vdom = dd.H('div', {foo: 'bar'}, cdom1, [cdom2, cdom3]);
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
+        expect(vdom.a).toEqual({
           foo: 'bar',
-          C: [ cdom1, cdom2, cdom3 ]
+          c: [ cdom1, cdom2, cdom3 ]
         });
       });
 
@@ -50,9 +50,9 @@ describe('.dom', function () {
         const vdom = dd.H('div', {foo: 'bar'}, 'foo', cdom);
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
+        expect(vdom.a).toEqual({
           foo: 'bar',
-          C: [ 'foo', cdom ]
+          c: [ 'foo', cdom ]
         });
       });
 
@@ -60,9 +60,9 @@ describe('.dom', function () {
         const vdom = dd.H('div', {foo: 'bar'}, 'foo');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
+        expect(vdom.a).toEqual({
           foo: 'bar',
-          C: [ 'foo' ]
+          c: [ 'foo' ]
         });
       });
 
@@ -70,8 +70,8 @@ describe('.dom', function () {
         const vdom = dd.H('div', 'foo');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
-          C: [ 'foo' ]
+        expect(vdom.a).toEqual({
+          c: [ 'foo' ]
         });
       });
 
@@ -79,8 +79,8 @@ describe('.dom', function () {
         const vdom = dd.H('div', 'foo', 'bar', 'baz');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
-          C: [ 'foo', 'bar', 'baz' ]
+        expect(vdom.a).toEqual({
+          c: [ 'foo', 'bar', 'baz' ]
         });
       });
 
@@ -88,8 +88,8 @@ describe('.dom', function () {
         const vdom = dd.H('div', 'foo', ['bar', 'baz']);
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
-          C: [ 'foo', 'bar', 'baz' ]
+        expect(vdom.a).toEqual({
+          c: [ 'foo', 'bar', 'baz' ]
         });
       });
 
@@ -98,8 +98,8 @@ describe('.dom', function () {
         const vdom = dd.H('div', cdom, 'foo');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
-          C: [ cdom, 'foo' ]
+        expect(vdom.a).toEqual({
+          c: [ cdom, 'foo' ]
         });
       });
 
@@ -112,8 +112,8 @@ describe('.dom', function () {
         const vdom = dd.H.apply({}, ['div', cdom, 'foo']);
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
-          C: [ cdom, 'foo' ]
+        expect(vdom.a).toEqual({
+          c: [ cdom, 'foo' ]
         });
       });
 
@@ -122,18 +122,18 @@ describe('.dom', function () {
         const vdom = dd.H.call({}, 'div', cdom, 'foo');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
-          C: [ cdom, 'foo' ]
+        expect(vdom.a).toEqual({
+          c: [ cdom, 'foo' ]
         });
       });
 
-      it('H.tag should be a shorthand', function () {
+      it('H.<tag> should be a shorthand', function () {
         const cdom = dd.H('div');
         const vdom = dd.H.div(cdom, 'foo');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.P).toEqual({
-          C: [ cdom, 'foo' ]
+        expect(vdom.a).toEqual({
+          c: [ cdom, 'foo' ]
         });
       });
 
@@ -254,13 +254,13 @@ describe('.dom', function () {
 
     });
 
-    describe('Lifecycle Method', function () {
+    describe('Lifecycle Methods', function () {
 
-      it('should be called correctly when mounted', function () {
+      it('should correctly call .m when mounted', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
-        const SampleComponent = (props, state, setState, onUpdate) => {
-          onUpdate(updateHandler);
+        const SampleComponent = (props, state, setState, hooks) => {
+          hooks.m = updateHandler;
           return dd.H(props.tag);
         };
 
@@ -275,11 +275,11 @@ describe('.dom', function () {
         ])
       });
 
-      it('should be called correctly when updated', function () {
+      it('should correctly call .d when DOM element tag changed', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
-        const SampleComponent = (props, state, setState, onUpdate) => {
-          onUpdate(updateHandler);
+        const SampleComponent = (props, state, setState, hooks) => {
+          hooks.d = updateHandler;
           return dd.H(props.tag);
         };
 
@@ -293,19 +293,17 @@ describe('.dom', function () {
 
         const dom2 = dom.firstChild;
 
-        expect(updateHandler.mock.calls.length).toEqual(3)
+        expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          [dom1, undefined],
-          [],
           [dom2, dom1]
         ])
       });
 
-      it('should be called correctly when props change', function () {
+      it('should correctly call .d when props change', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
-        const SampleComponent = (props, state, setState, onUpdate) => {
-          onUpdate(updateHandler);
+        const SampleComponent = (props, state, setState, hooks) => {
+          hooks.d = updateHandler;
           return dd.H('div', {className: props.className});
         };
 
@@ -319,18 +317,17 @@ describe('.dom', function () {
 
         const dom2 = dom.firstChild;
 
-        expect(updateHandler.mock.calls.length).toEqual(2)
+        expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          [dom1, undefined],
           [dom1, dom1]
         ])
       });
 
-      it('should be called correctly when replaced', function () {
+      it('should correctly call .u when replaced', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
-        const SampleComponent = (props, state, setState, onUpdate) => {
-          onUpdate(updateHandler);
+        const SampleComponent = (props, state, setState, hooks) => {
+          hooks.u = updateHandler;
           return dd.H(props.tag);
         };
 
@@ -342,18 +339,17 @@ describe('.dom', function () {
         const vdom2 = dd.H('span');
         dd.R(vdom2, dom)
 
-        expect(updateHandler.mock.calls.length).toEqual(2)
+        expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          [dom1, undefined],
           []
         ])
       });
 
-      it('should be called correctly when removed', function () {
+      it('should correctly call .u when removed', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
-        const SampleComponent = (props, state, setState, onUpdate) => {
-          onUpdate(updateHandler);
+        const SampleComponent = (props, state, setState, hooks) => {
+          hooks.u = updateHandler;
           return dd.H(props.tag);
         };
 
@@ -364,11 +360,74 @@ describe('.dom', function () {
 
         dd.R([], dom)
 
-        expect(updateHandler.mock.calls.length).toEqual(2)
+        expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          [dom1, undefined],
           []
         ])
+      });
+
+      it('should correctly call .u when removed as a deep child', function () {
+        const dom = document.createElement('div');
+        const updateHandler = jest.fn();
+        const SampleComponent = (props, state, setState, hooks) => {
+          hooks.u = updateHandler;
+          return dd.H(props.tag);
+        };
+
+        const vdom1 = dd.H('div',
+          dd.H('div',
+            dd.H(SampleComponent, {tag: 'div'})
+          )
+        );
+        dd.R(vdom1, dom)
+
+        const dom1 = dom.firstChild;
+
+        dd.R([], dom)
+
+        expect(updateHandler.mock.calls.length).toEqual(1)
+        expect(updateHandler.mock.calls).toEqual([
+          []
+        ])
+      });
+
+      it('should correctly call .m, .d, .u in a mount, update, unmount cycle', function () {
+        const dom = document.createElement('div');
+        const mHandler = jest.fn();
+        const dHandler = jest.fn();
+        const uHandler = jest.fn();
+
+        const SampleComponent = (props, state, setState, hooks) => {
+          hooks.m = mHandler;
+          hooks.d = dHandler;
+          hooks.u = uHandler;
+          return dd.H('div', {className: props.className});
+        };
+
+        const vdom1 = dd.H(SampleComponent, {className: 'foo'});
+        dd.R(vdom1, dom)
+
+        expect(mHandler.mock.calls.length).toEqual(1)
+        expect(dHandler.mock.calls.length).toEqual(0)
+        expect(uHandler.mock.calls.length).toEqual(0)
+
+        const dom1 = dom.firstChild;
+
+        const vdom2 = dd.H(SampleComponent, {className: 'bar'});
+        dd.R(vdom2, dom)
+
+        expect(mHandler.mock.calls.length).toEqual(1)
+        expect(dHandler.mock.calls.length).toEqual(1)
+        expect(uHandler.mock.calls.length).toEqual(0)
+
+        const dom2 = dom.firstChild;
+
+        dd.R([], dom)
+
+        expect(mHandler.mock.calls.length).toEqual(1)
+        expect(dHandler.mock.calls.length).toEqual(1)
+        expect(uHandler.mock.calls.length).toEqual(1)
+
       });
     });
 
