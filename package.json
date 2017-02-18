@@ -5,7 +5,8 @@
   "main": "dotdom.min.js",
   "scripts": {
     "test": "./node_modules/.bin/jest",
-    "build": "./node_modules/.bin/babili src/dotdom.js | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
+    "build": "./node_modules/.bin/babili src/dotdom.js | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz",
+    "build:uglify": "./node_modules/.bin/uglifyjs src/dotdom.js --compress --mangle | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
     "babili": "0.0.10",
     "jest": "^18.1.0",
     "mock-browser": "^0.92.12",
+    "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony",
     "watch": "^1.0.1"
   }
 }
