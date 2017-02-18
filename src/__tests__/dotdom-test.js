@@ -1,72 +1,141 @@
-require('../dotdom');
-const dd = window;
+const dd = require('../dotdom');
 
 describe('.dom', function () {
 
   describe('#H', function () {
-    it('should create vnode without arguments', function () {
-      const vdom = dd.H('div');
 
-      expect(vdom.E).toEqual('div');
-      expect(vdom.P).toEqual({C: []});
-    });
+    describe('Factory', function () {
 
-    it('should create vnode with props', function () {
-      const vdom = dd.H('div', {foo: 'bar'});
+      it('should create vnode without arguments', function () {
+        const vdom = dd.H('div');
 
-      expect(vdom.E).toEqual('div');
-      expect(vdom.P).toEqual({foo: 'bar', C: []});
-    });
-
-    it('should create vnode with props and children', function () {
-      const cdom = dd.H('div');
-      const vdom = dd.H('div', {foo: 'bar'}, cdom);
-
-      expect(vdom.E).toEqual('div');
-      expect(vdom.P).toEqual({
-        foo: 'bar',
-        C: [ cdom ]
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({C: []});
       });
+
+      it('should create vnode with props', function () {
+        const vdom = dd.H('div', {foo: 'bar'});
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({foo: 'bar', C: []});
+      });
+
+      it('should create vnode with props and children', function () {
+        const cdom = dd.H('div');
+        const vdom = dd.H('div', {foo: 'bar'}, cdom);
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          foo: 'bar',
+          C: [ cdom ]
+        });
+      });
+
+      it('should create vnode with props and children as array', function () {
+        const cdom1 = dd.H('div');
+        const cdom2 = dd.H('div');
+        const cdom3 = dd.H('div');
+        const vdom = dd.H('div', {foo: 'bar'}, cdom1, [cdom2, cdom3]);
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          foo: 'bar',
+          C: [ cdom1, cdom2, cdom3 ]
+        });
+      });
+
+      it('should create vnode with props and mixed children', function () {
+        const cdom = dd.H('div');
+        const vdom = dd.H('div', {foo: 'bar'}, 'foo', cdom);
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          foo: 'bar',
+          C: [ 'foo', cdom ]
+        });
+      });
+
+      it('should create vnode with props and string children', function () {
+        const vdom = dd.H('div', {foo: 'bar'}, 'foo');
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          foo: 'bar',
+          C: [ 'foo' ]
+        });
+      });
+
+      it('should create vnode with only child', function () {
+        const vdom = dd.H('div', 'foo');
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          C: [ 'foo' ]
+        });
+      });
+
+      it('should create vnode with children', function () {
+        const vdom = dd.H('div', 'foo', 'bar', 'baz');
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          C: [ 'foo', 'bar', 'baz' ]
+        });
+      });
+
+      it('should create vnode with children in arrays', function () {
+        const vdom = dd.H('div', 'foo', ['bar', 'baz']);
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          C: [ 'foo', 'bar', 'baz' ]
+        });
+      });
+
+      it('should create vnode with only mixed children', function () {
+        const cdom = dd.H('div');
+        const vdom = dd.H('div', cdom, 'foo');
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          C: [ cdom, 'foo' ]
+        });
+      });
+
     });
 
-    it('should create vnode with props and mixed children', function () {
-      const cdom = dd.H('div');
-      const vdom = dd.H('div', {foo: 'bar'}, 'foo', cdom);
+    describe('Proxy', function () {
 
-      expect(vdom.E).toEqual('div');
-      expect(vdom.P).toEqual({
-        foo: 'bar',
-        C: [ 'foo', cdom ]
+      it('H.apply should be proxied', function () {
+        const cdom = dd.H('div');
+        const vdom = dd.H.apply({}, ['div', cdom, 'foo']);
+
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          C: [ cdom, 'foo' ]
+        });
       });
-    });
 
-    it('should create vnode with props and string children', function () {
-      const vdom = dd.H('div', {foo: 'bar'}, 'foo');
+      it('H.call should be proxied', function () {
+        const cdom = dd.H('div');
+        const vdom = dd.H.call({}, 'div', cdom, 'foo');
 
-      expect(vdom.E).toEqual('div');
-      expect(vdom.P).toEqual({
-        foo: 'bar',
-        C: [ 'foo' ]
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          C: [ cdom, 'foo' ]
+        });
       });
-    });
 
-    it('should create vnode with only child', function () {
-      const vdom = dd.H('div', 'foo');
+      it('H.tag should be a shorthand', function () {
+        const cdom = dd.H('div');
+        const vdom = dd.H.div(cdom, 'foo');
 
-      expect(vdom.E).toEqual('div');
-      expect(vdom.P).toEqual({
-        C: [ 'foo' ]
+        expect(vdom.E).toEqual('div');
+        expect(vdom.P).toEqual({
+          C: [ cdom, 'foo' ]
+        });
       });
-    });
 
-    it('should create vnode with only mixed children', function () {
-      const cdom = dd.H('div');
-      const vdom = dd.H('div', cdom, 'foo');
-
-      expect(vdom.E).toEqual('div');
-      expect(vdom.P).toEqual({
-        C: [ cdom, 'foo' ]
-      });
     });
 
   });
@@ -292,8 +361,8 @@ describe('.dom', function () {
         }
         const HostComponent = function() {
           return dd.H('div',
-            H(Component),
-            H(Component)
+            dd.H(Component),
+            dd.H(Component)
           )
         }
         const vdom = dd.H(HostComponent);
@@ -379,8 +448,8 @@ describe('.dom', function () {
           }, `${clicks} clicks`)
         }
         const vdom = dd.H('div',
-          H(Component),
-          H(Component)
+          dd.H(Component),
+          dd.H(Component)
         );
 
         dd.R(vdom, dom)

@@ -15,6 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/* BEGIN NPM-GLUE */
+
+// This code block will be striped when building the stand-alone version.
+// When using `npm` this exports the correct functions in order to be easily
+// imported in the correct scope, without leaking to the global scope.
+
+const window = {};
+module.exports = window;
+
+/* END NPM-GLUE */
+
 ((global, document, Object, vnodeFlag, globalState, createElement, render, wrapClassProxy) => {
 
   /**
@@ -41,8 +53,10 @@
                                                                       // first argument
 
     P: props[vnodeFlag]                                               // If the props argument is a renderable VNode,
-        && children.unshift(props) && {C: children}                   // ... prepend it to the children
-        || (props.C = children) && props                              // ... otherwise append 'C' to the property
+        ? {C: [].concat(props, ...children)}                          // ... prepend it to the children
+        : (props.C = [].concat(...children)) && props                 // ... otherwise append 'C' to the property
+                                                                      // the .concat ensures that arrays of children
+                                                                      // will be flattened into a single array.
   })
 
   /**
@@ -140,25 +154,18 @@
           ? _new_dom.data = vnode                                     // - String nodes update only the text
           : Object.keys(vnode.P).map(                                 // - Element nodes have properties
               (
-                key,                                                  // 1. The property name
-
-                _unused2,                                             // 2. Index is unused
-                _unused3,                                             // 3. Array is unused
-
-                _value=vnode.P[key]                                   // a. We cache the property value
-
+                key                                                   // 1. The property name
               ) =>
 
                 key == 'style' ?                                      // The 'style' property is an object and must be
                                                                       // applied recursively.
                   Object.assign(
                     _new_dom[key],                                    // '[key]' is shorter than '.style'
-                    _value
+                    vnode.P[key]
                   )
 
-                : (key != 'C' &&                                      // 'C' is the children, so we skip it
-
-                  (_new_dom[key] = _value))                           // All properties are applied directly to DOM
+                : (_new_dom[key] !== vnode.P[key] &&                   // All properties are applied directly to DOM, as
+                  (_new_dom[key] = vnode.P[key]))                     // long as they are different than ther value in the
                                                                       // instance. This includes `onXXX` event handlers.
 
             ) &&
@@ -214,8 +221,8 @@
   global.H = new Proxy(
     createElement,
     {
-      get: (_unused4, tagName) =>
-        wrapClassProxy(
+      get: (targetFn, tagName) =>
+        targetFn[tagName] || wrapClassProxy(
           createElement.bind(global, tagName)
         )
     }
