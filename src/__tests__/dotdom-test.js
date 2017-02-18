@@ -1,5 +1,4 @@
-require('../dotdom');
-const dd = window;
+const dd = require('../dotdom');
 
 describe('.dom', function () {
 
@@ -362,8 +361,8 @@ describe('.dom', function () {
         }
         const HostComponent = function() {
           return dd.H('div',
-            H(Component),
-            H(Component)
+            dd.H(Component),
+            dd.H(Component)
           )
         }
         const vdom = dd.H(HostComponent);
@@ -449,8 +448,8 @@ describe('.dom', function () {
           }, `${clicks} clicks`)
         }
         const vdom = dd.H('div',
-          H(Component),
-          H(Component)
+          dd.H(Component),
+          dd.H(Component)
         );
 
         dd.R(vdom, dom)
