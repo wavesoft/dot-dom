@@ -2,10 +2,10 @@
   "name": "dot-dom",
   "version": "0.2.1",
   "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
-  "main": "dotdom.min.js",
+  "main": "src/dotdom.js",
   "scripts": {
     "test": "./node_modules/.bin/jest",
-    "build": "./node_modules/.bin/babili src/dotdom.js | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
+    "build": "cat src/dotdom.js | perl -0pe 's/BEGIN NPM-GLUE.*END NPM-GLUE//s' | ./node_modules/.bin/babili | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
   },
   "repository": {
     "type": "git",
