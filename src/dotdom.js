@@ -38,7 +38,7 @@ module.exports = window;
   /**
    * Create a VNode element
    *
-   * @param {String|Function} eleent - The tag name or the component to render
+   * @param {String|Function} element - The tag name or the component to render
    * @param {Object} [props] - The object properties
    * @param {Array} [children] - The child VNode elements
    * @returns {VNode} Returns a virtual DOM instance
