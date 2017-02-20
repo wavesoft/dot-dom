@@ -71,7 +71,7 @@ R(
   </tr>
 </table>
 
-#### 2. Simple component
+#### 2. Stateless Component
 
 Creating a component on which you can pass properties.
 
@@ -83,13 +83,11 @@ Creating a component on which you can pass properties.
   <tr>
     <td valign="top">
 <pre lang="javascript">
-class Hello extends React.Component {
-  render() {
+function Hello(props) {
     return React.createElement(
-      'div', null, `Hello ${this.props.toWhat}`
+      'div', null, `Hello ${props.toWhat}`
     );
   }
-}
 
 ReactDOM.render(
   React.createElement(
@@ -114,7 +112,7 @@ R(
   </tr>
 </table>
 
-#### 3. Stateful component
+#### 3. Stateful Component
 
 Creating components that can maintain their own state.
 
