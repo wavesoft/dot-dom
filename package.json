@@ -6,7 +6,7 @@
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "build": "cat src/dotdom.js | perl -0pe 's/BEGIN NPM-GLUE.*END NPM-GLUE//s' | ./node_modules/.bin/babili | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz",
-    "build:uglify": "./node_modules/.bin/uglifyjs src/dotdom.js --compress --mangle | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
+    "build:uglify": "cat src/dotdom.js | perl -0pe 's/BEGIN NPM-GLUE.*END NPM-GLUE//s' | ./node_modules/.bin/uglifyjs --compress --mangle | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
   },
   "repository": {
     "type": "git",
