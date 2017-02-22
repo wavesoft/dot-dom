@@ -394,7 +394,7 @@ describe('.dom', function () {
         expect(vdom1).not.toBe(vdom2);
         expect(mountHandler.mock.calls.length).toEqual(1)
         expect(mountHandler.mock.calls).toEqual([
-          [dom2, undefined]
+          [dom2, dom1]
         ])
       });
 
@@ -435,6 +435,41 @@ describe('.dom', function () {
         dd.R(vdom1, dom)
 
         const dom1 = dom.firstChild;
+
+        dd.R([], dom)
+
+        expect(updateHandler.mock.calls.length).toEqual(1)
+        expect(updateHandler.mock.calls).toEqual([
+          []
+        ])
+      });
+
+      it('should correctly call .u when removed as a deep child because of root replacement', function () {
+        const dom = document.createElement('div');
+        const updateHandler = jest.fn();
+        const SampleComponent = (props, state, setState, hooks) => {
+          hooks.u = updateHandler;
+          return dd.H(props.tag);
+        };
+        const ComponentA = (props, state, setState, hooks) => {
+          return dd.H('div', props.c);
+        };
+        const ComponentB = (props, state, setState, hooks) => {
+          return dd.H('div', props.c);
+        };
+
+        const vdom1 = dd.H('div',
+          dd.H(ComponentA,
+            dd.H(SampleComponent, {tag: 'div'})
+          )
+        );
+        dd.R(vdom1, dom)
+
+        const dom1 = dom.firstChild;
+
+        const vdom2 = dd.H('div',
+          dd.H(ComponentB)
+        );
 
         dd.R([], dom)
 
