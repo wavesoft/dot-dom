@@ -88,7 +88,7 @@ module.exports = window;
             : _path_state                                             //    The second component is needed in order to
         ),                                                            //    reset the state if the component has changed
         _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
-        _hooks={},
+        _hooks={i:vnode.$},
         _new_dom                                                      // e. The new DOM element placeholder
 
       ) => {
@@ -133,7 +133,6 @@ module.exports = window;
             ? (_child.$ != vnode.$ && _child.data != vnode)           // the VNode element or the text are the same
 
               ? (
-                  (_child.u || createElement)(),
                   dom.replaceChild(                                   // - If not, we replace the old element with the
                     _new_dom,                                         //   new one.
                     _child
@@ -144,7 +143,19 @@ module.exports = window;
 
             : dom.appendChild(                                        // mount lifecycle method and append
                 _new_dom
-              )
+              );
+
+        /* Call lifecycle methods */
+
+        (
+          (
+            _child
+              ? _child.i != _hooks.i
+                ? ((_child.u || createElement)(), _hooks.m)
+                : _hooks.d
+              : _hooks.m
+          ) || createElement
+        )(_new_dom, _child);
 
         /* Update Element */
 
@@ -183,19 +194,7 @@ module.exports = window;
               vnode.a.c,                                              // we recursively continue rendering into it's
               _new_dom,                                               // child nodes.
               _path
-            ) ||
-            (
-              (
-                _child                                                // If we already have a child,
-                  ? _hooks.d                                          // this it's an Update cycle,
-                  : _hooks.m                                          // otherwise it's a Mount cycle
-              )
-              || createElement                                        // And if we are missing the handler this will ensure
-                                                                      // that we can still call the function.
-            )(
-              _new_dom,                                               // The first argument is always the new DOM element
-              _child                                                  // The second argument is `undefined` on the mount cycle
-            )                                                         // or it contains the previous DOM on the update cycle.
+            )
       }
     );
 
