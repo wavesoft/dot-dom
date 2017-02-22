@@ -22,7 +22,7 @@
 // When using `npm` this exports the correct functions in order to be easily
 // imported in the correct scope, without leaking to the global scope.
 
-const window = {};
+var window = typeof window !== "undefined" && window || {};
 module.exports = window;
 
 /* END NPM-GLUE */
