@@ -323,7 +323,7 @@ describe('.dom', function () {
         ])
       });
 
-      it('should correctly call .u when replaced', function () {
+      it('should correctly call .u when replaced with plain tag', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, hooks) => {
@@ -342,6 +342,59 @@ describe('.dom', function () {
         expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
           []
+        ])
+      });
+
+      it('should correctly call .u when replaced with component', function () {
+        const dom = document.createElement('div');
+        const updateHandler = jest.fn();
+        const ComponentA = (props, state, setState, hooks) => {
+          hooks.u = updateHandler;
+          return dd.H(props.tag);
+        };
+        const ComponentB = (props, state, setState, hooks) => {
+          return dd.H(props.tag);
+        };
+
+        const vdom1 = dd.H(ComponentA, {tag: 'div'});
+        dd.R(vdom1, dom)
+
+        const dom1 = dom.firstChild;
+
+        const vdom2 = dd.H(ComponentB, {tag: 'div'});
+        dd.R(vdom2, dom)
+
+        expect(updateHandler.mock.calls.length).toEqual(1)
+        expect(updateHandler.mock.calls).toEqual([
+          []
+        ])
+      });
+
+      it('should correctly call .m on the component replaced with', function () {
+        const dom = document.createElement('div');
+        const mountHandler = jest.fn();
+        const ComponentA = (props, state, setState, hooks) => {
+          return dd.H(props.tag);
+        };
+        const ComponentB = (props, state, setState, hooks) => {
+          hooks.m = mountHandler;
+          return dd.H(props.tag);
+        };
+
+        const vdom1 = dd.H(ComponentA, {tag: 'div'});
+        dd.R(vdom1, dom)
+
+        const dom1 = dom.firstChild;
+
+        const vdom2 = dd.H(ComponentB, {tag: 'div'});
+        dd.R(vdom2, dom)
+
+        const dom2 = dom.firstChild;
+
+        expect(vdom1).not.toBe(vdom2);
+        expect(mountHandler.mock.calls.length).toEqual(1)
+        expect(mountHandler.mock.calls).toEqual([
+          [dom2, undefined]
         ])
       });
 
