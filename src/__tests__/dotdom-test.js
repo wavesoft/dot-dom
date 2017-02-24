@@ -11,14 +11,14 @@ describe('.dom', function () {
         const vdom = dd.H('div');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.a).toEqual({c: []});
+        expect(vdom.a).toEqual({c: [], className: ''});
       });
 
       it('should create vnode with props', function () {
         const vdom = dd.H('div', {foo: 'bar'});
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.a).toEqual({foo: 'bar', c: []});
+        expect(vdom.a).toEqual({foo: 'bar', c: [], className: ''});
       });
 
       it('should create vnode with props and children', function () {
@@ -28,7 +28,8 @@ describe('.dom', function () {
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
           foo: 'bar',
-          c: [ cdom ]
+          c: [ cdom ],
+          className: ''
         });
       });
 
@@ -41,7 +42,8 @@ describe('.dom', function () {
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
           foo: 'bar',
-          c: [ cdom1, cdom2, cdom3 ]
+          c: [ cdom1, cdom2, cdom3 ],
+          className: ''
         });
       });
 
@@ -52,7 +54,8 @@ describe('.dom', function () {
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
           foo: 'bar',
-          c: [ 'foo', cdom ]
+          c: [ 'foo', cdom ],
+          className: ''
         });
       });
 
@@ -62,7 +65,8 @@ describe('.dom', function () {
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
           foo: 'bar',
-          c: [ 'foo' ]
+          c: [ 'foo' ],
+          className: ''
         });
       });
 
@@ -71,7 +75,8 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ 'foo' ]
+          c: [ 'foo' ],
+          className: ''
         });
       });
 
@@ -80,7 +85,8 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ 'foo', 'bar', 'baz' ]
+          c: [ 'foo', 'bar', 'baz' ],
+          className: ''
         });
       });
 
@@ -89,7 +95,8 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ 'foo', 'bar', 'baz' ]
+          c: [ 'foo', 'bar', 'baz' ],
+          className: ''
         });
       });
 
@@ -99,7 +106,8 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ cdom, 'foo' ]
+          c: [ cdom, 'foo' ],
+          className: ''
         });
       });
 
@@ -113,7 +121,8 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ cdom, 'foo' ]
+          c: [ cdom, 'foo' ],
+          className: ''
         });
       });
 
@@ -123,7 +132,8 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ cdom, 'foo' ]
+          c: [ cdom, 'foo' ],
+          className: ''
         });
       });
 
@@ -133,7 +143,8 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ cdom, 'foo' ]
+          c: [ cdom, 'foo' ],
+          className: ''
         });
       });
 
