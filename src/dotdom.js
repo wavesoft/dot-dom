@@ -27,7 +27,7 @@ module.exports = window;
 
 /* END NPM-GLUE */
 
-((global) => {
+// ((global) => {
 
   /**
    * Create a VNode element
@@ -37,19 +37,29 @@ module.exports = window;
    * @param {Array} [children] - The child VNode elements
    * @returns {VNode} Returns a virtual DOM instance
    */
-  let createElement = (element, props={}, ...children) => ({
-    $: element,                                                       // 'E' holds the name or function passed as
+  let createElement = (element, props={}, ...children) => (
+    element = ({                                                      // The reference of `element` will be kept
+                                                                      // in the object so we are safe to replace it
+
+      $: element,                                                     // 'E' holds the name or function passed as
                                                                       // first argument
 
-    a: (props.$ || props.trim || props.map)                           // If the props argument is a renderable VNode,
+      a: (props.$ || props.trim || props.map)                         // If the props argument is a renderable VNode,
                                                                       // a string or an array, then
 
-        ? {c: [].concat(props, ...children)}                          // ... prepend it to the children
-        : (props.c = [].concat(...children)) && props                 // ... otherwise append 'C' to the property
+          ? {c: [].concat(props, ...children)}                        // ... prepend it to the children
+          : (props.c = [].concat(...children)) && props               // ... otherwise append 'C' to the property
                                                                       // the .concat ensures that arrays of children
                                                                       // will be flattened into a single array.
 
-  })
+      }
+    ),
+
+    element.a.className = element.a.className || '',                  // Ensure `className` always exist, since this
+                                                                      // way we can cleanly replace className when
+                                                                      // removed.
+    element
+  )
 
   /**
    * Render a VNode in the DOM
@@ -57,11 +67,11 @@ module.exports = window;
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
    * @param {HTLDomElement}
    */
-  let render = global.R = (
+  let render = window.R = (
     vnodes,                                                           // 1. The vnode tree to render
     dom,                                                              // 2. The DOMElement where to render into
 
-    _npath='',                                                        // a. The current state path
+    _npath,                                                           // a. The current state path
     _children=dom.childNodes,                                         // b. Shorthand for accessing the children
     _c=0                                                              // c. Counter for processed children
 
@@ -88,7 +98,7 @@ module.exports = window;
             : _path_state                                             //    The second component is needed in order to
         ),                                                            //    reset the state if the component has changed
         _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
-        _hooks={i:vnode.$},
+        _hooks={a:vnode.$},
         _new_dom                                                      // e. The new DOM element placeholder
 
       ) => {
@@ -150,7 +160,7 @@ module.exports = window;
         (
           (
             _child
-              ? _child.i != _hooks.i
+              ? _child.a != _hooks.a
                 ? ((_child.u || createElement)(), _hooks.m)
                 : _hooks.d
               : _hooks.m
@@ -159,7 +169,7 @@ module.exports = window;
 
         /* Update Element */
 
-        Object.assign(_new_dom, _hooks, vnode);                       // Keep the following information in the DOM:
+        Object.assign(_new_dom, vnode, _hooks);                       // Keep the following information in the DOM:
                                                                       // - $ : The tag name from the vnode. We use this
                                                                       //       instead of the .tagName because some
                                                                       //       browsers convert it to capital-case
@@ -236,8 +246,8 @@ module.exports = window;
               (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
                                                                       // calling the wrapped factory function
 
-                .a.className =                                        // And then we assign the class name,
-                  [_instance.a.className] + ' ' + className,          // concatenating to the previous value
+                .a.className += ' ' + className,                      // And then we assign the class name,
+                                                                      // concatenating to the previous value
 
               _instance                                               // And finally we return the instance
             )
@@ -250,7 +260,7 @@ module.exports = window;
    * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
    * virtual DOM elements.
    */
-  global.H = new Proxy(
+  window.H = new Proxy(
     createElement,
     {
       get: (targetFn, tagName) =>
@@ -263,4 +273,4 @@ module.exports = window;
     }
   )
 
-})(window);
+// })(window);
