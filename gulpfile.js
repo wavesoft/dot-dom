@@ -61,7 +61,7 @@ const getBaseStream = () => {
 };
 
 gulp.task('build:js', () => {
-    console.log('!!')
+
     const baseStream = getBaseStream();
 
     return gulpMerge(
