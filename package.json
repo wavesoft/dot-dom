@@ -5,8 +5,8 @@
   "main": "src/dotdom.js",
   "scripts": {
     "test": "./node_modules/.bin/jest",
-    "build": "cat src/dotdom.js | perl -0pe 's/BEGIN NPM-GLUE.*END NPM-GLUE//s' | ./node_modules/.bin/babili | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz",
-    "build:uglify": "cat src/dotdom.js | perl -0pe 's/BEGIN NPM-GLUE.*END NPM-GLUE//s' | ./node_modules/.bin/uglifyjs --compress --mangle | tee dotdom.min.js | gzip -9 > dotdom.min.js.gz"
+    "build": "./node_modules/.bin/gulp build",
+    "watch": "./node_modules/.bin/gulp watch"
   },
   "repository": {
     "type": "git",
@@ -24,10 +24,20 @@
   },
   "homepage": "https://github.com/wavesoft/dotdom#readme",
   "devDependencies": {
-    "babel-core": "^6.22.1",
-    "babili": "0.0.10",
+    "babel-preset-babili": "0.0.11",
+    "gulp": "3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-cli": "1.2.2",
+    "gulp-clone": "^1.0.0",
+    "gulp-gzip": "1.4.0",
+    "gulp-merge": "^0.1.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-strip-code": "^0.1.4",
+    "gulp-uglify": "^2.0.1",
+    "gulp-util": "^3.0.8",
     "jest": "^18.1.0",
     "mock-browser": "^0.92.12",
+    "through2": "^2.0.3",
     "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony",
     "watch": "^1.0.1"
   }
