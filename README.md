@@ -14,7 +14,7 @@ Why? Because with such library you can create powerful GUIs in tight space envir
 
 * _Tiny by design_ : The library should never exceed the 512 bytes in size. The goal is not to have yet another template engine, but to have as many features as possible in 512 bytes. If a new feature is needed, an other must be sacraficed or the scope must be reduced.
 
-* _Built for the future_ : The library is heavily exploiting the ES6 specifications, meaning that it's **not** supported by older borwsers. Currently it's supported by the 70% of the browsers in the market, but expect this to be 90% within the next year.
+* _Built for the future_ : The library is heavily exploiting the ES6 specifications, meaning that it's **not** supported by older browsers. Currently it's supported by the 70% of the browsers in the market, but expect this to be 90% within the next year.
 
 * _Declarative_ : Describe your HTML DOM in a structured, natural manner, helping you create powerful yet readable user interfaces.
 
@@ -31,11 +31,7 @@ For minimum footprint, include `dotdom.min.js.gz` (511b) to your project.
 <script src="dotdom.min.js.gz" />
 ```
 
-Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the following (779b):
-
-```js
-((a,b,c,d,e,f,g,h)=>{String.prototype[d]=1,f=(i,j={},...k)=>({[d]:1,E:i,P:j[d]?{C:[].concat(j,...k)}:(j.C=[].concat(...k))&&j}),a.R=g=(i,j,k='',l=j.childNodes,m=0)=>{for((i.map?i:[i]).map((n,o,p,q=k+'.'+o,r=e[q]||[{},n.E],s=e[q]=r[1]==n.E?r:[{},n.E],t=l[m++],u)=>{n.E&&n.E.call&&(n=n.E(n.P,s[0],v=>c.assign(s[0],v)&&g(i,j,k))),u=n.trim?b.createTextNode(n):b.createElement(n.E),(u=t?t.E!=n.E&&t.data!=n?j.replaceChild(u,t)&&u:t:j.appendChild(u)).E=n.E,n.trim?u.data=n:c.keys(n.P).map((v)=>'style'==v?c.assign(u[v],n.P[v]):u[v]!==n.P[v]&&(u[v]=n.P[v]))&&g(n.P.C,u,q)});l[m];)j.removeChild(l[m])},h=i=>new Proxy(i,{get:(j,k,l)=>h((...m)=>((l=j(...m)).P.className=[l.P.className]+' '+k,l))}),a.H=new Proxy(f,{get:(i,j)=>i[j]||h(f.bind(a,j))})})(window,document,Object,Symbol(),{});
-```
+Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the [minified code](https://raw.githubusercontent.com/wavesoft/dot-dom/master/dotdom.min.js).
 
 ## Examples
 
