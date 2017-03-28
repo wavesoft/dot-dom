@@ -258,6 +258,19 @@ module.exports = window;
    * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
    * virtual DOM elements.
    */
+  window.H = new Proxy(
+     createElement,
+     {
+        get: (targetFn, tagName) =>
+          targetFn[tagName] ||                                          // Make sure we don't override any native
+                                                                       // property or method from the base function
+ 
+          wrapClassProxy(                                               // Otherwise, for every tag we extract a
+            createElement.bind(global, tagName)                         // class-wrapped crateElement method, bound to the
+          )                                                             // tag named as the property requested.
+      }
+   )
+  
   window.H = createElement;
 
 // })(window);
