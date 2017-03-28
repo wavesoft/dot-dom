@@ -37,7 +37,7 @@ module.exports = window;
    * @param {Array} [children] - The child VNode elements
    * @returns {VNode} Returns a virtual DOM instance
    */
-  let createElement = (element, props={}, ...children) => (
+  let cE = (element, props={}, ...children) => (
     element = ({                                                      // The reference of `element` will be kept
                                                                       // in the object so we are safe to replace it
 
@@ -59,7 +59,7 @@ module.exports = window;
                                                                       // way we can cleanly replace className when
                                                                       // removed.
     element
-  ),z=(a=[],b,c)=>a.map(e => e(b,c))
+  ),z=(a=[],b,c)=>a.map(e => e(b,c)),o=Object.assign
 
   /**
    * Render a VNode in the DOM
@@ -67,7 +67,7 @@ module.exports = window;
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
    * @param {HTLDomElement}
    */
-  let render = window.R = (
+  let r = window.R = (
     vnodes,                                                           // 1. The vnode tree to render
     dom,                                                              // 2. The DOMElement where to render into
 
@@ -90,9 +90,9 @@ module.exports = window;
                                                                       // placeholder for the local variables after
 
         _path=_npath+' '+index,                                       // a. The state path of this vnode
-        _path_state=wrapClassProxy[_path] || [{}, vnode.$],           // b. Get the state record for this path
+        _path_state=wc[_path] || [{}, vnode.$],                       // b. Get the state record for this path
         _state=(                                                      // c. Update and get the state record
-          wrapClassProxy[_path] =                                     //    The record is an the following format:
+          wc[_path] =                                                 //    The record is an the following format:
             _path_state[1] != vnode.$                                 //  [ {state object},
             ? [{}, vnode.$]                                           //    'vnode element' ]
             : _path_state                                             //    The second component is needed in order to
@@ -114,12 +114,12 @@ module.exports = window;
 
             (newState) =>                                             // 3. The setState function
 
-              Object.assign(                                          // First we update the state part of the record
+              o(                                                      // First we update the state part of the record
                 _state[0],                                            // Note: When we defined the variable we kept the
                 newState                                              //       reference to the record array
               ) &&
 
-              render(                                                 // We then trigger the same render cycle that will
+              r(                                                      // We then trigger the same render cycle that will
                 vnodes,                                               // update the DOM
                 dom,
                 _npath
@@ -167,7 +167,7 @@ module.exports = window;
 
         /* Update Element */
 
-        Object.assign(_new_dom, vnode, _hooks);                       // Keep the following information in the DOM:
+        o(_new_dom, vnode, _hooks);                                   // Keep the following information in the DOM:
                                                                       // - $ : The tag name from the vnode. We use this
                                                                       //       instead of the .tagName because some
                                                                       //       browsers convert it to capital-case
@@ -181,11 +181,11 @@ module.exports = window;
 
         vnode.trim
           ? _new_dom.data = vnode                                     // - String nodes update only the text
-          : Object.assign(
+          : o(
               _new_dom,                                               // '[key]' is shorter than '.style'
               vnode.a
             ) &&
-            render(                                                   // Only if we have an element (and not  text node)
+            r(                                                        // Only if we have an element (and not  text node)
               vnode.a.c,                                              // we recursively continue rendering into it's
               _new_dom,                                               // child nodes.
               _path
@@ -199,10 +199,10 @@ module.exports = window;
                                                                       // elements in the VDom. If there are more child
                                                                       // nodes in the DOM, we remove them.
 
-      z(_children[_c].u)                           // We then call the unmount lifecycle method for the
+      z(_children[_c].u)                                              // We then call the unmount lifecycle method for the
                                                                       // elements that will be removed
 
-      render(                                                         // Remove child an trigger a recursive child removal
+      r(                                                              // Remove child an trigger a recursive child removal
         [],                                                           // in order to call the correct lifecycle methods in our
         dom.removeChild(_children[_c])                                // deep children too.
       )
@@ -219,14 +219,14 @@ module.exports = window;
    *
    * @param {function} factoryFn - The factory function to call for creating vnode
    */
-  let wrapClassProxy = (factoryFn) =>
+  let wc = (factoryFn) =>
     new Proxy(                                                        // We are creating a proxy object for every tag in
                                                                       // order to be able to customize the class name
                                                                       // via a shorthand call.
       factoryFn,
       {
         get: (targetFn, className, _instance) =>
-          wrapClassProxy(
+          wc(
             (...args) => (
               (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
                                                                       // calling the wrapped factory function
@@ -241,19 +241,19 @@ module.exports = window;
     )
 
   /**
-   * Expose as `H` a proxy around the createElement function that can either be used
+   * Expose as `H` a proxy around the cE function that can either be used
    * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
    * virtual DOM elements.
    */
   window.H = new Proxy(
-    createElement,
+    cE,
     {
       get: (targetFn, tagName) =>
         targetFn[tagName] ||                                          // Make sure we don't override any native
                                                                       // property or method from the base function
 
-        wrapClassProxy(                                               // Otherwise, for every tag we extract a
-          createElement.bind(global, tagName)                         // class-wrapped crateElement method, bound to the
+        wc(                                                           // Otherwise, for every tag we extract a
+          cE.bind(global, tagName)                                    // class-wrapped crateElement method, bound to the
         )                                                             // tag named as the property requested.
     }
   )
