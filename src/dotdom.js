@@ -259,17 +259,17 @@ module.exports = window;
    * virtual DOM elements.
    */
   window.H = new Proxy(
-     createElement,
-     {
-        get: (targetFn, tagName) =>
-          targetFn[tagName] ||                                          // Make sure we don't override any native
+    createElement,
+    {
+       get: (targetFn, tagName) =>
+         targetFn[tagName] ||                                          // Make sure we don't override any native
                                                                        // property or method from the base function
  
-          wrapClassProxy(                                               // Otherwise, for every tag we extract a
-            createElement.bind(global, tagName)                         // class-wrapped crateElement method, bound to the
-          )                                                             // tag named as the property requested.
-      }
-   )
+         wrapClassProxy(                                               // Otherwise, for every tag we extract a
+           createElement.bind(global, tagName)                         // class-wrapped crateElement method, bound to the
+         )                                                             // tag named as the property requested.
+     }
+  )
   
   window.H = createElement;
 
