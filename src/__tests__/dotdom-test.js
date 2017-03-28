@@ -11,14 +11,14 @@ describe('.dom', function () {
         const vdom = dd.H('div');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.a).toEqual({c: [], className: ''});
+        expect(vdom.a).toEqual({c: []});
       });
 
       it('should create vnode with props', function () {
         const vdom = dd.H('div', {foo: 'bar'});
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.a).toEqual({foo: 'bar', c: [], className: ''});
+        expect(vdom.a).toEqual({foo: 'bar', c: []});
       });
 
       it('should create vnode with props and children', function () {
@@ -28,8 +28,7 @@ describe('.dom', function () {
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
           foo: 'bar',
-          c: [ cdom ],
-          className: ''
+          c: [ cdom ]
         });
       });
 
@@ -42,8 +41,7 @@ describe('.dom', function () {
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
           foo: 'bar',
-          c: [ cdom1, cdom2, cdom3 ],
-          className: ''
+          c: [ cdom1, cdom2, cdom3 ]
         });
       });
 
@@ -54,8 +52,7 @@ describe('.dom', function () {
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
           foo: 'bar',
-          c: [ 'foo', cdom ],
-          className: ''
+          c: [ 'foo', cdom ]
         });
       });
 
@@ -65,8 +62,7 @@ describe('.dom', function () {
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
           foo: 'bar',
-          c: [ 'foo' ],
-          className: ''
+          c: [ 'foo' ]
         });
       });
 
@@ -75,8 +71,7 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ 'foo' ],
-          className: ''
+          c: [ 'foo' ]
         });
       });
 
@@ -85,8 +80,7 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ 'foo', 'bar', 'baz' ],
-          className: ''
+          c: [ 'foo', 'bar', 'baz' ]
         });
       });
 
@@ -95,8 +89,7 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ 'foo', 'bar', 'baz' ],
-          className: ''
+          c: [ 'foo', 'bar', 'baz' ]
         });
       });
 
@@ -106,8 +99,7 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ cdom, 'foo' ],
-          className: ''
+          c: [ cdom, 'foo' ]
         });
       });
 
@@ -121,8 +113,7 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ cdom, 'foo' ],
-          className: ''
+          c: [ cdom, 'foo' ]
         });
       });
 
@@ -132,8 +123,7 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ cdom, 'foo' ],
-          className: ''
+          c: [ cdom, 'foo' ]
         });
       });
 
@@ -143,8 +133,7 @@ describe('.dom', function () {
 
         expect(vdom.$).toEqual('div');
         expect(vdom.a).toEqual({
-          c: [ cdom, 'foo' ],
-          className: ''
+          c: [ cdom, 'foo' ]
         });
       });
 
@@ -271,7 +260,7 @@ describe('.dom', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, hooks) => {
-          hooks.m = updateHandler;
+          hooks.m.push(updateHandler);
           return dd.H(props.tag);
         };
 
@@ -290,7 +279,7 @@ describe('.dom', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, hooks) => {
-          hooks.d = updateHandler;
+          hooks.d.push(updateHandler);
           return dd.H(props.tag);
         };
 
@@ -314,7 +303,7 @@ describe('.dom', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, hooks) => {
-          hooks.d = updateHandler;
+          hooks.d.push(updateHandler);
           return dd.H('div', {className: props.className});
         };
 
@@ -338,7 +327,7 @@ describe('.dom', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, hooks) => {
-          hooks.u = updateHandler;
+          hooks.u.push(updateHandler);
           return dd.H(props.tag);
         };
 
@@ -360,7 +349,7 @@ describe('.dom', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const ComponentA = (props, state, setState, hooks) => {
-          hooks.u = updateHandler;
+          hooks.u.push(updateHandler);
           return dd.H(props.tag);
         };
         const ComponentB = (props, state, setState, hooks) => {
@@ -413,7 +402,7 @@ describe('.dom', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, hooks) => {
-          hooks.u = updateHandler;
+          hooks.u.push(updateHandler);
           return dd.H(props.tag);
         };
 
@@ -434,7 +423,7 @@ describe('.dom', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, hooks) => {
-          hooks.u = updateHandler;
+          hooks.u.push(updateHandler);
           return dd.H(props.tag);
         };
 
@@ -459,7 +448,7 @@ describe('.dom', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, hooks) => {
-          hooks.u = updateHandler;
+          hooks.u.push(updateHandler);
           return dd.H(props.tag);
         };
         const ComponentA = (props, state, setState, hooks) => {
@@ -497,9 +486,9 @@ describe('.dom', function () {
         const uHandler = jest.fn();
 
         const SampleComponent = (props, state, setState, hooks) => {
-          hooks.m = mHandler;
-          hooks.d = dHandler;
-          hooks.u = uHandler;
+          hooks.m.push(mHandler);
+          hooks.d.push(dHandler);
+          hooks.u.push(uHandler);
           return dd.H('div', {className: props.className});
         };
 
