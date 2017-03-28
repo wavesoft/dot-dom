@@ -179,11 +179,19 @@ module.exports = window;
                                                                       // it occupies less space than assigning $ and u
                                                                       // individually.
 
+
+        console.log(JSON.stringify(_new_dom), JSON.stringify(vnode.a));
+
         vnode.trim
           ? _new_dom.data = vnode                                     // - String nodes update only the text
           : o(
               _new_dom,
               vnode.a
+            )
+            &&
+            o(
+              _new_dom.style,
+              vnode.a.style
             )
             &&
             r(                                                   // Only if we have an element (and not  text node)
