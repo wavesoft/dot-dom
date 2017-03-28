@@ -181,7 +181,7 @@ module.exports = window;
 
         vnode.trim
           ? _new_dom.data = vnode                                     // - String nodes update only the text
-          : Object.assign(
+          : o(
               _new_dom,
               vnode.a
             ) &&
