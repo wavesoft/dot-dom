@@ -59,7 +59,13 @@ module.exports = window;
                                                                       // way we can cleanly replace className when
                                                                       // removed.
     element
-  ),z=(a=[],b,c)=>a.map(e => e(b,c)),o=Object.assign
+  )
+
+  , z = (a = [], b, c) => a.map(e => e(b, c))                         // z is a helper method that calls all methods in
+                                                                      // an array of functions (used for life cycle hooks)
+
+  , o = Object.assign                                                 // o is just an Object.assign short-hand helper
+                                                                      // which helps save some bytes in the end
 
   /**
    * Render a VNode in the DOM
