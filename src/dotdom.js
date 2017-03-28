@@ -59,7 +59,7 @@ module.exports = window;
                                                                       // way we can cleanly replace className when
                                                                       // removed.
     element
-  )
+  ),z=(a=[],b,c)=>a.map(e => e(b,c))
 
   /**
    * Render a VNode in the DOM
@@ -98,7 +98,7 @@ module.exports = window;
             : _path_state                                             //    The second component is needed in order to
         ),                                                            //    reset the state if the component has changed
         _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
-        _hooks={a:vnode.$},
+        _hooks={a:vnode.$,m:[],u:[],d:[]},
         _new_dom                                                      // e. The new DOM element placeholder
 
       ) => {
@@ -110,9 +110,9 @@ module.exports = window;
           (vnode = vnode.$(                                           // it and replace the current vnode variable.
 
             vnode.a,                                                  // 1. The component properties
-            _state[0],                                                // 2. The stateful component state
+            { state: _state[0],                                                // 2. The stateful component state
 
-            (newState) =>                                             // 3. The setState function
+            setState: (newState) =>                                             // 3. The setState function
 
               Object.assign(                                          // First we update the state part of the record
                 _state[0],                                            // Note: When we defined the variable we kept the
@@ -125,7 +125,7 @@ module.exports = window;
                 _npath
               ),
 
-              _hooks
+              hooks: _hooks }
 
           ));
 
@@ -157,15 +157,13 @@ module.exports = window;
 
         /* Call lifecycle methods */
 
-        (
-          (
-            _child
-              ? _child.a != _hooks.a
-                ? ((_child.u || createElement)(), _hooks.m)
-                : _hooks.d
-              : _hooks.m
-          ) || createElement
-        )(_new_dom, _child);
+        z(
+          _child
+            ? _child.a != _hooks.a
+              ? (z(_child.u), _hooks.m)
+              : _hooks.d
+            : _hooks.m
+        ,_new_dom, _child);
 
         /* Update Element */
 
@@ -214,7 +212,7 @@ module.exports = window;
                                                                       // elements in the VDom. If there are more child
                                                                       // nodes in the DOM, we remove them.
 
-      (_children[_c].u || createElement)();                           // We then call the unmount lifecycle method for the
+      z(_children[_c].u)                           // We then call the unmount lifecycle method for the
                                                                       // elements that will be removed
 
       render(                                                         // Remove child an trigger a recursive child removal
@@ -260,17 +258,6 @@ module.exports = window;
    * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
    * virtual DOM elements.
    */
-  window.H = new Proxy(
-    createElement,
-    {
-      get: (targetFn, tagName) =>
-        targetFn[tagName] ||                                          // Make sure we don't override any native
-                                                                      // property or method from the base function
-
-        wrapClassProxy(                                               // Otherwise, for every tag we extract a
-          createElement.bind(global, tagName)                         // class-wrapped crateElement method, bound to the
-        )                                                             // tag named as the property requested.
-    }
-  )
+  window.H = createElement;
 
 // })(window);
