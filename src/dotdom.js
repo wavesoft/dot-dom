@@ -141,7 +141,7 @@ module.exports = window;
 
         _new_dom =
           _child                                                      // If we have a previous child we first check if
-            ? (_child.$ != vnode.$ && _child.data != vnode)           // the VNode element or the text are the same
+            ? (_child.$ != vnode.$ && _child.t != vnode)              // the VNode element or the text are the same
 
               ? (
                   dom.replaceChild(                                   // - If not, we replace the old element with the
@@ -181,7 +181,7 @@ module.exports = window;
                                                                       // individually.
 
         vnode.trim
-          ? _new_dom.data = vnode                                     // - String nodes update only the text
+          ? _new_dom.t = vnode                                        // - String nodes update only the text
           : o(
               _new_dom,                                               // '[key]' is shorter than '.style'
               vnode.a
