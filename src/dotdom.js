@@ -236,8 +236,8 @@ module.exports = window;
               (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
                                                                       // calling the wrapped factory function
 
-                .a.className += ' ' + className,                       // And then we assign the class name,
-                                                                      // concatenating to the previous value
+                .a.className = (_instance.a.className || '')          // And then we assign the class name,
+                               + ' ' + className,                     // concatenating to the previous value
 
               _instance                                               // And finally we return the instance
             )
