@@ -74,7 +74,6 @@ module.exports = window;
     _npath,                                                           // a. The current state path
     _children=dom.childNodes,                                         // b. Shorthand for accessing the children
     _c=0                                                              // c. Counter for processed children
-
   ) => {
 
     (vnodes.map ? vnodes : [vnodes]).map(                             // Cast `vnodes` to array if nor already
@@ -90,9 +89,9 @@ module.exports = window;
                                                                       // placeholder for the local variables after
 
         _path=_npath+' '+index,                                       // a. The state path of this vnode
-        _path_state=w[_path] || [{}, vnode.$],           // b. Get the state record for this path
+        _path_state=w[_path] || [{}, vnode.$],                        // b. Get the state record for this path
         _state=(                                                      // c. Update and get the state record
-          w[_path] =                                     //    The record is an the following format:
+          w[_path] =                                                  //    The record is an the following format:
             _path_state[1] != vnode.$                                 //  [ {state object},
             ? [{}, vnode.$]                                           //    'vnode element' ]
             : _path_state                                             //    The second component is needed in order to
@@ -167,7 +166,7 @@ module.exports = window;
 
         /* Update Element */
 
-        o(_new_dom, vnode, _hooks);                       // Keep the following information in the DOM:
+        o(_new_dom, vnode, _hooks);                                   // Keep the following information in the DOM:
                                                                       // - $ : The tag name from the vnode. We use this
                                                                       //       instead of the .tagName because some
                                                                       //       browsers convert it to capital-case
@@ -178,9 +177,6 @@ module.exports = window;
                                                                       // objects we expose some unneeded properties, but
                                                                       // it occupies less space than assigning $ and u
                                                                       // individually.
-
-
-        console.log(JSON.stringify(_new_dom), JSON.stringify(vnode.a));
 
         vnode.trim
           ? _new_dom.data = vnode                                     // - String nodes update only the text
@@ -194,7 +190,7 @@ module.exports = window;
               vnode.a.style
             )
             &&
-            r(                                                   // Only if we have an element (and not  text node)
+            r(                                                        // Only if we have an element (and not  text node)
               vnode.a.c,                                              // we recursively continue rendering into it's
               _new_dom,                                               // child nodes.
               _path
@@ -240,7 +236,7 @@ module.exports = window;
               (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
                                                                       // calling the wrapped factory function
 
-                .a.className += ' ' + className,                      // And then we assign the class name,
+                .a.className += ' ' + className,                       // And then we assign the class name,
                                                                       // concatenating to the previous value
 
               _instance                                               // And finally we return the instance
@@ -261,8 +257,8 @@ module.exports = window;
         targetFn[tagName] ||                                          // Make sure we don't override any native
                                                                       // property or method from the base function
 
-        w(                                               // Otherwise, for every tag we extract a
-          c.bind(global, tagName)                         // class-wrapped crateElement method, bound to the
+        w(                                                            // Otherwise, for every tag we extract a
+          c.bind(global, tagName)                                     // class-wrapped crateElement method, bound to the
         )                                                             // tag named as the property requested.
     }
   )

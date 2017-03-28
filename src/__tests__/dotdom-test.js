@@ -327,7 +327,7 @@ describe('.dom', function () {
         const dom = document.createElement('div');
         const updateHandler = jest.fn();
         const SampleComponent = (props, state, setState, hooks) => {
-          hooks.u.push(updateHandler);
+          hooks.u.push(updateHandler); //updateHandler
           return dd.H(props.tag);
         };
 
@@ -341,7 +341,7 @@ describe('.dom', function () {
 
         expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          []
+          [undefined,undefined]
         ])
       });
 
@@ -366,7 +366,7 @@ describe('.dom', function () {
 
         expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          []
+          [undefined,undefined]
         ])
       });
 
@@ -377,7 +377,7 @@ describe('.dom', function () {
           return dd.H(props.tag);
         };
         const ComponentB = (props, state, setState, hooks) => {
-          hooks.m = mountHandler;
+          hooks.m.push(mountHandler);
           return dd.H(props.tag);
         };
 
@@ -415,7 +415,7 @@ describe('.dom', function () {
 
         expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          []
+          [undefined,undefined]
         ])
       });
 
@@ -440,7 +440,7 @@ describe('.dom', function () {
 
         expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          []
+          [undefined,undefined]
         ])
       });
 
@@ -475,7 +475,7 @@ describe('.dom', function () {
 
         expect(updateHandler.mock.calls.length).toEqual(1)
         expect(updateHandler.mock.calls).toEqual([
-          []
+          [undefined,undefined]
         ])
       });
 
