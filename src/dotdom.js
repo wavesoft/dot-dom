@@ -110,9 +110,9 @@ module.exports = window;
           (vnode = vnode.$(                                           // it and replace the current vnode variable.
 
             vnode.a,                                                  // 1. The component properties
-            { state: _state[0],                                                // 2. The stateful component state
+            _state[0],                                                // 2. The stateful component state
 
-            setState: (newState) =>                                             // 3. The setState function
+            (newState) =>                                             // 3. The setState function
 
               Object.assign(                                          // First we update the state part of the record
                 _state[0],                                            // Note: When we defined the variable we kept the
@@ -125,7 +125,7 @@ module.exports = window;
                 _npath
               ),
 
-              hooks: _hooks }
+              _hooks
 
           ));
 
