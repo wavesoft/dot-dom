@@ -27,7 +27,6 @@ module.exports = window;
 
 /* END NPM-GLUE */
 
-// ((global) => {
 
   /**
    * Create a VNode element
@@ -268,5 +267,3 @@ module.exports = window;
         )                                                             // tag named as the property requested.
     }
   )
-
-// })(window);
