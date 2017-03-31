@@ -53,10 +53,10 @@ module.exports = window;
     }
   )
 
-  , z = (a = [], b, c) => a.map(e => e(b, c))                         // z is a helper method that calls all methods in
+  , callAllMethods = (a = [], b, c) => a.map(e => e(b, c))            // z is a helper method that calls all methods in
                                                                       // an array of functions (used for life cycle hooks)
 
-  , o = Object.assign                                                 // o is just an Object.assign short-hand helper
+  , ObjectAssign = Object.assign                                      // o is just an Object.assign short-hand helper
                                                                       // which helps save some bytes in the end
 
   /**
@@ -95,7 +95,7 @@ module.exports = window;
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
    * @param {HTLDomElement}
    */
-  , r = window.R = (
+  , render = window.R = (
     vnodes,                                                           // 1. The vnode tree to render
     dom,                                                              // 2. The DOMElement where to render into
 
@@ -141,12 +141,12 @@ module.exports = window;
 
             (newState) =>                                             // 3. The setState function
 
-              o(                                                      // First we update the state part of the record
+              ObjectAssign(                                           // First we update the state part of the record
                 _state[0],                                            // Note: When we defined the variable we kept the
                 newState                                              //       reference to the record array
               ) &&
 
-              r(                                                      // We then trigger the same render cycle that will
+              render(                                                 // We then trigger the same render cycle that will
                 vnodes,                                               // update the DOM
                 dom,
                 _npath
@@ -184,17 +184,17 @@ module.exports = window;
 
         /* Call lifecycle methods */
 
-        z(
+        callAllMethods(
           _child
             ? _child.a != _hooks.a
-              ? z(_child.u) && _hooks.m
+              ? callAllMethods(_child.u) && _hooks.m
               : _hooks.d
             : _hooks.m
         ,_new_dom, _child);
 
         /* Update Element */
 
-        o(_new_dom, vnode, _hooks);                                   // Keep the following information in the DOM:
+        ObjectAssign(_new_dom, vnode, _hooks);                        // Keep the following information in the DOM:
                                                                       // - $ : The tag name from the vnode. We use this
                                                                       //       instead of the .tagName because some
                                                                       //       browsers convert it to capital-case
@@ -208,17 +208,17 @@ module.exports = window;
 
         vnode.trim
           ? _new_dom.data = vnode                                     // - String nodes update only the text
-          : o(
+          : ObjectAssign(
               _new_dom,
               vnode.a
             )
             &&
-            o(
+            ObjectAssign(
               _new_dom.style,
               vnode.a.style
             )
             &&
-            r(                                                        // Only if we have an element (and not  text node)
+            render(                                                   // Only if we have an element (and not  text node)
               vnode.a.c,                                              // we recursively continue rendering into it's
               _new_dom,                                               // child nodes.
               _path
@@ -232,10 +232,10 @@ module.exports = window;
                                                                       // elements in the VDom. If there are more child
                                                                       // nodes in the DOM, we remove them.
 
-      z(_children[_c].u)                                              // We then call the unmount lifecycle method for the
+      callAllMethods(_children[_c].u)                                 // We then call the unmount lifecycle method for the
                                                                       // elements that will be removed
 
-      r(                                                              // Remove child an trigger a recursive child removal
+      render(                                                              // Remove child an trigger a recursive child removal
         [],                                                           // in order to call the correct lifecycle methods in our
         dom.removeChild(_children[_c])                                // deep children too.
       )
