@@ -37,7 +37,7 @@ module.exports = window;
    * @returns {VNode} Returns a virtual DOM instance
    */
   let createElement = (element, props={}, ...children) => (
-    element = ({                                                      // The reference of `element` will be kept
+    element = {                                                       // The reference of `element` will be kept
                                                                       // in the object so we are safe to replace it
 
       $: element,                                                     // 'E' holds the name or function passed as
@@ -51,8 +51,7 @@ module.exports = window;
                                                                       // the .concat ensures that arrays of children
                                                                       // will be flattened into a single array.
 
-      }
-    ),
+      },
 
     element
   )
@@ -136,9 +135,9 @@ module.exports = window;
 
         /* Expand functional Components */
 
-        while ((vnode.$ || _unused1).call)                                 // (This expands to : vnode.$ && vnode.$.call &&)
+        while ((vnode.$ || _unused1).call)                            // (This expands to : vnode.$ && vnode.$.call &&)
                                                                       // If the vnode is a functional component, expand
-          (vnode = vnode.$(                                           // it and replace the current vnode variable.
+          vnode = vnode.$(                                            // it and replace the current vnode variable.
 
             vnode.a,                                                  // 1. The component properties
             _state[0],                                                // 2. The stateful component state
@@ -158,7 +157,7 @@ module.exports = window;
 
               _hooks
 
-          ));
+          );
 
         /* Create new DOM element */
 
@@ -191,7 +190,7 @@ module.exports = window;
         z(
           _child
             ? _child.a != _hooks.a
-              ? (z(_child.u), _hooks.m)
+              ? z(_child.u) && _hooks.m
               : _hooks.d
             : _hooks.m
         ,_new_dom, _child);
@@ -232,7 +231,7 @@ module.exports = window;
 
     /* Remove extraneous nodes */
 
-    while (_children[_c])   {                                        // The _c property keeps track of the number of
+    while (_children[_c])   {                                         // The _c property keeps track of the number of
                                                                       // elements in the VDom. If there are more child
                                                                       // nodes in the DOM, we remove them.
 
