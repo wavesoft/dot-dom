@@ -27,7 +27,7 @@ module.exports = window;
 
 /* END NPM-GLUE */
 
-
+(() => {
   /**
    * Create a VNode element
    *
@@ -36,7 +36,7 @@ module.exports = window;
    * @param {Array} [children] - The child VNode elements
    * @returns {VNode} Returns a virtual DOM instance
    */
-  let c = (element, props={}, ...children) => (
+  let createElement = (element, props={}, ...children) => (
     element = ({                                                      // The reference of `element` will be kept
                                                                       // in the object so we are safe to replace it
 
@@ -54,9 +54,6 @@ module.exports = window;
       }
     ),
 
-    // element.a.className = element.a.className || '',               // Ensure `className` always exist, since this
-                                                                      // way we can cleanly replace className when
-                                                                      // removed.
     element
   )
 
@@ -67,12 +64,42 @@ module.exports = window;
                                                                       // which helps save some bytes in the end
 
   /**
+   * Helper function that wraps an element shorthand function with a proxy
+   * that can be used to append class names to the instance.
+   *
+   * The result is wrapped with the same function, creating a chainable mechanism
+   * for appending classes.
+   *
+   * @param {function} factoryFn - The factory function to call for creating vnode
+   */
+  , wrapClassProxy = factoryFn =>
+    new Proxy(                                                        // We are creating a proxy object for every tag in
+                                                                      // order to be able to customize the class name
+                                                                      // via a shorthand call.
+      factoryFn,
+      {
+        get: (targetFn, className, _instance) =>
+          wrapClassProxy(
+            (...args) => (
+              (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
+                                                                      // calling the wrapped factory function
+
+                .a.className = (_instance.a.className || '')          // And then we assign the class name,
+                               + ' ' + className,                     // concatenating to the previous value
+
+              _instance                                               // And finally we return the instance
+            )
+          )
+      }
+    )
+
+  /**
    * Render a VNode in the DOM
    *
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
    * @param {HTLDomElement}
    */
-  let r = window.R = (
+  , r = window.R = (
     vnodes,                                                           // 1. The vnode tree to render
     dom,                                                              // 2. The DOMElement where to render into
 
@@ -94,9 +121,9 @@ module.exports = window;
                                                                       // placeholder for the local variables after
 
         _path=_npath+' '+index,                                       // a. The state path of this vnode
-        _path_state=w[_path] || [{}, vnode.$],                        // b. Get the state record for this path
+        _path_state=wrapClassProxy[_path] || [{}, vnode.$],           // b. Get the state record for this path
         _state=(                                                      // c. Update and get the state record
-          w[_path] =                                                  //    The record is an the following format:
+          wrapClassProxy[_path] =                                     //    The record is an the following format:
             _path_state[1] != vnode.$                                 //  [ {state object},
             ? [{}, vnode.$]                                           //    'vnode element' ]
             : _path_state                                             //    The second component is needed in order to
@@ -205,7 +232,7 @@ module.exports = window;
 
     /* Remove extraneous nodes */
 
-    while (_children[_c]) {                                           // The _c property keeps track of the number of
+    while (_children[_c])   {                                        // The _c property keeps track of the number of
                                                                       // elements in the VDom. If there are more child
                                                                       // nodes in the DOM, we remove them.
 
@@ -216,39 +243,9 @@ module.exports = window;
         [],                                                           // in order to call the correct lifecycle methods in our
         dom.removeChild(_children[_c])                                // deep children too.
       )
+
     }
-
   }
-
-  /**
-   * Helper function that wraps an element shorthand function with a proxy
-   * that can be used to append class names to the instance.
-   *
-   * The result is wrapped with the same function, creating a chainable mechanism
-   * for appending classes.
-   *
-   * @param {function} factoryFn - The factory function to call for creating vnode
-   */
-  let w = (factoryFn) =>
-    new Proxy(                                                        // We are creating a proxy object for every tag in
-                                                                      // order to be able to customize the class name
-                                                                      // via a shorthand call.
-      factoryFn,
-      {
-        get: (targetFn, className, _instance) =>
-          w(
-            (...args) => (
-              (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
-                                                                      // calling the wrapped factory function
-
-                .a.className = (_instance.a.className || '')          // And then we assign the class name,
-                               + ' ' + className,                     // concatenating to the previous value
-
-              _instance                                               // And finally we return the instance
-            )
-          )
-      }
-    )
 
   /**
    * Expose as `H` a proxy around the createElement function that can either be used
@@ -256,14 +253,15 @@ module.exports = window;
    * virtual DOM elements.
    */
   window.H = new Proxy(
-    c,
+    createElement,
     {
       get: (targetFn, tagName) =>
         targetFn[tagName] ||                                          // Make sure we don't override any native
                                                                       // property or method from the base function
 
-        w(                                                            // Otherwise, for every tag we extract a
-          c.bind(global, tagName)                                     // class-wrapped crateElement method, bound to the
+        wrapClassProxy(                                               // Otherwise, for every tag we extract a
+          createElement.bind(global, tagName)                         // class-wrapped crateElement method, bound to the
         )                                                             // tag named as the property requested.
     }
   )
+})()
