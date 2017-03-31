@@ -136,7 +136,7 @@ module.exports = window;
 
         /* Expand functional Components */
 
-        (vnode.$ || _unused1).call &&                                 // (This expands to : vnode.$ && vnode.$.call &&)
+        while ((vnode.$ || _unused1).call)                                 // (This expands to : vnode.$ && vnode.$.call &&)
                                                                       // If the vnode is a functional component, expand
           (vnode = vnode.$(                                           // it and replace the current vnode variable.
 
