@@ -37,10 +37,9 @@ module.exports = window;
    * @returns {VNode} Returns a virtual DOM instance
    */
   let createElement = (element, props={}, ...children) => (
-    element = {                                                       // The reference of `element` will be kept
-                                                                      // in the object so we are safe to replace it
+    {
 
-      $: element,                                                     // 'E' holds the name or function passed as
+      $: element,                                                     // '$' holds the name or function passed as
                                                                       // first argument
 
       a: (props.$ || props.trim || props.map)                         // If the props argument is a renderable VNode,
@@ -51,9 +50,7 @@ module.exports = window;
                                                                       // the .concat ensures that arrays of children
                                                                       // will be flattened into a single array.
 
-      },
-
-    element
+    }
   )
 
   , z = (a = [], b, c) => a.map(e => e(b, c))                         // z is a helper method that calls all methods in
