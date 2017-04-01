@@ -53,10 +53,10 @@ module.exports = window;
     }
   )
 
-  , callAllMethods = (a = [], b, c) => a.map(e => e(b, c))            // z is a helper method that calls all methods in
-                                                                      // an array of functions (used for life cycle hooks)
+  , callAllMethods = (a = [], b, c) => a.map(e => e(b, c))            // Helper method that calls all methods in an array
+                                                                      // of functions (used for life cycle hooks)
 
-  , ObjectAssign = Object.assign                                      // o is just an Object.assign short-hand helper
+  , ObjectAssign = Object.assign                                      // Just an Object.assign short-hand helper
                                                                       // which helps save some bytes in the end
 
   , _window = window                                                  // window variable, saves a byte
@@ -127,8 +127,18 @@ module.exports = window;
             : _path_state                                             //    The second component is needed in order to
         ),                                                            //    reset the state if the component has changed
         _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
-        _hooks={a:vnode.$,m:[],u:[],d:[]},
-        _new_dom                                                      // e. The new DOM element placeholder
+        _hooks={                                                      // e. Prepare the hooks object that will be passed
+                                                                      //    down to the functional component
+          a:vnode.$,                                                  //    - The 'a' property is keeping a reference
+                                                                      //      to the element (property '$') and is used
+                                                                      //      for space-optimal assignment of the tag to
+                                                                      //      the DOM element through ObjectAssign in the
+                                                                      //      Update Element phase.
+          m:[],                                                       //    - The 'm' property contains the `mount` cb
+          u:[],                                                       //    - The 'u' property contains the `unmount` cb
+          d:[]                                                        //    - The 'd' property contains the `update` cb
+        },
+        _new_dom                                                      // f. The new DOM element placeholder
 
       ) => {
         /* Expand functional Components */
@@ -186,12 +196,18 @@ module.exports = window;
         /* Call lifecycle methods */
 
         callAllMethods(
-          _child
-            ? _child.a != _hooks.a
-              ? callAllMethods(_child.u) && _hooks.m
-              : _hooks.d
-            : _hooks.m
-        ,_new_dom, _child);
+          _child                                                      // If there is a DOM reflection
+            ? _child.a != _hooks.a                                    // .. and the element has changed
+              ? callAllMethods(_child.u) && _hooks.m                  // - Unmount the previous & Mount the new
+              : _hooks.d                                              // - Otherwise just update
+
+                                                                      // If there is no DOM reflection
+            : _hooks.m,                                               // - Mount the new
+
+                                                                      // Pass the following arguments:
+          _new_dom,                                                   // 1. The new DOM instance
+          _child                                                      // 2. The old DOM instance
+        );
 
         /* Update Element */
 
