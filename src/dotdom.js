@@ -117,11 +117,11 @@ module.exports = window;
                                                                       // placeholder for the local variables after
 
         _path=_npath+' '+index,                                       // a. The state path of this vnode
-        _path_state=wrapClassProxy[_path] || [{}, vnode.$],           // b. Get the state record for this path
+        _path_state=wrapClassProxy[_path] || [vnode.$, {}],           // b. Get the state record for this path
         _state=(                                                      // c. Update and get the state record
           wrapClassProxy[_path] =                                     //    The record is an the following format:
-            _path_state[1] != vnode.$                                 //  [ {state object},
-            ? [{}, vnode.$]                                           //    'vnode element' ]
+            _path_state[0] != vnode.$                                 //  [ {state object},
+            ? [vnode.$, {}]                                           //    'vnode element' ]
             : _path_state                                             //    The second component is needed in order to
         ),                                                            //    reset the state if the component has changed
         _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
@@ -129,7 +129,6 @@ module.exports = window;
         _new_dom                                                      // e. The new DOM element placeholder
 
       ) => {
-
         /* Expand functional Components */
 
         while ((vnode.$ || _unused1).call)                            // (This expands to : vnode.$ && vnode.$.call &&)
@@ -137,12 +136,12 @@ module.exports = window;
           vnode = vnode.$(                                            // it and replace the current vnode variable.
 
             vnode.a,                                                  // 1. The component properties
-            _state[0],                                                // 2. The stateful component state
+            _state[1],                                                // 2. The stateful component state
 
             (newState) =>                                             // 3. The setState function
 
               ObjectAssign(                                           // First we update the state part of the record
-                _state[0],                                            // Note: When we defined the variable we kept the
+                _state[1],                                            // Note: When we defined the variable we kept the
                 newState                                              //       reference to the record array
               ) &&
 
@@ -256,7 +255,7 @@ module.exports = window;
                                                                       // property or method from the base function
 
         wrapClassProxy(                                               // Otherwise, for every tag we extract a
-          createElement.bind(global, tagName)                         // class-wrapped crateElement method, bound to the
+          createElement.bind(window, tagName)                         // class-wrapped crateElement method, bound to the
         )                                                             // tag named as the property requested.
     }
   )
