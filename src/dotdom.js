@@ -59,6 +59,8 @@ module.exports = window;
   , ObjectAssign = Object.assign                                      // o is just an Object.assign short-hand helper
                                                                       // which helps save some bytes in the end
 
+  , _window = window                                                  // window variable, saves a byte
+
   /**
    * Helper function that wraps an element shorthand function with a proxy
    * that can be used to append class names to the instance.
@@ -95,7 +97,7 @@ module.exports = window;
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
    * @param {HTLDomElement}
    */
-  , render = window.R = (
+  , render = _window.R = (
     vnodes,                                                           // 1. The vnode tree to render
     dom,                                                              // 2. The DOMElement where to render into
 
@@ -247,7 +249,7 @@ module.exports = window;
    * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
    * virtual DOM elements.
    */
-  window.H = new Proxy(
+  _window.H = new Proxy(
     createElement,
     {
       get: (targetFn, tagName) =>
@@ -255,7 +257,7 @@ module.exports = window;
                                                                       // property or method from the base function
 
         wrapClassProxy(                                               // Otherwise, for every tag we extract a
-          createElement.bind(window, tagName)                         // class-wrapped crateElement method, bound to the
+          createElement.bind(_window, tagName)                         // class-wrapped crateElement method, bound to the
         )                                                             // tag named as the property requested.
     }
   )
