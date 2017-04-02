@@ -101,7 +101,7 @@ module.exports = window;
     vnodes,                                                           // 1. The vnode tree to render
     dom,                                                              // 2. The DOMElement where to render into
 
-    _npath,                                                           // a. The current state path
+    _stateRoot=[[],{}],                                               // a. The current state graph
     _children=dom.childNodes,                                         // b. Shorthand for accessing the children
     _c=0                                                              // c. Counter for processed children
   ) => {
@@ -118,16 +118,15 @@ module.exports = window;
         _unused1,                                                     // We don't handle the array, but we need the
                                                                       // placeholder for the local variables after
 
-        _path=_npath+' '+index,                                       // a. The state path of this vnode
-        _path_state=wrapClassProxy[_path] || [vnode.$, {}],           // b. Get the state record for this path
-        _state=(                                                      // c. Update and get the state record
-          wrapClassProxy[_path] =                                     //    The record is an the following format:
-            _path_state[0] != vnode.$                                 //  [ {state object},
-            ? [vnode.$, {}]                                           //    'vnode element' ]
-            : _path_state                                             //    The second component is needed in order to
+        _path_state=_stateRoot[0][index] || [[], vnode.$, {}],        // a. Get the state record for this path
+        _state=(                                                      // b. Update and get the state record
+          _stateRoot[0][index] =                                      //    The record is an the following format:
+            _path_state[1] != vnode.$                                 //  [ 'vnode element', {state object},
+            ? [[], vnode.$, {}]                                       //    [ children states ] ]
+            : _path_state                                             //    The first component is needed in order to
         ),                                                            //    reset the state if the component has changed
-        _child=_children[_c++],                                       // d. Get the next DOM child + increment counter
-        _hooks={                                                      // e. Prepare the hooks object that will be passed
+        _child=_children[_c++],                                       // c. Get the next DOM child + increment counter
+        _hooks={                                                      // d. Prepare the hooks object that will be passed
                                                                       //    down to the functional component
           a:vnode.$,                                                  //    - The 'a' property is keeping a reference
                                                                       //      to the element (property '$') and is used
@@ -138,7 +137,7 @@ module.exports = window;
           u:[],                                                       //    - The 'u' property contains the `unmount` cb
           d:[]                                                        //    - The 'd' property contains the `update` cb
         },
-        _new_dom                                                      // f. The new DOM element placeholder
+        _new_dom                                                      // e. The new DOM element placeholder
 
       ) => {
         /* Expand functional Components */
@@ -148,19 +147,19 @@ module.exports = window;
           vnode = vnode.$(                                            // it and replace the current vnode variable.
 
             vnode.a,                                                  // 1. The component properties
-            _state[1],                                                // 2. The stateful component state
+            _state[2],                                                // 2. The stateful component state
 
             (newState) =>                                             // 3. The setState function
 
               ObjectAssign(                                           // First we update the state part of the record
-                _state[1],                                            // Note: When we defined the variable we kept the
+                _state[2],                                            // Note: When we defined the variable we kept the
                 newState                                              //       reference to the record array
               ) &&
 
               render(                                                 // We then trigger the same render cycle that will
                 vnodes,                                               // update the DOM
                 dom,
-                _npath
+                _stateRoot
               ),
 
               _hooks
@@ -238,7 +237,7 @@ module.exports = window;
             render(                                                   // Only if we have an element (and not  text node)
               vnode.a.c,                                              // we recursively continue rendering into it's
               _new_dom,                                               // child nodes.
-              _path
+              _state
             )
       }
     );

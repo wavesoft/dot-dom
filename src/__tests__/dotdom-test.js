@@ -909,6 +909,66 @@ describe('.dom', function () {
         );
       });
 
+      it('should reset state of child components when parent is re-mounted', function () {
+        const dom = document.createElement('div');
+        const ChildComponent = function(props, {clicks=0}, setState) {
+          return dd.H('button', {
+            onclick() {
+              setState({
+                clicks: clicks + 1
+              })
+            }
+          }, `${clicks} clicks`)
+        }
+        const ComponentA = function(props, state, setState) {
+          return dd.H('div', {title: 'a'},
+            dd.H(ChildComponent)
+          )
+        }
+        const ComponentB = function(props, state, setState) {
+          return dd.H('div', {title: 'b'},
+            dd.H(ChildComponent)
+          )
+        }
+        const Toggler = function(props, {first=true}, setState) {
+          return dd.H('div',
+            dd.H('button', {
+              onclick() {
+                setState({first: !first})
+              }
+            }, 'toggle'),
+            first
+              ? dd.H(ComponentA)
+              : dd.H(ComponentB)
+          )
+        }
+
+        const vdom = dd.H(Toggler);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><button>toggle</button><div title="a"><button>0 clicks</button></div></div>'
+        );
+
+        const event = new window.MouseEvent('click');
+        dom.firstChild.childNodes[1].childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>toggle</button><div title="a"><button>1 clicks</button></div></div>'
+        );
+
+        dom.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>toggle</button><div title="b"><button>0 clicks</button></div></div>'
+        );
+
+        dom.firstChild.childNodes[1].childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>toggle</button><div title="b"><button>1 clicks</button></div></div>'
+        );
+
+      });
+
     });
 
     describe('Tag Shorthands', function () {
