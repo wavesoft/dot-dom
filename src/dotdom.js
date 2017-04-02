@@ -121,8 +121,8 @@ module.exports = window;
         _path_state=_stateRoot[0][index] || [[], vnode.$, {}],        // a. Get the state record for this path
         _state=(                                                      // b. Update and get the state record
           _stateRoot[0][index] =                                      //    The record is an the following format:
-            _path_state[1] != vnode.$                                 //  [ 'vnode element', {state object},
-            ? [[], vnode.$, {}]                                       //    [ children states ] ]
+            _path_state[1] != vnode.$                                 //  [ [ children states ], 'vnode element',
+            ? [[], vnode.$, {}]                                       //    {state object} ]
             : _path_state                                             //    The first component is needed in order to
         ),                                                            //    reset the state if the component has changed
         _child=_children[_c++],                                       // c. Get the next DOM child + increment counter
