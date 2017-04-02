@@ -702,56 +702,6 @@ describe('.dom', function () {
         );
       });
 
-      it('should update independently parallel stateful components', function () {
-        const dom = document.createElement('div');
-        const Component = function(props, {clicks=0}, setState) {
-          return dd.H('button', {
-            onclick() {
-              setState({
-                clicks: clicks + 1
-              })
-            }
-          }, `${clicks} clicks`)
-        }
-        const vdom = dd.H('div',
-          dd.H(Component),
-          dd.H(Component)
-        );
-
-        dd.R(vdom, dom)
-
-        expect(dom.innerHTML).toEqual(
-          '<div><button>0 clicks</button><button>0 clicks</button></div>'
-        );
-
-        const event = new window.MouseEvent('click');
-
-        dom.firstChild.childNodes[0].dispatchEvent(event);
-        expect(dom.innerHTML).toEqual(
-          '<div><button>1 clicks</button><button>0 clicks</button></div>'
-        );
-
-        dom.firstChild.childNodes[0].dispatchEvent(event);
-        expect(dom.innerHTML).toEqual(
-          '<div><button>2 clicks</button><button>0 clicks</button></div>'
-        );
-
-        dom.firstChild.childNodes[1].dispatchEvent(event);
-        expect(dom.innerHTML).toEqual(
-          '<div><button>2 clicks</button><button>1 clicks</button></div>'
-        );
-
-        dom.firstChild.childNodes[1].dispatchEvent(event);
-        expect(dom.innerHTML).toEqual(
-          '<div><button>2 clicks</button><button>2 clicks</button></div>'
-        );
-
-        dom.firstChild.childNodes[0].dispatchEvent(event);
-        expect(dom.innerHTML).toEqual(
-          '<div><button>3 clicks</button><button>2 clicks</button></div>'
-        );
-      });
-
       it('should maintain state of child components', function () {
         const dom = document.createElement('div');
         const Component = function(props, {clicks=0}, setState) {
@@ -965,6 +915,135 @@ describe('.dom', function () {
         dom.firstChild.childNodes[1].childNodes[0].dispatchEvent(event);
         expect(dom.innerHTML).toEqual(
           '<div><button>toggle</button><div title="b"><button>1 clicks</button></div></div>'
+        );
+
+      });
+
+      it('should correctly update independent instances of same component', function () {
+        const dom = document.createElement('div');
+        const Component = function(props, {clicks=0}, setState) {
+          return dd.H('button', {
+            onclick() {
+              setState({
+                clicks: clicks + 1
+              })
+            }
+          }, `${clicks} clicks`)
+        }
+        const vdom = dd.H('div',
+          dd.H(Component),
+          dd.H(Component)
+        );
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><button>0 clicks</button><button>0 clicks</button></div>'
+        );
+
+        const event = new window.MouseEvent('click');
+
+        dom.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><button>0 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>2 clicks</button><button>0 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[1].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>2 clicks</button><button>1 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[1].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>2 clicks</button><button>2 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>3 clicks</button><button>2 clicks</button></div>'
+        );
+      });
+
+      it('should correctly update independent children and parent component', function () {
+        const dom = document.createElement('div');
+        const ChildA = function(props, {clicks=0}, setState) {
+          return dd.H('button',
+            {
+              title: 'a',
+              onclick() {
+                setState({clicks: clicks+1})
+              }
+            },
+            `${clicks} clicks`
+          )
+        }
+        const ChildB = function(props, {clicks=0}, setState) {
+          return dd.H('button',
+            {
+              title: 'b',
+              onclick() {
+                setState({clicks: clicks+1})
+              }
+            },
+            `${clicks} clicks`
+          )
+        }
+        const Root = function(props, {clicks=0}, setState) {
+          return dd.H('div',
+            dd.H('button', {
+              onclick() {
+                setState({clicks: clicks+1})
+              }
+            }, `${clicks} clicks`),
+            dd.H('div',
+              dd.H(ChildA),
+              dd.H(ChildB)
+            )
+          )
+        }
+
+        const vdom = dd.H(Root);
+        const event = new window.MouseEvent('click');
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><button>0 clicks</button><div><button title="a">0 clicks</button><button title="b">0 clicks</button></div></div>'
+        );
+
+        dom.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><div><button title="a">0 clicks</button><button title="b">0 clicks</button></div></div>'
+        );
+
+        dom.firstChild.childNodes[1].childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><div><button title="a">1 clicks</button><button title="b">0 clicks</button></div></div>'
+        );
+
+        dom.firstChild.childNodes[1].childNodes[1].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><div><button title="a">1 clicks</button><button title="b">1 clicks</button></div></div>'
+        );
+
+        dom.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>2 clicks</button><div><button title="a">1 clicks</button><button title="b">1 clicks</button></div></div>'
+        );
+
+        dom.firstChild.childNodes[1].childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>2 clicks</button><div><button title="a">2 clicks</button><button title="b">1 clicks</button></div></div>'
+        );
+
+        dom.firstChild.childNodes[1].childNodes[1].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>2 clicks</button><div><button title="a">2 clicks</button><button title="b">2 clicks</button></div></div>'
         );
 
       });
