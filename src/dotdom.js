@@ -16,18 +16,19 @@
  * limitations under the License.
  */
 
-/* BEGIN NPM-GLUE */
+(/* BEGIN NPM-GLUE */
 
 // This code block will be striped when building the stand-alone version.
 // When using `npm` this exports the correct functions in order to be easily
 // imported in the correct scope, without leaking to the global scope.
 
-const window = {};
+const window = typeof window !== "undefined" && window || {};
+
 module.exports = window;
+  
+window.dotdom = 
 
-/* END NPM-GLUE */
-
-((global, document, Object, vnodeFlag, globalState, createElement, render, wrapClassProxy) => {
+/* END NPM-GLUE */(global, document, Object, vnodeFlag, globalState, createElement, render, wrapClassProxy) => {
 
   /**
    * Put the `vnodeFlag` to all strings in order to be considered as virtual
