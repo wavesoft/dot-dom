@@ -907,7 +907,9 @@ describe('.dom', function () {
           '<div><button>toggle</button><div title="a"><button>1 clicks</button></div></div>'
         );
 
+        console.log('--pre--');
         dom.firstChild.childNodes[0].dispatchEvent(event);
+        console.log('--post--');
         expect(dom.innerHTML).toEqual(
           '<div><button>toggle</button><div title="b"><button>0 clicks</button></div></div>'
         );
