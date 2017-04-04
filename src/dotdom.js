@@ -142,9 +142,9 @@ module.exports = window;
       ) => {
         /* Expand functional Components */
 
-        while ((vnode.$ || _unused1).call)                            // (This expands to : vnode.$ && vnode.$.call &&)
+        ((vnode.$ || _unused1).call) &&                               // (This expands to : vnode.$ && vnode.$.call &&)
                                                                       // If the vnode is a functional component, expand
-          vnode = vnode.$(                                            // it and replace the current vnode variable.
+          (vnode = vnode.$(                                            // it and replace the current vnode variable.
 
             vnode.a,                                                  // 1. The component properties
             _state[2],                                                // 2. The stateful component state
@@ -164,7 +164,7 @@ module.exports = window;
 
               _hooks
 
-          );
+          ));
 
         /* Create new DOM element */
 
