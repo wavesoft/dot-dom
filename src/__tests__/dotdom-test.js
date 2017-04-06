@@ -603,6 +603,88 @@ describe('.dom', function () {
         dd.R(vdom2, dom)
         expect(dom.children.length).toEqual(1);
       });
+
+      it('should not try to re-assign attributes with same value', function () {
+        let state = {};
+        const p1Handler = jest.fn((value) => state.p1 = value);
+        const p2Handler = jest.fn((value) => state.p2 = value);
+        const dom = document.createElement('div');
+        const vdom0 = [dd.H('div')];
+        const vdom1 = [dd.H('div', {p1: 'foo'})];
+        const vdom2 = [dd.H('div', {p1: 'foo', p2: 'bar'})];
+
+        dd.R(vdom0, dom)
+        expect(dom.children.length).toEqual(1);
+        Object.defineProperty(dom.children[0], 'p1', {
+          set: p1Handler,
+          get: () => state.p1
+        })
+        Object.defineProperty(dom.children[0], 'p2', {
+          set: p2Handler,
+          get: () => state.p2
+        })
+
+        dd.R(vdom1, dom)
+        dd.R(vdom2, dom)
+        expect(dom.children.length).toEqual(1);
+        expect(p1Handler.mock.calls).toEqual([
+          ['foo']
+        ])
+        expect(p2Handler.mock.calls).toEqual([
+          ['bar']
+        ])
+      });
+
+      it('should only assign style properties recursively', function () {
+        let state = {};
+        const p1Handler = jest.fn((value) => state.p1 = value);
+        const p2Handler = jest.fn((value) => state.p2 = value);
+        const dom = document.createElement('div');
+        const vdom0 = [dd.H('div')];
+        const vdom1 = [dd.H('div', {style: {p1: 'foo'}})];
+        const vdom2 = [dd.H('div', {style: {p1: 'foo', p2: 'bar'}})];
+
+        dd.R(vdom0, dom)
+        expect(dom.children.length).toEqual(1);
+        Object.defineProperty(dom.children[0].style, 'p1', {
+          set: p1Handler,
+          get: () => state.p1
+        })
+        Object.defineProperty(dom.children[0].style, 'p2', {
+          set: p2Handler,
+          get: () => state.p2
+        })
+
+        dd.R(vdom1, dom)
+        dd.R(vdom2, dom)
+        expect(dom.children.length).toEqual(1);
+        expect(p1Handler.mock.calls).toEqual([
+          ['foo'],
+          ['foo']
+        ])
+        expect(p2Handler.mock.calls).toEqual([
+          ['bar']
+        ])
+      });
+
+      it('should assign style string as cssText', function () {
+        const cssTextHandler = jest.fn();
+        const dom = document.createElement('div');
+        const vdom0 = [dd.H('div')];
+        const vdom1 = [dd.H('div', {style: 'foo: bar'})];
+
+        dd.R(vdom0, dom)
+        expect(dom.children.length).toEqual(1);
+        Object.defineProperty(dom.children[0].style, 'cssText', {
+          set: cssTextHandler
+        })
+
+        dd.R(vdom1, dom)
+        expect(dom.children.length).toEqual(1);
+        expect(cssTextHandler.mock.calls).toEqual([
+          ['foo: bar']
+        ])
+      });
     });
 
     describe('Components', function () {

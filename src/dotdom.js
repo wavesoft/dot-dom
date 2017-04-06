@@ -219,16 +219,23 @@ module.exports = window;
 
         vnode.trim
           ? _new_dom.data = vnode                                     // - String nodes update only the text
-          : ObjectAssign(
-              _new_dom,
-              vnode.a
-            )
-            &&
-            ObjectAssign(
-              _new_dom.style,
-              vnode.a.style
-            )
-            &&
+          : Object.keys(vnode.a).map(                                 // - Element nodes have properties
+              (
+                key                                                   // 1. The property name
+              ) =>
+
+                key == 'style' ?                                      // The 'style' property is an object and must be
+                                                                      // applied recursively.
+                  Object.assign(
+                    _new_dom[key],                                    // '[key]' is shorter than '.style'
+                    vnode.a[key]
+                  )
+
+                : (_new_dom[key] !== vnode.a[key] &&                  // All properties are applied directly to DOM, as
+                  (_new_dom[key] = vnode.a[key]))                     // long as they are different than ther value in the
+                                                                      // instance. This includes `onXXX` event handlers.
+
+            ) &&
             render(                                                   // Only if we have an element (and not  text node)
               vnode.a.c,                                              // we recursively continue rendering into it's
               _new_dom                                                // child nodes.
