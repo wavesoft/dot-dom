@@ -72,8 +72,8 @@ module.exports = window;
     _baseState={},                                                    // a. The base path state object
     _children=dom.childNodes,                                         // b. Shorthand for accessing the children
     _c=0,                                                             // c. Counter for processed children
-    _t=0,
-    _r=1
+    _t=0,                                                             // d. Timeout container for rerendering nodes
+    _r=1                                                              // e. Rendering bit to prevent infinite loops
   ) => {
     function nrender(
 
@@ -106,13 +106,13 @@ module.exports = window;
         }
         
         function timer(newState = {}) {
-          if(_r) return
+          if(_r) return                                               // Don't run if rendering
           if(_t) clearTimeout(_t)
-          _t = setTimeout(() => update(newState))
+          _t = setTimeout(() => update(newState))                     // Setup a timer to call the state updater
         }
         
         function update(newState = {}) {                              // 3. The setState function
-          _r = 1
+          _r = 1                                                      // Set the rendering bit to 1
           _c = __c                                                    // First set the iterator to the stored index
           Object.assign(                                              // Then we update the state part of the record
             _pathState[1],                                            // Note: When we defined the variable we kept the
@@ -124,7 +124,7 @@ module.exports = window;
             0,                                                        // 0 for _unused1
             _pathState                                                // Current path state to be re-used
           )
-          _r = 0
+          _r = 0                                                      // Set rendering bit to 0
         }
 
         /* Expand functional Components */
@@ -145,9 +145,10 @@ module.exports = window;
             }),
             timer
           )
-          if(nnode.constructor === Array) {
-            nnode = H('div', {}, nnode)                               // Creates a wrapper div for lists of vnodes
-          }
+        }
+        
+        if(nnode.constructor === Array) {
+          nnode = H('div', {}, nnode)                                 // Creates a wrapper div for lists of vnodes
         }
 
 
