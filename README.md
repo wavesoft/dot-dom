@@ -258,20 +258,6 @@ This is the same as calling `div({className: 'className'})` and the function int
 
 *Note:* You can add more than one class by concatenating more than one `.class` to the tag. For example: `div.foo.bar` is the same as `div({className: 'foo bar'})`.
 
-## Caveats
-
-* You cannot trigger an update with a property removal. You **must** set the new property to an empty value instead. For example:
-
-  ```js
-  // Wrong
-  R(div({className: 'foo'}), document.body);
-  R(div({}), document.body);
-
-  // Correct
-  R(div({className: 'foo'}), document.body);
-  R(div({className: ''}), document.body);
-  ```
-
 ## Contribution
 
 Are you interested in contributing to **.dom**? You are more than welcome! Just be sure to follow the guidelines:

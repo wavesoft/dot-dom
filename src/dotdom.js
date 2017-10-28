@@ -129,12 +129,16 @@ module.exports = window;
           nnode = nnode.E(                                            // it and replace the current vnode variable.
 
             nnode.P,                                                  // 1. The component properties
-            new Proxy(_pathState[1], {                                // 2. The stateful component state
-              set(target, name, value) {
+            new Proxy(_pathState[1], {                                // 2. The stateful component state proxied by
+              deleteProperty(target, name) {                          // a. deleteProperty (i.e. delete object[name])
+                timer()                                               //   Each of the proxy handlers calls the timer
+                delete target[name]                                   //   function that sets up component re-rendering
+              },
+              set(target, name, value) {                              // b. set (i.e. object[name] = value
                 timer()
                 target[name] = value
               },
-              get: function(target, name) {
+              get: function(target, name) {                           // c. get (i.e. console.log(object[name])
                 timer()
                 return target[name]
               }
@@ -212,7 +216,8 @@ module.exports = window;
     while (_children[_c])                                             // The _c property keeps track of the number of
       dom.removeChild(_children[_c])                                  // elements in the VDom. If there are more child
                                                                       // nodes in the DOM, we remove them.
-    _r = 0
+    
+    _r = 0                                                            // Reset rendering bit
   }
 
   /**
