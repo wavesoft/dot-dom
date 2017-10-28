@@ -114,10 +114,6 @@ module.exports = window;
         function update(newState = {}) {                              // 3. The setState function
           _r = 1                                                      // First set the rendering bit to 1
           _c = __c                                                    // Then set the iterator to the stored index
-          Object.assign(                                              // Then we update the state part of the record
-            _pathState[1],                                            // Note: When we defined the variable we kept the
-            newState                                                  //       reference to the record array
-          ) &&
           nrender(                                                    // We then trigger the same render cycle that will
             vnode,                                                    // update the DOM
             index,                                                    // vnode index
@@ -142,8 +138,7 @@ module.exports = window;
                 timer()
                 return target[name]
               }
-            }),
-            timer
+            })
           )
         }
         
