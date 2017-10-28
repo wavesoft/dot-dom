@@ -152,16 +152,16 @@ ReactDOM.render(
     </td>
     <td valign="top">
 <pre lang="javascript">
-function Clickable(props, state, setState) {
-  const {clicks=0} = state;
+function Clickable(props, state) {
+  state.clicks = state.clicks || 0
 
   return H('button',
     {
       onclick() {
-        setState({clicks: clicks+1})
+        state.clicks++
       }
     },
-    `Clicked ${clicks} times`
+    `Clicked ${state.clicks} times`
   );
 }
 
@@ -210,7 +210,7 @@ Instead of a tag name you can provide a function that returns a Virtual DOM
 according to some higher-level logic. Such function have the following signature:
 
 ```js
-const Component = (props, state, setState) {
+const Component = (props, state) {
 
   // Return your Virtual DOM
   return div( ... )
@@ -220,12 +220,8 @@ const Component = (props, state, setState) {
 The `props` property contains the properties object as given when the component
 was created.
 
-The `state` is initialized to an empty object `{}` and it's updated by calling
-the `setState({ newState })` method. The latter will also trigger an update to
-the component and it's children.
-
-You can also assign properties to the `state` object directly if you don't want
-to cause an update.
+The `state` is initialized to an empty object `{}` and any change to the object
+will re-render the component and it's children.
 
 ### Tag Shorthand `tag( [properties], [children ...] )`
 
