@@ -27,7 +27,7 @@ module.exports = window;
 
 /* END NPM-GLUE */
 
-((global, document, Object, vnodeFlag, createElement, render, wrapClassProxy) => {
+((global, document, Object, vnodeFlag, createElement, render, wrapClassProxy, anonIndex = 0) => {
 
   /**
    * Put the `vnodeFlag` to all strings in order to be considered as virtual
@@ -95,9 +95,11 @@ module.exports = window;
       ) {
       
         if(!_pathState) {                                             // If path state is not set
-          
+          if(vnode.E && vnode.E.call && !vnode.E.name && !vnode.E._id)// Adds unique identifier for anonymous functions
+            vnode.E._id = anonIndex++
           _path = index + (vnode.E ? ('.' + (vnode.E.trim ? vnode.E : // a. Get the address to the path state based
-              vnode.E.call ? (vnode.E.name || '*') : '')) : '')       // on index and tag / component name
+              vnode.E.call ?                                          // on index and tag / component name
+                (vnode.E.name || vnode.E._id || '*') : '')) : '')
           _pathState = _baseState[_path] =                            // b. Retrieve path state for this vnode
             _baseState[_path] || [0,{},{}]                            // c. Update base [cache, nodeState, childrenState]
                                                                       //   cache - cached dom node
