@@ -153,7 +153,8 @@ module.exports = window;
 
         /* Create new DOM element */
 
-        _new_dom = _pathState[0] ? _pathState[0] :                    // We prepare the new DOM element in advance in
+        _new_dom = _pathState[0] && (_pathState[0].E == nnode.E) ? 
+          _pathState[0] :                                             // We prepare the new DOM element in advance in
           nnode.trim                                                  // order to spare a few comparison bytes
             ? document.createTextNode(nnode)
             : document.createElement(nnode.E);
