@@ -96,15 +96,26 @@ module.exports = window;
       
         if(!_pathState) {                                             // If path state is not set
           if(vnode.E && vnode.E.call && !vnode.E.name && !vnode.E._id)// Adds unique identifier for anonymous functions
-            vnode.E._id = anonIndex++
+            vnode.E._id = ++anonIndex
           _path = index + (vnode.E ? ('.' + (vnode.E.trim ? vnode.E : // a. Get the address to the path state based
               vnode.E.call ?                                          // on index and tag / component name
                 (vnode.E.name || vnode.E._id || '*') : '')) : '')
           _pathState = _baseState[_path] =                            // b. Retrieve path state for this vnode
-            _baseState[_path] || [0,{},{}]                            // c. Update base [cache, nodeState, childrenState]
-                                                                      //   cache - cached dom node
-                                                                      //   nodeState - state for this node
-                                                                      //   childrenState - children base state
+            _baseState[_path] || [0, new Proxy({}, {                  // c. Update base [cache, nodeState(proxy), childrenState]
+          
+              deleteProperty(target, name) {                          // i. deleteProperty (i.e. delete object[name])
+                timer()                                               //   Each of the proxy handlers calls the timer
+                delete target[name]                                   //   function that sets up component re-rendering
+              },
+              set(target, name, value) {                              // ii. set (i.e. object[name] = value
+                timer()
+                target[name] = value
+              },
+              get: function(target, name) {                           // iii. get (i.e. console.log(object[name])
+                timer()
+                return target[name]
+              }
+            }),{}]
         }
         
         function timer(newState = {}) {
@@ -127,24 +138,14 @@ module.exports = window;
 
         /* Expand functional Components */
 
-        while(nnode.E && nnode.E.call) {                              // If the vnode is a functional component, expand
-          nnode = nnode.E(                                            // it and replace the current vnode variable.
+        while(nnode.E && nnode.E.call) {                              
+          nnode.E.data = _pathState[1]
+            
+          nnode = nnode.E(                                            // If the vnode is a functional component, expand
+                                                                      // it and replace the current vnode variable.
 
             nnode.P,                                                  // 1. The component properties
-            new Proxy(_pathState[1], {                                // 2. The stateful component state proxied by
-              deleteProperty(target, name) {                          // a. deleteProperty (i.e. delete object[name])
-                timer()                                               //   Each of the proxy handlers calls the timer
-                delete target[name]                                   //   function that sets up component re-rendering
-              },
-              set(target, name, value) {                              // b. set (i.e. object[name] = value
-                timer()
-                target[name] = value
-              },
-              get: function(target, name) {                           // c. get (i.e. console.log(object[name])
-                timer()
-                return target[name]
-              }
-            })
+            _pathState[1]                                             // 2. The proxied state
           )
         }
         
