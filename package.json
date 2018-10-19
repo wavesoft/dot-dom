@@ -3,6 +3,10 @@
   "version": "0.2.2",
   "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
   "main": "src/dotdom.js",
+  "files": [
+    "src/dotdom.js",
+    "dotdom.min.js"
+  ],
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "build": "./node_modules/.bin/gulp build",
