@@ -2,7 +2,7 @@
 
 > A tiny (511 byte) virtual DOM template engine for embedded projects
 
-| <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/edge.png" alt="IE / Edge" width="16px" height="16px" /> IE / Edge | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/firefox.png" alt="Firefox" width="16px" height="16px" /> Firefox | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome.png" alt="Chrome" width="16px" height="16px" /> Chrome | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari.png" alt="Safari" width="16px" height="16px" /> Safari | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/opera.png" alt="Opera" width="16px" height="16px" /> Opera | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari-ios.png" alt="iOS Safari" width="16px" height="16px" /> iOS Safari | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome-android.png" alt="Chrome for Android" width="16px" height="16px" /> Chrome for Android |
+| ![IE/Edge] IE/Edge | ![Firefox] Firefox | ![Chrome] Chrome | ![Safari] Safari | ![Opera] Opera | ![iOS Safari] iOS Safari | ![Chrome for Android] Chrome for Android |
 | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
 | Edge 14+ | 45+ | 49+ | 10+ | 37+ | 10.2+ | 55+
 
@@ -28,7 +28,7 @@ Why? Because with such library you can create powerful GUIs in tight space envir
 For minimum footprint, include `dotdom.min.js.gz` (511b) to your project.
 
 ```html
-<script src="dotdom.min.js.gz" />
+<script src="dotdom.min.js.gz"></script>
 ```
 
 Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the [minified code](https://raw.githubusercontent.com/wavesoft/dot-dom/master/dotdom.min.js).
@@ -42,140 +42,87 @@ the .dom primitives relate to React.
 
 Rendering a very simple DOM structure.
 
-<table width="100%">
-  <tr>
-    <th>React</th>
-    <th>.dom</th>
-  </tr>
-  <tr>
-    <td valign="top">
-<pre lang="javascript">
-ReactDOM.render(
-  React.createElement('div', null, 'Hello world'),
-  document.body
-);
-</pre>
-    </td>
-    <td valign="top">
-<pre lang="javascript">
-R(
-  H('div', 'Hello world'),
-  document.body
-)
-</pre>
-    </td>
-  </tr>
-</table>
+```js
++-----------------------------------+-----------------------------------+
+| React                             | .dom                              |
++===================================+===================================+
+| ReactDOM.render(                  | R(                                |
+|   React.createElement('div', null |   H('div', 'Hello world'),        |
+| , 'Hello world'),                 |   document.body                   |
+|   document.body                   | )                                 |
+| );                                |                                   |
++-----------------------------------+-----------------------------------+
+```
 
 #### 2. Stateless Component
 
 Creating a component on which you can pass properties.
 
-<table width="100%">
-  <tr>
-    <th>React</th>
-    <th>.dom</th>
-  </tr>
-  <tr>
-    <td valign="top">
-<pre lang="javascript">
-function Hello(props) {
-    return React.createElement(
-      'div', null, `Hello ${props.toWhat}`
-    );
-  }
-
-ReactDOM.render(
-  React.createElement(
-    Hello, {toWhat: 'World'}, null
-  ),
-  document.body
-);
-</pre>
-    </td>
-    <td valign="top">
-<pre lang="javascript">
-function Hello(props) {
-  return H('div', `Hello ${props.toWhat}`);
-}
-
-R(
-  H(Hello, {toWhat: 'World'}),
-  document.body
-)
-</pre>
-    </td>
-  </tr>
-</table>
+```js
++-----------------------------------+-----------------------------------+
+| React                             | .dom                              |
++===================================+===================================+
+| function Hello(props) {           | function Hello(props) {           |
+|     return React.createElement(   |   return H('div', `Hello ${props. |
+|       'div', null, `Hello ${props | toWhat}`);                        |
+| .toWhat}`                         | }                                 |
+|     );                            |                                   |
+|   }                               | R(                                |
+|                                   |   H(Hello, {toWhat: 'World'}),    |
+| ReactDOM.render(                  |   document.body                   |
+|   React.createElement(            | )                                 |
+|     Hello, {toWhat: 'World'}, nul |                                   |
+| l                                 |                                   |
+|   ),                              |                                   |
+|   document.body                   |                                   |
+| );                                |                                   |
++-----------------------------------+-----------------------------------+
+```
 
 #### 3. Stateful Component
 
 Creating components that can maintain their own state.
 
-<table width="100%">
-  <tr>
-    <th>React</th>
-    <th>.dom</th>
-  </tr>
-  <tr>
-    <td valign="top">
-<pre lang="javascript">
-class Clickable extends React.Component {
-  constructor() {
-    super(...arguments);
-    this.state = {
-      clicks: 0
-    };
-  }
-
-  render() {
-    const {clicks} = this.state;
-
-    return React.createElement(
-      'button', {
-        onClick() {
-          this.setState({clicks: clicks+1})
-        }
-      }, `Clicked ${clicks} times`
-    );
-  }
-}
-
-ReactDOM.render(
-  React.createElement('div', null,
-    React.createElement(Clickable, null, null),
-    React.createElement(Clickable, null, null)
-  ),
-  document.body
-);
-</pre>
-    </td>
-    <td valign="top">
-<pre lang="javascript">
-function Clickable(props, state, setState) {
-  const {clicks=0} = state;
-
-  return H('button',
-    {
-      onclick() {
-        setState({clicks: clicks+1})
-      }
-    },
-    `Clicked ${clicks} times`
-  );
-}
-
-R(
-  H('div',
-    H(Clickable),
-    H(Clickable)
-  ),
-  document.body
-)
-</pre>
-    </td>
-  </tr>
-</table>
+```js
++-----------------------------------+-----------------------------------+
+| React                             | .dom                              |
++===================================+===================================+
+| class Clickable extends React.Com | function Clickable(props, state,  |
+| ponent {                          | setState) {                       |
+|   constructor() {                 |   const {clicks=0} = state;       |
+|     super(...arguments);          |                                   |
+|     this.state = {                |   return H('button',              |
+|       clicks: 0                   |     {                             |
+|     };                            |       onclick() {                 |
+|   }                               |         setState({clicks: clicks+ |
+|                                   | 1})                               |
+|   render() {                      |       }                           |
+|     const {clicks} = this.state;  |     },                            |
+|                                   |     `Clicked ${clicks} times`     |
+|     return React.createElement(   |   );                              |
+|       'button', {                 | }                                 |
+|         onClick() {               |                                   |
+|           this.setState({clicks:  | R(                                |
+| clicks+1})                        |   H('div',                        |
+|         }                         |     H(Clickable),                 |
+|       }, `Clicked ${clicks} times |     H(Clickable)                  |
+| `                                 |   ),                              |
+|     );                            |   document.body                   |
+|   }                               | )                                 |
+| }                                 |                                   |
+|                                   |                                   |
+| ReactDOM.render(                  |                                   |
+|   React.createElement('div', null |                                   |
+| ,                                 |                                   |
+|     React.createElement(Clickable |                                   |
+| , null, null),                    |                                   |
+|     React.createElement(Clickable |                                   |
+| , null, null)                     |                                   |
+|   ),                              |                                   |
+|   document.body                   |                                   |
+| );                                |                                   |
++-----------------------------------+-----------------------------------+
+```
 
 ## API Reference
 
@@ -210,8 +157,7 @@ Instead of a tag name you can provide a function that returns a Virtual DOM
 according to some higher-level logic. Such function have the following signature:
 
 ```js
-const Component = (props, state, setState) {
-
+const Component = (props, state, setState) => {
   // Return your Virtual DOM
   return div( ... )
 }
@@ -303,11 +249,28 @@ Are you interested in contributing to **.dom**? You are more than welcome! Just 
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
    * ...
    */
-  global.R = render = (
+  global.R = render => (
     vnodes,                                                           // Flat-code comments start on column 70 and
     dom,                                                              // wrap after column 120.
 
     /* Logical separations can be commented like this */
-
     ...
   ```
+
+# License
+
+Licensed under the [Apache License, Version 2.0](https://raw.githubusercontent.com/wavesoft/dot-dom/master/LICENSE)
+
+[IE/Edge]: https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/edge.png
+
+[Firefox]: https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/firefox.png
+
+[Chrome]: https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome.png
+
+[Safari]: https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari.png
+  
+[Opera]: https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/opera.png
+
+[iOS Safari]: https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari-ios.png
+
+[Chrome for Android]: https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome-android.png
