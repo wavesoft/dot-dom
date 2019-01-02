@@ -27,7 +27,8 @@ module.exports = window;
 
 /* END NPM-GLUE */
 
-((
+(() => {
+  let
   /**
    * Create a VNode element
    *
@@ -54,8 +55,8 @@ module.exports = window;
     }
   )
 
-  , callAllMethods = (a = [], b, c) => a.map(e => e(b, c))            // Helper method that calls all methods in an
-                                                                      // array of functions (used for life cycle hooks)
+  , callAllMethods = (methods = [], arg1, arg2) =>                    // Helper method that calls all methods in an
+      methods.map(e => e(arg1, arg2))                                 // array of functions (used for life cycle hooks)
 
   /**
    * Helper function that wraps an element shorthand function with a proxy
@@ -257,8 +258,6 @@ module.exports = window;
     }
   }
 
-) => (
-
   /**
    * Expose as `H` a proxy around the createElement function that can either be used
    * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
@@ -272,8 +271,10 @@ module.exports = window;
                                                                       // property or method from the base function
 
         wrapClassProxy(                                               // Otherwise, for every tag we extract a
-          createElement.bind(window, tagName)                         // class-wrapped crateElement method, bound to the
-        )                                                             // tag named as the property requested.
+          createElement.bind(targetFn, tagName)                       // class-wrapped crateElement method, bound to the
+        )                                                             // tag named as the property requested. We are not
+                                                                      // using 'this', therefore we are using any reference
+                                                                      // that could lead on reduced code footprint.
     }
   )
-))()
+})()
