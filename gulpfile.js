@@ -7,7 +7,7 @@ const rename = require('gulp-rename');
 const gzip = require('gulp-gzip');
 
 const babel = require('gulp-babel');
-const uglify = require('gulp-uglify');
+const uglify = require('gulp-uglify-es').default;
 
 const clone = require('gulp-clone');
 const gulpMerge = require('gulp-merge');
@@ -68,6 +68,9 @@ gulp.task('build:js', () => {
         baseStream
             .pipe(clone())
             .pipe(uglify())
+            .on('error', function (err) {
+                gutil.log(gutil.colors.red('[Error]'), err.toString());
+            })
             .pipe(rename({
                 suffix: '-uglify'
             })),

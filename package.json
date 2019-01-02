@@ -34,6 +34,7 @@
     "gulp-rename": "^1.2.2",
     "gulp-strip-code": "^0.1.4",
     "gulp-uglify": "^2.0.1",
+    "gulp-uglify-es": "^1.0.4",
     "gulp-util": "^3.0.8",
     "jest": "^18.1.0",
     "mock-browser": "^0.92.12",
