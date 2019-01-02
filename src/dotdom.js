@@ -42,8 +42,9 @@ module.exports = window;
       $: element,                                                     // '$' holds the name or function passed as
                                                                       // first argument
 
-      a: (props.$ || props.trim || props.map)                         // If the props argument is a renderable VNode,
-                                                                      // a string or an array, then
+      a: (props.$ || props.concat)                                    // If the props argument is a renderable VNode,
+                                                                      // a string or an array (.concat exists on both
+                                                                      // strings and arrays), then
 
           ? {c: [].concat(props, ...children)}                        // ... prepend it to the children
           : (props.c = [].concat(...children)) && props               // ... otherwise append 'C' to the property
@@ -144,7 +145,7 @@ module.exports = window;
 
             (newState) =>                                             // 3. The setState function
 
-              Object.assign(                                           // First we update the state record, that also
+              Object.assign(                                          // First we update the state record, that also
                 _state,                                               // updates the contents of the DOM element, since
                 newState                                              // the reference is perserved.
               ) &&
@@ -201,7 +202,7 @@ module.exports = window;
 
         /* Update Element */
 
-        Object.assign(_new_dom, vnode, _hooks);                        // Keep the following information in the DOM:
+        Object.assign(_new_dom, vnode, _hooks);                       // Keep the following information in the DOM:
                                                                       // - $ : The tag name from the vnode. We use this
                                                                       //       instead of the .tagName because some
                                                                       //       browsers convert it to capital-case
