@@ -666,25 +666,6 @@ describe('.dom', function () {
           ['bar']
         ])
       });
-
-      it('should assign style string as cssText', function () {
-        const cssTextHandler = jest.fn();
-        const dom = document.createElement('div');
-        const vdom0 = [dd.H('div')];
-        const vdom1 = [dd.H('div', {style: 'foo: bar'})];
-
-        dd.R(vdom0, dom)
-        expect(dom.children.length).toEqual(1);
-        Object.defineProperty(dom.children[0].style, 'cssText', {
-          set: cssTextHandler
-        })
-
-        dd.R(vdom1, dom)
-        expect(dom.children.length).toEqual(1);
-        expect(cssTextHandler.mock.calls).toEqual([
-          ['foo: bar']
-        ])
-      });
     });
 
     describe('Components', function () {

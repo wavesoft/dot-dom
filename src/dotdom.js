@@ -27,7 +27,7 @@ module.exports = window;
 
 /* END NPM-GLUE */
 
-(() => {
+((
   /**
    * Create a VNode element
    *
@@ -36,7 +36,7 @@ module.exports = window;
    * @param {Array} [children] - The child VNode elements
    * @returns {VNode} Returns a virtual DOM instance
    */
-  let createElement = (element, props={}, ...children) => (
+  createElement = (element, props={}, ...children) => (
     {
 
       $: element,                                                     // '$' holds the name or function passed as
@@ -53,13 +53,8 @@ module.exports = window;
     }
   )
 
-  , callAllMethods = (a = [], b, c) => a.map(e => e(b, c))            // Helper method that calls all methods in an array
-                                                                      // of functions (used for life cycle hooks)
-
-  , ObjectAssign = Object.assign                                      // Just an Object.assign short-hand helper
-                                                                      // which helps save some bytes in the end
-
-  , _window = window                                                  // window variable, saves a byte
+  , callAllMethods = (a = [], b, c) => a.map(e => e(b, c))            // Helper method that calls all methods in an
+                                                                      // array of functions (used for life cycle hooks)
 
   /**
    * Helper function that wraps an element shorthand function with a proxy
@@ -97,7 +92,7 @@ module.exports = window;
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
    * @param {HTLDomElement}
    */
-  , render = _window.R = (
+  , render = window.R = (
     vnodes,                                                           // 1. The vnode tree to render
     dom,                                                              // 2. The DOMElement where to render into
 
@@ -105,7 +100,7 @@ module.exports = window;
     _c=0                                                              // b. Counter for processed children
   ) => {
 
-    (vnodes.map ? vnodes : [vnodes]).map(                             // Cast `vnodes` to array if nor already
+    [].concat(vnodes).map(                                            // Cast `vnodes` to array if nor already
 
                                                                       // In this `map` loop we ensure that the DOM
                                                                       // elements correspond to the correct virtual
@@ -128,7 +123,7 @@ module.exports = window;
           a:vnode.$,                                                  //    - The 'a' property is keeping a reference
                                                                       //      to the element (property '$') and is used
                                                                       //      for space-optimal assignment of the tag to
-                                                                      //      the DOM element through ObjectAssign in the
+                                                                      //      the DOM element through Object.assign in the
                                                                       //      Update Element phase.
           m:[],                                                       //    - The 'm' property contains the `mount` cb
           u:[],                                                       //    - The 'u' property contains the `unmount` cb
@@ -137,20 +132,21 @@ module.exports = window;
         _new_dom                                                      // d. The new DOM element placeholder
 
       ) => {
+
         /* Expand functional Components */
 
-        ((vnode.$ || _unused1).call) &&                               // (This expands to : vnode.$ && vnode.$.call &&)
-                                                                      // If the vnode is a functional component, expand
-          (vnode = vnode.$(                                            // it and replace the current vnode variable.
+        for (;(vnode.$ || _unused1).call;)                            // Expand recursive functional components until
+                                                                      // we encounter a non-callable element.
+          vnode = vnode.$(
 
             vnode.a,                                                  // 1. The component properties
             _state,                                                   // 2. The stateful component state
 
             (newState) =>                                             // 3. The setState function
 
-              ObjectAssign(                                           // First we update the state record, that also updates
-                _state,                                               // the contents of the DOM element, since the reference
-                newState                                              // is perserved.
+              Object.assign(                                           // First we update the state record, that also
+                _state,                                               // updates the contents of the DOM element, since
+                newState                                              // the reference is perserved.
               ) &&
               render(                                                 // We then trigger the same render cycle that will
                 vnodes,                                               // update the DOM
@@ -159,7 +155,7 @@ module.exports = window;
 
             _hooks                                                    // 4. The lifecycle method hooks
 
-          ));
+          );
 
         /* Create new DOM element */
 
@@ -183,8 +179,8 @@ module.exports = window;
                 )
               : _child                                                // - If it's the same, we keep the old child
 
-            : dom.appendChild(                                        // mount lifecycle method and append
-                _new_dom
+            : dom.appendChild(                                        // If we did not have a previous child, just
+                _new_dom                                              // append the new node
               );
 
         /* Call lifecycle methods */
@@ -205,7 +201,7 @@ module.exports = window;
 
         /* Update Element */
 
-        ObjectAssign(_new_dom, vnode, _hooks);                        // Keep the following information in the DOM:
+        Object.assign(_new_dom, vnode, _hooks);                        // Keep the following information in the DOM:
                                                                       // - $ : The tag name from the vnode. We use this
                                                                       //       instead of the .tagName because some
                                                                       //       browsers convert it to capital-case
@@ -245,7 +241,7 @@ module.exports = window;
 
     /* Remove extraneous nodes */
 
-    while (_children[_c])   {                                         // The _c property keeps track of the number of
+    for (;_children[_c];)   {                                         // The _c property keeps track of the number of
                                                                       // elements in the VDom. If there are more child
                                                                       // nodes in the DOM, we remove them.
 
@@ -260,12 +256,14 @@ module.exports = window;
     }
   }
 
+) => (
+
   /**
    * Expose as `H` a proxy around the createElement function that can either be used
    * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
    * virtual DOM elements.
    */
-  _window.H = new Proxy(
+  window.H = new Proxy(
     createElement,
     {
       get: (targetFn, tagName) =>
@@ -273,8 +271,8 @@ module.exports = window;
                                                                       // property or method from the base function
 
         wrapClassProxy(                                               // Otherwise, for every tag we extract a
-          createElement.bind(_window, tagName)                         // class-wrapped crateElement method, bound to the
+          createElement.bind(window, tagName)                         // class-wrapped crateElement method, bound to the
         )                                                             // tag named as the property requested.
     }
   )
-})()
+))()
