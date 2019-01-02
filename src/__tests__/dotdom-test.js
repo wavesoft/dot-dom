@@ -603,6 +603,69 @@ describe('.dom', function () {
         dd.R(vdom2, dom)
         expect(dom.children.length).toEqual(1);
       });
+
+      it('should not try to re-assign attributes with same value', function () {
+        let state = {};
+        const p1Handler = jest.fn((value) => state.p1 = value);
+        const p2Handler = jest.fn((value) => state.p2 = value);
+        const dom = document.createElement('div');
+        const vdom0 = [dd.H('div')];
+        const vdom1 = [dd.H('div', {p1: 'foo'})];
+        const vdom2 = [dd.H('div', {p1: 'foo', p2: 'bar'})];
+
+        dd.R(vdom0, dom)
+        expect(dom.children.length).toEqual(1);
+        Object.defineProperty(dom.children[0], 'p1', {
+          set: p1Handler,
+          get: () => state.p1
+        })
+        Object.defineProperty(dom.children[0], 'p2', {
+          set: p2Handler,
+          get: () => state.p2
+        })
+
+        dd.R(vdom1, dom)
+        dd.R(vdom2, dom)
+        expect(dom.children.length).toEqual(1);
+        expect(p1Handler.mock.calls).toEqual([
+          ['foo']
+        ])
+        expect(p2Handler.mock.calls).toEqual([
+          ['bar']
+        ])
+      });
+
+      it('should only assign style properties recursively', function () {
+        let state = {};
+        const p1Handler = jest.fn((value) => state.p1 = value);
+        const p2Handler = jest.fn((value) => state.p2 = value);
+        const dom = document.createElement('div');
+        const vdom0 = [dd.H('div')];
+        const vdom1 = [dd.H('div', {style: {p1: 'foo'}})];
+        const vdom2 = [dd.H('div', {style: {p1: 'foo', p2: 'bar'}})];
+
+        dd.R(vdom0, dom)
+        expect(dom.children.length).toEqual(1);
+        Object.defineProperty(dom.children[0].style, 'p1', {
+          set: p1Handler,
+          get: () => state.p1
+        })
+        Object.defineProperty(dom.children[0].style, 'p2', {
+          set: p2Handler,
+          get: () => state.p2
+        })
+
+        dd.R(vdom1, dom)
+        dd.R(vdom2, dom)
+        expect(dom.children.length).toEqual(1);
+        expect(p1Handler.mock.calls).toEqual([
+          ['foo'],
+          ['foo']
+        ])
+        expect(p2Handler.mock.calls).toEqual([
+          ['bar']
+        ])
+      });
     });
 
     describe('Components', function () {
@@ -859,7 +922,7 @@ describe('.dom', function () {
         );
       });
 
-      it('should reset state of child components when parent is re-mounted', function () {
+      it('should reset state of child components when parent is changed', function () {
         const dom = document.createElement('div');
         const ChildComponent = function(props, {clicks=0}, setState) {
           return dd.H('button', {

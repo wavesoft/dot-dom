@@ -3,6 +3,10 @@
   "version": "0.2.2",
   "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
   "main": "src/dotdom.js",
+  "files": [
+    "src/dotdom.js",
+    "dotdom.min.js"
+  ],
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "build": "./node_modules/.bin/gulp build",
@@ -34,6 +38,7 @@
     "gulp-rename": "^1.2.2",
     "gulp-strip-code": "^0.1.4",
     "gulp-uglify": "^2.0.1",
+    "gulp-uglify-es": "^1.0.4",
     "gulp-util": "^3.0.8",
     "jest": "^18.1.0",
     "mock-browser": "^0.92.12",

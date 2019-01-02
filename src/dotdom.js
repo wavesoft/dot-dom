@@ -28,6 +28,8 @@ module.exports = window;
 /* END NPM-GLUE */
 
 (() => {
+  let
+
   /**
    * Create a VNode element
    *
@@ -36,14 +38,15 @@ module.exports = window;
    * @param {Array} [children] - The child VNode elements
    * @returns {VNode} Returns a virtual DOM instance
    */
-  let createElement = (element, props={}, ...children) => (
+  createElement = (element, props={}, ...children) => (
     {
 
       $: element,                                                     // '$' holds the name or function passed as
                                                                       // first argument
 
-      a: (props.$ || props.trim || props.map)                         // If the props argument is a renderable VNode,
-                                                                      // a string or an array, then
+      a: (props.$ || props.concat)                                    // If the props argument is a renderable VNode,
+                                                                      // a string or an array (.concat exists on both
+                                                                      // strings and arrays), then
 
           ? {c: [].concat(props, ...children)}                        // ... prepend it to the children
           : (props.c = [].concat(...children)) && props               // ... otherwise append 'C' to the property
@@ -53,13 +56,15 @@ module.exports = window;
     }
   )
 
-  , callAllMethods = (a = [], b, c) => a.map(e => e(b, c))            // Helper method that calls all methods in an array
-                                                                      // of functions (used for life cycle hooks)
-
-  , ObjectAssign = Object.assign                                      // Just an Object.assign short-hand helper
-                                                                      // which helps save some bytes in the end
-
-  , _window = window                                                  // window variable, saves a byte
+  /**
+   * Helper method that calls all methods in an array of functions
+   *
+   * @param {Array} methods - The array of methods to call
+   * @param {Object} arg1 - An arbitrary first argument
+   * @param {Object} arg2 - An arbitrary second argument
+   */
+  , callLifecycleMethods = (methods = [], arg1, arg2) =>
+      methods.map(e => e(arg1, arg2))
 
   /**
    * Helper function that wraps an element shorthand function with a proxy
@@ -97,16 +102,15 @@ module.exports = window;
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
    * @param {HTLDomElement}
    */
-  , render = _window.R = (
+  , render = window.R = (
     vnodes,                                                           // 1. The vnode tree to render
     dom,                                                              // 2. The DOMElement where to render into
 
-    _stateRoot=[[],{}],                                               // a. The current state graph
-    _children=dom.childNodes,                                         // b. Shorthand for accessing the children
-    _c=0                                                              // c. Counter for processed children
+    _children=dom.childNodes,                                         // a. Shorthand for accessing the children
+    _c=0                                                              // b. Counter for processed children
   ) => {
 
-    (vnodes.map ? vnodes : [vnodes]).map(                             // Cast `vnodes` to array if nor already
+    [].concat(vnodes).map(                                            // Cast `vnodes` to array if nor already
 
                                                                       // In this `map` loop we ensure that the DOM
                                                                       // elements correspond to the correct virtual
@@ -114,57 +118,56 @@ module.exports = window;
       (
         vnode,                                                        // 1. We handle the vnode from the array
         index,                                                        // 2. And the index
-
-        _unused1,                                                     // We don't handle the array, but we need the
+        _vnodes,                                                      // We don't handle the array, but we need the
                                                                       // placeholder for the local variables after
-
-        _path_state=_stateRoot[0][index] || [[], vnode.$, {}],        // a. Get the state record for this path
-        _state=(                                                      // b. Update and get the state record
-          _stateRoot[0][index] =                                      //    The record is an the following format:
-            _path_state[1] != vnode.$                                 //  [ [ children states ], 'vnode element',
-            ? [[], vnode.$, {}]                                       //    {state object} ]
-            : _path_state                                             //    The first component is needed in order to
-        ),                                                            //    reset the state if the component has changed
-        _child=_children[_c++],                                       // c. Get the next DOM child + increment counter
-        _hooks={                                                      // d. Prepare the hooks object that will be passed
+        _child=_children[_c++],                                       // a. Get the next DOM child + increment counter
+        _state=(                                                      // b. Get the current state from the DOM child
+            _child &&                                                 //    - If there is no child, bail
+            (_child.a == vnode.$)                                     //    - If the element has changed, bail
+            && _child.s                                               //    - If the element has a state, use that
+          ) || {},                                                    //    - Default state value
+        _hooks={                                                      // c. Prepare the hooks object that will be passed
                                                                       //    down to the functional component
+          s:_state,                                                   //    - The 's' property is keeping a reference to
+                                                                      //      the current element state. (Used above)
           a:vnode.$,                                                  //    - The 'a' property is keeping a reference
                                                                       //      to the element (property '$') and is used
                                                                       //      for space-optimal assignment of the tag to
-                                                                      //      the DOM element through ObjectAssign in the
+                                                                      //      the DOM element through Object.assign in the
                                                                       //      Update Element phase.
           m:[],                                                       //    - The 'm' property contains the `mount` cb
           u:[],                                                       //    - The 'u' property contains the `unmount` cb
           d:[]                                                        //    - The 'd' property contains the `update` cb
         },
-        _new_dom                                                      // e. The new DOM element placeholder
+        _new_dom                                                      // d. The new DOM element placeholder
 
       ) => {
+
         /* Expand functional Components */
 
-        ((vnode.$ || _unused1).call) &&                               // (This expands to : vnode.$ && vnode.$.call &&)
-                                                                      // If the vnode is a functional component, expand
-          (vnode = vnode.$(                                            // it and replace the current vnode variable.
+        for (;(vnode.$ || vnodes).call;)                              // Expand recursive functional components until
+                                                                      // we encounter a non-callable element. (The `vnodes` is
+                                                                      // used as a reference to any kind of an object in order
+                                                                      // to be able to resolve `.call`, even if it's undefined).
+          vnode = vnode.$(
 
             vnode.a,                                                  // 1. The component properties
-            _state[2],                                                // 2. The stateful component state
+            _state,                                                   // 2. The stateful component state
 
             (newState) =>                                             // 3. The setState function
 
-              ObjectAssign(                                           // First we update the state part of the record
-                _state[2],                                            // Note: When we defined the variable we kept the
-                newState                                              //       reference to the record array
+              Object.assign(                                          // First we update the state record, that also
+                _state,                                               // updates the contents of the DOM element, since
+                newState                                              // the reference is perserved.
               ) &&
-
               render(                                                 // We then trigger the same render cycle that will
                 vnodes,                                               // update the DOM
-                dom,
-                _stateRoot
+                dom
               ),
 
-              _hooks
+            _hooks                                                    // 4. The lifecycle method hooks
 
-          ));
+          );
 
         /* Create new DOM element */
 
@@ -188,29 +191,36 @@ module.exports = window;
                 )
               : _child                                                // - If it's the same, we keep the old child
 
-            : dom.appendChild(                                        // mount lifecycle method and append
-                _new_dom
+            : dom.appendChild(                                        // If we did not have a previous child, just
+                _new_dom                                              // append the new node
               );
 
         /* Call lifecycle methods */
 
-        callAllMethods(
+        callLifecycleMethods(
           _child                                                      // If there is a DOM reflection
             ? _child.a != _hooks.a                                    // .. and the element has changed
-              ? callAllMethods(_child.u) && _hooks.m                  // - Unmount the previous & Mount the new
-              : _hooks.d                                              // - Otherwise just update
+              ? (
+                  callLifecycleMethods(_child.u),                     // - [U] Unmount the previous one
+                  render(                                             //   And call the render function with empty
+                    [],                                               //   children in order to recursively unmount
+                    _child                                            //   the children tree.
+                  ),
+                  _hooks.m                                            // - [M] Mount the new
+                )
+              : _hooks.d                                              // - [D] Otherwise just update
 
                                                                       // If there is no DOM reflection
-            : _hooks.m,                                               // - Mount the new
+            : _hooks.m,                                               // - [M] Mount the new
 
                                                                       // Pass the following arguments:
           _new_dom,                                                   // 1. The new DOM instance
           _child                                                      // 2. The old DOM instance
         );
 
-        /* Update Element */
+        /* Update Element State */
 
-        ObjectAssign(_new_dom, vnode, _hooks);                        // Keep the following information in the DOM:
+        Object.assign(_new_dom, vnode, _hooks);                       // Keep the following information in the DOM:
                                                                       // - $ : The tag name from the vnode. We use this
                                                                       //       instead of the .tagName because some
                                                                       //       browsers convert it to capital-case
@@ -222,36 +232,44 @@ module.exports = window;
                                                                       // it occupies less space than assigning $ and u
                                                                       // individually.
 
+        /* Apply properties to the DOM element */
+
         vnode.trim
           ? _new_dom.data = vnode                                     // - String nodes update only the text
-          : ObjectAssign(
-              _new_dom,
-              vnode.a
-            )
-            &&
-            ObjectAssign(
-              _new_dom.style,
-              vnode.a.style
-            )
-            &&
-            render(                                                   // Only if we have an element (and not  text node)
+          : Object.keys(vnode.a).map(                                 // - Element nodes have properties
+              (
+                key                                                   // 1. The property name
+              ) =>
+
+                key == 'style' ?                                      // The 'style' property is an object and must be
+                                                                      // applied recursively.
+                  Object.assign(
+                    _new_dom[key],                                    // '[key]' is shorter than '.style'
+                    vnode.a[key]
+                  )
+
+                : (_new_dom[key] !== vnode.a[key] &&                  // All properties are applied directly to DOM, as
+                  (_new_dom[key] = vnode.a[key]))                     // long as they are different than ther value in the
+                                                                      // instance. This includes `onXXX` event handlers.
+
+            ) &&
+            render(                                                   // Only if we have an element (and not text node)
               vnode.a.c,                                              // we recursively continue rendering into it's
-              _new_dom,                                               // child nodes.
-              _state
+              _new_dom                                                // child nodes.
             )
       }
     );
 
     /* Remove extraneous nodes */
 
-    while (_children[_c])   {                                         // The _c property keeps track of the number of
+    for (;_children[_c];)   {                                         // The _c property keeps track of the number of
                                                                       // elements in the VDom. If there are more child
                                                                       // nodes in the DOM, we remove them.
 
-      callAllMethods(_children[_c].u)                                 // We then call the unmount lifecycle method for the
+      callLifecycleMethods(_children[_c].u)                           // We then call the unmount lifecycle method for the
                                                                       // elements that will be removed
 
-      render(                                                              // Remove child an trigger a recursive child removal
+      render(                                                         // Remove child an trigger a recursive child removal
         [],                                                           // in order to call the correct lifecycle methods in our
         dom.removeChild(_children[_c])                                // deep children too.
       )
@@ -264,7 +282,7 @@ module.exports = window;
    * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
    * virtual DOM elements.
    */
-  _window.H = new Proxy(
+  window.H = new Proxy(
     createElement,
     {
       get: (targetFn, tagName) =>
@@ -272,8 +290,9 @@ module.exports = window;
                                                                       // property or method from the base function
 
         wrapClassProxy(                                               // Otherwise, for every tag we extract a
-          createElement.bind(_window, tagName)                         // class-wrapped crateElement method, bound to the
-        )                                                             // tag named as the property requested.
-    }
+          createElement.bind(targetFn, tagName)                       // class-wrapped crateElement method, bound to the
+        )                                                             // tag named as the property requested. We are not
+                                                                      // using 'this', therefore we are using any reference
+    }                                                                 // that could lead on reduced code footprint.
   )
 })()

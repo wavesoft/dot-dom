@@ -1,4 +1,4 @@
-# .dom [![Build Status](https://travis-ci.org/wavesoft/dot-dom.svg?branch=master)](https://travis-ci.org/wavesoft/dot-dom) [![Try it in codepen.io](https://img.shields.io/badge/Try%20it-codepen.io-blue.svg)](https://codepen.io/anon/pen/YNdNwv?editors=0010) [![Gitter](https://badges.gitter.im/wavesoft/dot-dom.svg)](https://gitter.im/wavesoft/dot-dom?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+# .dom [![Build Status](https://travis-ci.org/wavesoft/dot-dom.svg?branch=master)](https://travis-ci.org/wavesoft/dot-dom) [![Try it in codepen.io](https://img.shields.io/badge/Try%20it-codepen.io-blue.svg)](https://codepen.io/anon/pen/OrzaXB?editors=0010) [![Gitter](https://badges.gitter.im/wavesoft/dot-dom.svg)](https://gitter.im/wavesoft/dot-dom?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 > A tiny (511 byte) virtual DOM template engine for embedded projects
 
