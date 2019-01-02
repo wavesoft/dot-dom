@@ -1210,6 +1210,60 @@ describe('.dom', function () {
         );
       });
 
+      it(`should should not replace the DOM element if not changed`, function () {
+        const vdom = document.createElement('span');
+        const dom = document.createElement('div');
+
+        // Probe for calls to removeChild
+        dom.removeChild = jest.fn(dom.removeChild.bind(dom));
+        dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
+
+        // First render
+        dd.R(vdom, dom);
+        expect(dom.innerHTML).toEqual(
+          `<span></span>`
+        );
+        expect(dom.firstChild).toStrictEqual(vdom);
+
+        // Second render
+        dd.R(vdom, dom);
+        expect(dom.innerHTML).toEqual(
+          `<span></span>`
+        );
+        expect(dom.firstChild).toStrictEqual(vdom);
+
+        // Make sure we were not called
+        expect(dom.removeChild).not.toBeCalled();
+        expect(dom.replaceChild).not.toBeCalled();
+      });
+
+      it(`should be replaced if reference changed`, function () {
+        const vdom1 = document.createElement('span');
+        const vdom2 = document.createElement('span');
+        const dom = document.createElement('div');
+
+        // Probe for calls to removeChild
+        dom.removeChild = jest.fn(dom.removeChild.bind(dom));
+        dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
+
+        // First render
+        dd.R(vdom1, dom);
+        expect(dom.innerHTML).toEqual(
+          `<span></span>`
+        );
+        expect(dom.firstChild).toStrictEqual(vdom1);
+
+        // Second render
+        dd.R(vdom2, dom);
+        expect(dom.innerHTML).toEqual(
+          `<span></span>`
+        );
+        expect(dom.firstChild).toStrictEqual(vdom2);
+
+        // Make sure we were not called
+        expect(dom.replaceChild).not.toBeCalled();
+      });
+
     });
   });
 
