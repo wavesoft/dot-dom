@@ -118,7 +118,7 @@ module.exports = window;
       (
         vnode,                                                        // 1. We handle the vnode from the array
         index,                                                        // 2. And the index
-        _unused1,                                                     // We don't handle the array, but we need the
+        _vnodes,                                                      // We don't handle the array, but we need the
                                                                       // placeholder for the local variables after
         _child=_children[_c++],                                       // a. Get the next DOM child + increment counter
         _state=(                                                      // b. Get the current state from the DOM child
@@ -145,8 +145,10 @@ module.exports = window;
 
         /* Expand functional Components */
 
-        for (;(vnode.$ || _unused1).call;)                            // Expand recursive functional components until
-                                                                      // we encounter a non-callable element.
+        for (;(vnode.$ || vnodes).call;)                              // Expand recursive functional components until
+                                                                      // we encounter a non-callable element. (The `vnodes` is
+                                                                      // used as a reference to any kind of an object in order
+                                                                      // to be able to resolve `.call`, even if it's undefined).
           vnode = vnode.$(
 
             vnode.a,                                                  // 1. The component properties
@@ -198,11 +200,18 @@ module.exports = window;
         callLifecycleMethods(
           _child                                                      // If there is a DOM reflection
             ? _child.a != _hooks.a                                    // .. and the element has changed
-              ? callLifecycleMethods(_child.u) && _hooks.m            // - Unmount the previous & Mount the new
-              : _hooks.d                                              // - Otherwise just update
+              ? (
+                  callLifecycleMethods(_child.u),                     // - [U] Unmount the previous one
+                  render(                                             //   And call the render function with empty
+                    [],                                               //   children in order to recursively unmount
+                    _child                                            //   the children tree.
+                  ),
+                  _hooks.m                                            // - [M] Mount the new
+                )
+              : _hooks.d                                              // - [D] Otherwise just update
 
                                                                       // If there is no DOM reflection
-            : _hooks.m,                                               // - Mount the new
+            : _hooks.m,                                               // - [M] Mount the new
 
                                                                       // Pass the following arguments:
           _new_dom,                                                   // 1. The new DOM instance
@@ -244,7 +253,7 @@ module.exports = window;
                                                                       // instance. This includes `onXXX` event handlers.
 
             ) &&
-            render(                                                   // Only if we have an element (and not  text node)
+            render(                                                   // Only if we have an element (and not text node)
               vnode.a.c,                                              // we recursively continue rendering into it's
               _new_dom                                                // child nodes.
             )
@@ -284,7 +293,6 @@ module.exports = window;
           createElement.bind(targetFn, tagName)                       // class-wrapped crateElement method, bound to the
         )                                                             // tag named as the property requested. We are not
                                                                       // using 'this', therefore we are using any reference
-                                                                      // that could lead on reduced code footprint.
-    }
+    }                                                                 // that could lead on reduced code footprint.
   )
 })()

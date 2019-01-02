@@ -922,7 +922,7 @@ describe('.dom', function () {
         );
       });
 
-      it('should reset state of child components when parent is re-mounted', function () {
+      it('should reset state of child components when parent is changed', function () {
         const dom = document.createElement('div');
         const ChildComponent = function(props, {clicks=0}, setState) {
           return dd.H('button', {
@@ -970,9 +970,7 @@ describe('.dom', function () {
           '<div><button>toggle</button><div title="a"><button>1 clicks</button></div></div>'
         );
 
-        console.log('--pre--');
         dom.firstChild.childNodes[0].dispatchEvent(event);
-        console.log('--post--');
         expect(dom.innerHTML).toEqual(
           '<div><button>toggle</button><div title="b"><button>0 clicks</button></div></div>'
         );
