@@ -93,7 +93,7 @@ describe('.dom', function () {
         });
       });
 
-      it('should create vnode with only mixed children', function () {
+      it('should create vnode with mixed children', function () {
         const cdom = dd.H('div');
         const vdom = dd.H('div', cdom, 'foo');
 
@@ -101,6 +101,14 @@ describe('.dom', function () {
         expect(vdom.a).toEqual({
           c: [ cdom, 'foo' ]
         });
+      });
+
+      it('should create vnode with dom children', function () {
+        const dom = document.createElement('div');
+        const vdom = dd.H('div', dom);
+
+        expect(vdom.$).toEqual('div');
+        expect(vdom.a.c[0]).toBe(dom);
       });
 
     });
@@ -1162,6 +1170,46 @@ describe('.dom', function () {
           '<div class="foo class1 class2 class3"></div>'
         );
       })
+    });
+
+    describe('DOM Elements as VNodes', function () {
+
+      it(`should pass-through DOM element`, function () {
+        const vdom = document.createElement('span');
+        const dom = document.createElement('div');
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          `<span></span>`
+        );
+      });
+
+      it(`should pass-through DOM element children`, function () {
+        const vdom = document.createElement('span');
+        const dom = document.createElement('div');
+
+        dd.R(dd.H('div', vdom), dom)
+
+        expect(dom.innerHTML).toEqual(
+          `<div><span></span></div>`
+        );
+      });
+
+      it(`should pass-through DOM element returned in components`, function () {
+        const dom = document.createElement('div');
+
+        const Component = (props) => {
+          return document.createElement('span');
+        };
+
+        dd.R(dd.H('div', dd.H(Component)), dom)
+
+        expect(dom.innerHTML).toEqual(
+          `<div><span></span></div>`
+        );
+      });
+
     });
   });
 
