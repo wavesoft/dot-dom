@@ -29,6 +29,7 @@ module.exports = window;
 
 (() => {
   let
+
   /**
    * Create a VNode element
    *
@@ -55,8 +56,15 @@ module.exports = window;
     }
   )
 
-  , callAllMethods = (methods = [], arg1, arg2) =>                    // Helper method that calls all methods in an
-      methods.map(e => e(arg1, arg2))                                 // array of functions (used for life cycle hooks)
+  /**
+   * Helper method that calls all methods in an array of functions
+   *
+   * @param {Array} methods - The array of methods to call
+   * @param {Object} arg1 - An arbitrary first argument
+   * @param {Object} arg2 - An arbitrary second argument
+   */
+  , callLifecycleMethods = (methods = [], arg1, arg2) =>
+      methods.map(e => e(arg1, arg2))
 
   /**
    * Helper function that wraps an element shorthand function with a proxy
@@ -187,10 +195,10 @@ module.exports = window;
 
         /* Call lifecycle methods */
 
-        callAllMethods(
+        callLifecycleMethods(
           _child                                                      // If there is a DOM reflection
             ? _child.a != _hooks.a                                    // .. and the element has changed
-              ? callAllMethods(_child.u) && _hooks.m                  // - Unmount the previous & Mount the new
+              ? callLifecycleMethods(_child.u) && _hooks.m            // - Unmount the previous & Mount the new
               : _hooks.d                                              // - Otherwise just update
 
                                                                       // If there is no DOM reflection
@@ -201,7 +209,7 @@ module.exports = window;
           _child                                                      // 2. The old DOM instance
         );
 
-        /* Update Element */
+        /* Update Element State */
 
         Object.assign(_new_dom, vnode, _hooks);                       // Keep the following information in the DOM:
                                                                       // - $ : The tag name from the vnode. We use this
@@ -214,6 +222,8 @@ module.exports = window;
                                                                       // objects we expose some unneeded properties, but
                                                                       // it occupies less space than assigning $ and u
                                                                       // individually.
+
+        /* Apply properties to the DOM element */
 
         vnode.trim
           ? _new_dom.data = vnode                                     // - String nodes update only the text
@@ -247,7 +257,7 @@ module.exports = window;
                                                                       // elements in the VDom. If there are more child
                                                                       // nodes in the DOM, we remove them.
 
-      callAllMethods(_children[_c].u)                                 // We then call the unmount lifecycle method for the
+      callLifecycleMethods(_children[_c].u)                           // We then call the unmount lifecycle method for the
                                                                       // elements that will be removed
 
       render(                                                         // Remove child an trigger a recursive child removal
