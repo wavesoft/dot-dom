@@ -63,39 +63,9 @@ module.exports = window;
    * @param {Object} arg1 - An arbitrary first argument
    * @param {Object} arg2 - An arbitrary second argument
    */
-  , callLifecycleMethods = (methods = [], arg1, arg2) =>
-      methods.map(e => e(arg1, arg2))
-
-  /**
-   * Helper function that wraps an element shorthand function with a proxy
-   * that can be used to append class names to the instance.
-   *
-   * The result is wrapped with the same function, creating a chainable mechanism
-   * for appending classes.
-   *
-   * @param {function} factoryFn - The factory function to call for creating vnode
-   */
-  , wrapClassProxy = factoryFn =>
-    new Proxy(                                                        // We are creating a proxy object for every tag in
-                                                                      // order to be able to customize the class name
-                                                                      // via a shorthand call.
-      factoryFn,
-      {
-        get: (targetFn, className, _instance) =>
-          wrapClassProxy(
-            (...args) => (
-              (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
-                                                                      // calling the wrapped factory function
-
-                .a.className = (_instance.a.className || '')          // And then we assign the class name,
-                               + ' ' + className,                     // concatenating to the previous value
-
-              _instance                                               // And finally we return the instance
-            )
-          )
-      }
-    )
-
+  , callLifecycleMethods = (methods, arg1, arg2) =>
+      methods.map(e => e(arg1, arg2))                                 // Detaching from stack is important, otherwise it
+                                                                      // can lead into infinite loops during render phase.
   /**
    * Render a VNode in the DOM
    *
@@ -117,9 +87,10 @@ module.exports = window;
                                                                       // node elements.
       (
         vnode,                                                        // 1. We handle the vnode from the array
-        index,                                                        // 2. And the index
-        _vnodes,                                                      // We don't handle the array, but we need the
-                                                                      // placeholder for the local variables after
+        index,                                                        // 2. The index
+        _callMethod,                                                  // 3. We ignore the array, and instead we are using
+                                                                      //    it as a variable where we are keeping the
+                                                                      //    lifecycle method to call at the end.
         _child=_children[_c++],                                       // a. Get the next DOM child + increment counter
         _state=(                                                      // b. Get the current state from the DOM child
             _child &&                                                 //    - If there is no child, bail
@@ -145,10 +116,10 @@ module.exports = window;
 
         /* Expand functional Components */
 
-        for (;(vnode.$ || vnodes).call;)                              // Expand recursive functional components until
+        for (;(vnode.$ || vnodes).bind;)                              // Expand recursive functional components until
                                                                       // we encounter a non-callable element. (The `vnodes` is
                                                                       // used as a reference to any kind of an object in order
-                                                                      // to be able to resolve `.call`, even if it's undefined).
+                                                                      // to be able to resolve `.bind`, even if it's undefined).
           vnode = vnode.$(
 
             vnode.a,                                                  // 1. The component properties
@@ -171,18 +142,19 @@ module.exports = window;
 
         /* Create new DOM element */
         _new_dom =
-          vnode.removeChild                                           // If this is a DOM element, pass it through, otherwise
-            ? vnode                                                   // we prepare the new DOM element in advance in order
-            : vnode.trim                                              // to spare a few comparison bytes later.
+          vnode.removeChild                                           // If this is a DOM element, pass it through ...
+            ? vnode                                                   // Otherwise we prepare the new DOM element in advance
+            : vnode.trim                                              // in order to save a few comparison bytes later.
               ? document.createTextNode(vnode)
               : document.createElement(vnode.$);
 
         /* Keep or replace the previous DOM element */
 
         _new_dom =
-          _child                                                      // If we have a previous child we first check if
-            ? (_child.$ != vnode.$ && _child.data != vnode)           // the VNode element or the text are the same
-
+          _child                                                      // If we have a previous child we do some reconciliation
+            ? (vnode.removeChild                                      // If it's a DOM element reference, check
+                ? _child != vnode
+                : (_child.$ != vnode.$ && _child.data != vnode))
               ? (
                   dom.replaceChild(                                   // - If not, we replace the old element with the
                     _new_dom,                                         //   new one.
@@ -194,11 +166,14 @@ module.exports = window;
 
             : dom.appendChild(                                        // If we did not have a previous child, just
                 _new_dom                                              // append the new node
-              );
+              )
 
-        /* Call lifecycle methods */
+        /* Prepare lifecycle methods */
 
-        callLifecycleMethods(
+        _callMethod =                                                 // We are not calling the method until we are done with
+                                                                      // the rendering cycle. Otherwise this could cause an
+                                                                      // infinite loop if `setState` is used.
+
           _child                                                      // If there is a DOM reflection
             ? _child.a != _hooks.a                                    // .. and the element has changed
               ? (
@@ -212,12 +187,7 @@ module.exports = window;
               : _hooks.d                                              // - [D] Otherwise just update
 
                                                                       // If there is no DOM reflection
-            : _hooks.m,                                               // - [M] Mount the new
-
-                                                                      // Pass the following arguments:
-          _new_dom,                                                   // 1. The new DOM instance
-          _child                                                      // 2. The old DOM instance
-        );
+            : _hooks.m;                                               // - [M] Mount the new
 
         /* Update Element State */
 
@@ -258,6 +228,16 @@ module.exports = window;
                 vnode.a.c,                                            // we recursively continue rendering into it's
                 _new_dom                                              // child nodes.
               )
+
+        /* Call life-cycle methods */
+
+        callLifecycleMethods(
+          _callMethod,
+                                                                      // Pass the following arguments:
+          _new_dom,                                                   // 1. The new DOM instance
+          _child                                                      // 2. The old DOM instance
+        );
+
       }
     );
 
@@ -277,6 +257,36 @@ module.exports = window;
 
     }
   }
+
+  /**
+   * Helper function that wraps an element shorthand function with a proxy
+   * that can be used to append class names to the instance.
+   *
+   * The result is wrapped with the same function, creating a chainable mechanism
+   * for appending classes.
+   *
+   * @param {function} factoryFn - The factory function to call for creating vnode
+   */
+  , wrapClassProxy = factoryFn =>
+    new Proxy(                                                        // We are creating a proxy object for every tag in
+                                                                      // order to be able to customize the class name
+                                                                      // via a shorthand call.
+      factoryFn,
+      {
+        get: (targetFn, className, _instance) =>
+          wrapClassProxy(
+            (...args) => (
+              (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
+                                                                      // calling the wrapped factory function
+
+                .a.className = (_instance.a.className || '')          // And then we assign the class name,
+                               + ' ' + className,                     // concatenating to the previous value
+
+              _instance                                               // And finally we return the instance
+            )
+          )
+      }
+    )
 
   /**
    * Expose as `H` a proxy around the createElement function that can either be used

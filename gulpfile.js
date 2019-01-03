@@ -51,6 +51,18 @@ const keepSmallest = () => {
     return through.obj(transform, flush);
 };
 
+/**
+ * Trims the tailing ';' to save an extra byte
+ */
+const trimSemicolon = () => {
+  function filter (file, enc, cb) {
+    file.contents = file.contents.slice(0,-1);
+    cb(null, file)
+  }
+
+  return through.obj(filter)
+};
+
 const getBaseStream = () => {
     return gulp
         .src('src/dotdom.js')
@@ -68,6 +80,7 @@ gulp.task('build:js', () => {
         baseStream
             .pipe(clone())
             .pipe(uglify())
+            .pipe(trimSemicolon())
             .on('error', function (err) {
                 gutil.log(gutil.colors.red('[Error]'), err.toString());
             })
@@ -79,6 +92,7 @@ gulp.task('build:js', () => {
             .pipe(babel({
                 presets: ['babili']
             }))
+            .pipe(trimSemicolon())
             .pipe(rename({
                 suffix: '-babili'
             }))
@@ -101,6 +115,7 @@ gulp.task('build:gz', () => {
         baseStream
             .pipe(clone())
             .pipe(uglify())
+            .pipe(trimSemicolon())
             .pipe(rename({
                 suffix: '-uglify'
             }))
@@ -110,6 +125,7 @@ gulp.task('build:gz', () => {
             .pipe(babel({
                 presets: ['babili']
             }))
+            .pipe(trimSemicolon())
             .pipe(rename({
                 suffix: '-babili'
             }))
