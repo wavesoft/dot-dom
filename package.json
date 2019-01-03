@@ -1,6 +1,6 @@
 {
   "name": "dot-dom",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
   "main": "src/dotdom.js",
   "files": [
@@ -37,9 +37,9 @@
     "gulp-merge": "^0.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-strip-code": "^0.1.4",
-    "gulp-uglify": "^2.0.1",
+    "gulp-uglify-es": "^1.0.4",
     "gulp-util": "^3.0.8",
-    "jest": "^18.1.0",
+    "jest": "^23.6.0",
     "mock-browser": "^0.92.12",
     "through2": "^2.0.3",
     "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony",

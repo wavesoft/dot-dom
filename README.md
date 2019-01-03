@@ -1,4 +1,4 @@
-# .dom [![Build Status](https://travis-ci.org/wavesoft/dot-dom.svg?branch=master)](https://travis-ci.org/wavesoft/dot-dom) [![Try it in codepen.io](https://img.shields.io/badge/Try%20it-codepen.io-blue.svg)](https://codepen.io/anon/pen/YNdNwv?editors=0010) [![Gitter](https://badges.gitter.im/wavesoft/dot-dom.svg)](https://gitter.im/wavesoft/dot-dom?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+# .dom [![Build Status](https://travis-ci.org/wavesoft/dot-dom.svg?branch=master)](https://travis-ci.org/wavesoft/dot-dom) [![Try it in codepen.io](https://img.shields.io/badge/Try%20it-codepen.io-blue.svg)](https://codepen.io/anon/pen/OrzaXB?editors=0010) [![Gitter](https://badges.gitter.im/wavesoft/dot-dom.svg)](https://gitter.im/wavesoft/dot-dom?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 > A tiny (511 byte) virtual DOM template engine for embedded projects
 
@@ -84,7 +84,7 @@ function Hello(props) {
       'div', null, `Hello ${props.toWhat}`
     );
   }
-
+<br />
 ReactDOM.render(
   React.createElement(
     Hello, {toWhat: 'World'}, null
@@ -98,7 +98,7 @@ ReactDOM.render(
 function Hello(props) {
   return H('div', `Hello ${props.toWhat}`);
 }
-
+<br />
 R(
   H(Hello, {toWhat: 'World'}),
   document.body
@@ -127,10 +127,10 @@ class Clickable extends React.Component {
       clicks: 0
     };
   }
-
+<br />
   render() {
     const {clicks} = this.state;
-
+<br />
     return React.createElement(
       'button', {
         onClick() {
@@ -140,7 +140,7 @@ class Clickable extends React.Component {
     );
   }
 }
-
+<br />
 ReactDOM.render(
   React.createElement('div', null,
     React.createElement(Clickable, null, null),
@@ -154,7 +154,7 @@ ReactDOM.render(
 <pre lang="javascript">
 function Clickable(props, state, setState) {
   const {clicks=0} = state;
-
+<br />
   return H('button',
     {
       onclick() {
@@ -164,12 +164,75 @@ function Clickable(props, state, setState) {
     `Clicked ${clicks} times`
   );
 }
-
+<br />
 R(
   H('div',
     H(Clickable),
     H(Clickable)
   ),
+  document.body
+)
+</pre>
+    </td>
+  </tr>
+</table>
+
+#### 4. Life-Cycle Component Events
+
+The component can also subscribe to life-cycle events:
+
+<table width="100%">
+  <tr>
+    <th>React</th>
+    <th>.dom</th>
+  </tr>
+  <tr>
+    <td valign="top">
+<pre lang="javascript">
+class WithLifeCycle extends React.Component {
+  constructor() {
+    super(...arguments);
+    this.state = {
+      mounted: "no"
+    };
+  }
+<br />
+  componentDidMount() {
+    this.setState({ mounted: "yes" })
+  }
+<br />
+  render() {
+    const {mounted} = this.state;
+<br />
+    return React.createElement(
+      'div', null, `mounted = ${mounted}`
+    );
+  }
+}
+<br />
+ReactDOM.render(
+  React.createElement('div', null,
+    React.createElement(WithLifeCycle, null, null),
+  ),
+  document.body
+);
+</pre>
+    </td>
+    <td valign="top">
+<pre lang="javascript">
+function WithLifeCycle(props, state, setState, hooks) {
+  const {mounted = "no"} = state;
+  hooks.m.push(() => {
+    setState({ mounted: "yes" })
+  });
+<br />
+  return H('div',
+    `mounted = ${mounted}`
+  );
+}
+<br />
+R(
+  H('div', H(WithLifeCycle)),
   document.body
 )
 </pre>
@@ -210,7 +273,7 @@ Instead of a tag name you can provide a function that returns a Virtual DOM
 according to some higher-level logic. Such function have the following signature:
 
 ```js
-const Component = (props, state, setState) {
+const Component = (props, state, setState, hooks) {
 
   // Return your Virtual DOM
   return div( ... )
@@ -226,6 +289,33 @@ the component and it's children.
 
 You can also assign properties to the `state` object directly if you don't want
 to cause an update.
+
+The `hooks` object can be used when you want to register handlers to the component life-cycle methods.
+
+#### Component Life-Cycle
+
+Similar to React, the **.dom** components have a life-cycle:
+
+  * They are **mounted** when their root DOM element is placed on the document.
+  * They are **unmounted** when their root DOM element is removed from the document.
+  * The yare **updated** when the state, the properties, or the rendered DOM has changed.
+
+To access the life-cycle methods you need to use the fourth argument on your component function. More specifically you have to push your handling function in either of the following fields:
+
+```js
+const Component = (props, state, setState, hooks) {
+  hooks.m.push((domElement) => {
+    // '.m' is called when the component is mounted
+  });
+  hooks.u.push(() => {
+    // `.u` is called when the component is unmounted
+  });
+  hooks.d.push((domElement, previousDomElement) => {
+    // `.d` is called when the component is updated
+  });
+  ...
+}
+```
 
 ### Tag Shorthand `tag( [properties], [children ...] )`
 
@@ -264,6 +354,8 @@ This is the same as calling `div({className: 'className'})` and the function int
 
 ## Caveats
 
+Since the project's focus is the small size, it is lacking sanity checks. This makes it susceptible to errors. Be **very careful** with the following caveats:
+
 * You cannot trigger an update with a property removal. You **must** set the new property to an empty value instead. For example:
 
   ```js
@@ -274,6 +366,13 @@ This is the same as calling `div({className: 'className'})` and the function int
   // Correct
   R(div({className: 'foo'}), document.body);
   R(div({className: ''}), document.body);
+  ```
+
+* You **must** never use a property named `$` in your components. Doing so, will make the property object to be considered as a Virtual DOM Node and will lead to unexpected results.
+
+  ```js
+  // *NEVER* do this!
+  R(H(MyComponent, {$: 'Foo'}), document.body)
   ```
 
 ## Contribution
@@ -311,3 +410,6 @@ Are you interested in contributing to **.dom**? You are more than welcome! Just 
 
     ...
   ```
+# License
+
+Licensed under the [Apache License, Version 2.0](https://raw.githubusercontent.com/wavesoft/dot-dom/master/LICENSE)
