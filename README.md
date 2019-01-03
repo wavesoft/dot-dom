@@ -1,6 +1,6 @@
 # .dom [![Build Status](https://travis-ci.org/wavesoft/dot-dom.svg?branch=master)](https://travis-ci.org/wavesoft/dot-dom) [![Try it in codepen.io](https://img.shields.io/badge/Try%20it-codepen.io-blue.svg)](https://codepen.io/anon/pen/OrzaXB?editors=0010) [![Gitter](https://badges.gitter.im/wavesoft/dot-dom.svg)](https://gitter.im/wavesoft/dot-dom?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-> A tiny (511 byte) virtual DOM template engine for embedded projects
+> A tiny (512 byte) virtual DOM template engine for embedded projects
 
 | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/edge.png" alt="IE / Edge" width="16px" height="16px" /> IE / Edge | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/firefox.png" alt="Firefox" width="16px" height="16px" /> Firefox | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome.png" alt="Chrome" width="16px" height="16px" /> Chrome | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari.png" alt="Safari" width="16px" height="16px" /> Safari | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/opera.png" alt="Opera" width="16px" height="16px" /> Opera | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/safari-ios.png" alt="iOS Safari" width="16px" height="16px" /> iOS Safari | <img src="https://raw.githubusercontent.com/godban/browsers-support-badges/master/src/images/chrome-android.png" alt="Chrome for Android" width="16px" height="16px" /> Chrome for Android |
 | --------- | --------- | --------- | --------- | --------- | --------- | --------- |
@@ -25,7 +25,7 @@ Why? Because with such library you can create powerful GUIs in tight space envir
 
 ## Installation
 
-For minimum footprint, include `dotdom.min.js.gz` (511b) to your project.
+For minimum footprint, include `dotdom.min.js.gz` (512b) to your project.
 
 ```html
 <script src="dotdom.min.js.gz" />
