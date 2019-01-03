@@ -37,7 +37,6 @@
     "gulp-merge": "^0.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-strip-code": "^0.1.4",
-    "gulp-uglify": "^2.0.1",
     "gulp-uglify-es": "^1.0.4",
     "gulp-util": "^3.0.8",
     "jest": "^23.6.0",
