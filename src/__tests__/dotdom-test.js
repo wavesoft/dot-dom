@@ -526,28 +526,7 @@ describe('.dom', function () {
 
       });
 
-      it('should call setState at `.m` without infinite loop', function () {
-        const dom = document.createElement('div');
-        const guardCounter = { c:0 };
-
-        const SampleComponent = (props, state, setState, hooks) => {
-          if (guardCounter.c++ > 10) throw new Error("Max call exceeded");
-
-          hooks.m.push(() => {
-            setState({ value: 1 })
-          });
-          return dd.H('div', {className: state.value});
-        };
-
-        const vdom1 = dd.H(SampleComponent);
-        dd.R(vdom1, dom)
-
-        expect(dom.innerHTML).toEqual(
-          '<div class="1"></div>'
-        );
-      });
-
-      it('should call `.u.` after setState', function () {
+      it('should correctly call `.u.` after setState', function () {
         const dom = document.createElement('div');
         const dHandler = jest.fn();
         const guardCounter = { c:0 };
@@ -576,6 +555,27 @@ describe('.dom', function () {
           '<div class="2"></div>'
         );
 
+      });
+
+      it('should not cause infinite loop when using setState in `.m`', function () {
+        const dom = document.createElement('div');
+        const guardCounter = { c:0 };
+
+        const SampleComponent = (props, state, setState, hooks) => {
+          if (guardCounter.c++ > 10) throw new Error("Max call exceeded");
+
+          hooks.m.push(() => {
+            setState({ value: 1 })
+          });
+          return dd.H('div', {className: state.value});
+        };
+
+        const vdom1 = dd.H(SampleComponent);
+        dd.R(vdom1, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div class="1"></div>'
+        );
       });
 
     });

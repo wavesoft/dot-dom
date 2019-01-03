@@ -45,14 +45,13 @@ module.exports = window;
                                                                       // first argument
 
       a: (props.$ || props.concat || props.removeChild)               // If the props argument is a renderable VNode,
-                                                                      // a string or an array (.concat exists on both
-                                                                      // strings and arrays), then
+                                                                      // a string, an array (.concat exists on both
+                                                                      // strings and arrays), or a DOM element, then ...
 
           ? {c: [].concat(props, ...children)}                        // ... prepend it to the children
-          : (props.c = [].concat(...children)) && props               // ... otherwise append 'C' to the property
+          : ((props.c = [].concat(...children)), props)               // ... otherwise append 'C' to the property
                                                                       // the .concat ensures that arrays of children
                                                                       // will be flattened into a single array.
-
     }
   )
 
@@ -63,9 +62,39 @@ module.exports = window;
    * @param {Object} arg1 - An arbitrary first argument
    * @param {Object} arg2 - An arbitrary second argument
    */
-  , callLifecycleMethods = (methods, arg1, arg2) =>
+  , callLifecycleMethods = (methods = [], arg1, arg2) =>
       methods.map(e => e(arg1, arg2))                                 // Detaching from stack is important, otherwise it
-                                                                      // can lead into infinite loops during render phase.
+
+  /**
+   * Helper function that wraps an element shorthand function with a proxy
+   * that can be used to append class names to the instance.
+   *
+   * The result is wrapped with the same function, creating a chainable mechanism
+   * for appending classes.
+   *
+   * @param {function} factoryFn - The factory function to call for creating vnode
+   */
+  , wrapClassProxy = factoryFn =>
+    new Proxy(                                                        // We are creating a proxy object for every tag in
+                                                                      // order to be able to customize the class name
+                                                                      // via a shorthand call.
+      factoryFn,
+      {
+        get: (targetFn, className, _instance) =>
+          wrapClassProxy(
+            (...args) => (
+              (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
+                                                                      // calling the wrapped factory function
+
+                .a.className = (_instance.a.className || '')          // And then we assign the class name,
+                               + ' ' + className,                     // concatenating to the previous value
+
+              _instance                                               // And finally we return the instance
+            )
+          )
+      }
+    )
+
   /**
    * Render a VNode in the DOM
    *
@@ -87,7 +116,8 @@ module.exports = window;
                                                                       // node elements.
       (
         vnode,                                                        // 1. We handle the vnode from the array
-        index,                                                        // 2. The index
+        _new_dom,                                                     // 2. We ignore the index, and instead we are using
+                                                                      //    it as the new DOM element placeholder
         _callMethod,                                                  // 3. We ignore the array, and instead we are using
                                                                       //    it as a variable where we are keeping the
                                                                       //    lifecycle method to call at the end.
@@ -109,8 +139,7 @@ module.exports = window;
           m: [],                                                      //    - The 'm' property contains the `mount` cb
           u: [],                                                      //    - The 'u' property contains the `unmount` cb
           d: []                                                       //    - The 'd' property contains the `update` cb
-        },
-        _new_dom                                                      // d. The new DOM element placeholder
+        }
 
       ) => {
 
@@ -144,7 +173,7 @@ module.exports = window;
         _new_dom =
           vnode.removeChild                                           // If this is a DOM element, pass it through ...
             ? vnode                                                   // Otherwise we prepare the new DOM element in advance
-            : vnode.trim                                              // in order to save a few comparison bytes later.
+            : vnode.replace                                           // in order to save a few comparison bytes later.
               ? document.createTextNode(vnode)
               : document.createElement(vnode.$);
 
@@ -175,16 +204,16 @@ module.exports = window;
                                                                       // infinite loop if `setState` is used.
 
           _child                                                      // If there is a DOM reflection
-            ? _child.a != _hooks.a                                    // .. and the element has changed
-              ? (
-                  callLifecycleMethods(_child.u),                     // - [U] Unmount the previous one
+            ? _child.a == _hooks.a                                    // .. and the element has not changed
+              ? _hooks.d                                              // - [D] Just update
+              : (
+                  callLifecycleMethods(_child.u),                     // - [U] Otherwise unmount the previous one
                   render(                                             //   And call the render function with empty
                     [],                                               //   children in order to recursively unmount
                     _child                                            //   the children tree.
                   ),
                   _hooks.m                                            // - [M] Mount the new
                 )
-              : _hooks.d                                              // - [D] Otherwise just update
 
                                                                       // If there is no DOM reflection
             : _hooks.m;                                               // - [M] Mount the new
@@ -205,7 +234,7 @@ module.exports = window;
 
         /* Apply properties to the DOM element */
         vnode.removeChild ||                                          // If this is a DOM element, don't do anything
-          vnode.trim
+          vnode.replace
             ? _new_dom.data = vnode                                   // - String nodes update only the text
             : Object.keys(vnode.a).map(                               // - Element nodes have properties
                 (
@@ -257,36 +286,6 @@ module.exports = window;
 
     }
   }
-
-  /**
-   * Helper function that wraps an element shorthand function with a proxy
-   * that can be used to append class names to the instance.
-   *
-   * The result is wrapped with the same function, creating a chainable mechanism
-   * for appending classes.
-   *
-   * @param {function} factoryFn - The factory function to call for creating vnode
-   */
-  , wrapClassProxy = factoryFn =>
-    new Proxy(                                                        // We are creating a proxy object for every tag in
-                                                                      // order to be able to customize the class name
-                                                                      // via a shorthand call.
-      factoryFn,
-      {
-        get: (targetFn, className, _instance) =>
-          wrapClassProxy(
-            (...args) => (
-              (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
-                                                                      // calling the wrapped factory function
-
-                .a.className = (_instance.a.className || '')          // And then we assign the class name,
-                               + ' ' + className,                     // concatenating to the previous value
-
-              _instance                                               // And finally we return the instance
-            )
-          )
-      }
-    )
 
   /**
    * Expose as `H` a proxy around the createElement function that can either be used

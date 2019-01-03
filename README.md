@@ -221,8 +221,8 @@ ReactDOM.render(
     <td valign="top">
 <pre lang="javascript">
 function WithLifeCycle(props, state, setState, hooks) {
-  const {mounted="no"} = state;
-  hooks.d.push(() => {
+  const {mounted = "no"} = state;
+  hooks.m.push(() => {
     setState({ mounted: "yes" })
   });
 <br />
@@ -232,10 +232,7 @@ function WithLifeCycle(props, state, setState, hooks) {
 }
 <br />
 R(
-  H('div',
-    H(Clickable),
-    H(Clickable)
-  ),
+  H('div', H(WithLifeCycle)),
   document.body
 )
 </pre>
