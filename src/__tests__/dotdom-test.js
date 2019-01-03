@@ -93,7 +93,7 @@ describe('.dom', function () {
         });
       });
 
-      it('should create vnode with only mixed children', function () {
+      it('should create vnode with mixed children', function () {
         const cdom = dd.H('div');
         const vdom = dd.H('div', cdom, 'foo');
 
@@ -101,6 +101,14 @@ describe('.dom', function () {
         expect(vdom.a).toEqual({
           c: [ cdom, 'foo' ]
         });
+      });
+
+      it('should create vnode with dom children', function () {
+        const dom = document.createElement('div');
+        const vdom = dd.H('div', dom);
+
+        expect(vdom.$).toEqual('div');
+        expect(vdom.a.c[0]).toBe(dom);
       });
 
     });
@@ -517,6 +525,59 @@ describe('.dom', function () {
         expect(uHandler.mock.calls.length).toEqual(1)
 
       });
+
+      it('should correctly call `.u.` after setState', function () {
+        const dom = document.createElement('div');
+        const dHandler = jest.fn();
+        const guardCounter = { c:0 };
+
+        const SampleComponent = (props, state, setState, hooks) => {
+          if (guardCounter.c++ > 10) throw new Error("Max call exceeded");
+
+          hooks.d.push(dHandler);
+          hooks.d.push(() => {
+            if (state.value == 1) {
+              setState({ value: 2 });
+            }
+          });
+          hooks.m.push(() => {
+            setState({ value: 1 })
+          });
+
+          return dd.H('div', {className: state.value});
+        };
+
+        const vdom1 = dd.H(SampleComponent);
+        dd.R(vdom1, dom)
+
+        expect(dHandler.mock.calls.length).toEqual(2)
+        expect(dom.innerHTML).toEqual(
+          '<div class="2"></div>'
+        );
+
+      });
+
+      it('should not cause infinite loop when using setState in `.m`', function () {
+        const dom = document.createElement('div');
+        const guardCounter = { c:0 };
+
+        const SampleComponent = (props, state, setState, hooks) => {
+          if (guardCounter.c++ > 10) throw new Error("Max call exceeded");
+
+          hooks.m.push(() => {
+            setState({ value: 1 })
+          });
+          return dd.H('div', {className: state.value});
+        };
+
+        const vdom1 = dd.H(SampleComponent);
+        dd.R(vdom1, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div class="1"></div>'
+        );
+      });
+
     });
 
     describe('Reconciliation', function () {
@@ -665,6 +726,57 @@ describe('.dom', function () {
         expect(p2Handler.mock.calls).toEqual([
           ['bar']
         ])
+      });
+
+      it('should discard state if parent DOM element changes', function () {
+        const dom = document.createElement('div');
+        const ChildComponent = function(props, {clicks=0}, setState) {
+          return dd.H('button', {
+            onclick() {
+              setState({
+                clicks: clicks + 1
+              })
+            }
+          }, `${clicks} clicks`)
+        }
+        const Toggler = function(props, {first=true}, setState) {
+          return dd.H('div',
+            dd.H('button', {
+              onclick() {
+                setState({first: !first})
+              }
+            }, 'toggle'),
+            first
+              ? dd.H('div', dd.H(ChildComponent))
+              : dd.H('span', dd.H(ChildComponent))
+          )
+        }
+
+        const vdom = dd.H(Toggler);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><button>toggle</button><div><button>0 clicks</button></div></div>'
+        );
+
+        const event = new window.MouseEvent('click');
+        dom.firstChild.childNodes[1].childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>toggle</button><div><button>1 clicks</button></div></div>'
+        );
+
+        dom.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>toggle</button><span><button>0 clicks</button></span></div>'
+        );
+
+        dom.firstChild.childNodes[1].childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>toggle</button><span><button>1 clicks</button></span></div>'
+        );
+
+
       });
     });
 
@@ -1162,6 +1274,136 @@ describe('.dom', function () {
           '<div class="foo class1 class2 class3"></div>'
         );
       })
+    });
+
+    describe('DOM Elements as VNodes', function () {
+
+      it(`should pass-through DOM element`, function () {
+        const vdom = document.createElement('span');
+        const dom = document.createElement('div');
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          `<span></span>`
+        );
+      });
+
+      it(`should pass-through DOM element children`, function () {
+        const vdom = document.createElement('span');
+        const dom = document.createElement('div');
+
+        dd.R(dd.H('div', vdom), dom)
+
+        expect(dom.innerHTML).toEqual(
+          `<div><span></span></div>`
+        );
+      });
+
+      it(`should pass-through DOM element returned in components`, function () {
+        const dom = document.createElement('div');
+
+        const Component = (props) => {
+          return document.createElement('span');
+        };
+
+        dd.R(dd.H('div', dd.H(Component)), dom)
+
+        expect(dom.innerHTML).toEqual(
+          `<div><span></span></div>`
+        );
+      });
+
+      it(`should should not replace the DOM element if not changed`, function () {
+        const vdom = document.createElement('span');
+        const dom = document.createElement('div');
+
+        // Probe for calls to removeChild
+        dom.removeChild = jest.fn(dom.removeChild.bind(dom));
+        dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
+
+        // First render
+        dd.R(vdom, dom);
+        expect(dom.innerHTML).toEqual(
+          `<span></span>`
+        );
+        expect(dom.firstChild).toStrictEqual(vdom);
+
+        // Second render
+        dd.R(vdom, dom);
+        expect(dom.innerHTML).toEqual(
+          `<span></span>`
+        );
+        expect(dom.firstChild).toStrictEqual(vdom);
+
+        // Make sure we were not called
+        expect(dom.removeChild).not.toBeCalled();
+        expect(dom.replaceChild).not.toBeCalled();
+      });
+
+      it(`should be replaced if reference changed`, function () {
+        const vdom1 = document.createElement('ol');
+        const vdom2 = document.createElement('ul');
+        const dom = document.createElement('div');
+
+        // Probe for calls to removeChild
+        dom.removeChild = jest.fn(dom.removeChild.bind(dom));
+        dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
+
+        // First render
+        dd.R(vdom1, dom);
+        expect(dom.innerHTML).toEqual(
+          `<ol></ol>`
+        );
+        expect(dom.firstChild).toStrictEqual(vdom1);
+
+        // Second render
+        dd.R(vdom2, dom);
+        expect(dom.innerHTML).toEqual(
+          `<ul></ul>`
+        );
+        expect(dom.firstChild).toStrictEqual(vdom2);
+
+        // Make sure we were not called
+        expect(dom.replaceChild).toBeCalled();
+        expect(dom.removeChild).not.toBeCalled();
+      });
+
+      it(`should not replace the reference even after prop changes`, function () {
+        const vdom = document.createElement('span');
+        const dom = document.createElement('div');
+
+        const v = {v: 0};
+
+        const AdvancedComponent = (props, state, setState, hooks) => {
+          if (v.v++ > 10) throw new TypeError('aborted');
+
+          hooks.m.push(() => {
+            setState({dom: document.createElement('div')})
+            state.dom.innerHTML = `mount`;
+          });
+          hooks.d.push(() => {
+            state.dom.innerHTML = `change=${props.value}`;
+          })
+          return dd.H('div', state.dom);
+        };
+
+        // First render
+        const vdom1 = dd.H(AdvancedComponent, {value :'foo'});
+        dd.R(vdom1, dom);
+        expect(dom.innerHTML).toEqual(
+          `<div><div>mount</div></div>`
+        );
+
+        // Second render
+        const vdom2 = dd.H(AdvancedComponent, {value :'bar'});
+        dd.R(vdom2, dom)
+        expect(dom.innerHTML).toEqual(
+          `<div><div>change=bar</div></div>`
+        );
+
+      });
+
     });
   });
 
