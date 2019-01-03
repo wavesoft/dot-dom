@@ -410,3 +410,6 @@ Are you interested in contributing to **.dom**? You are more than welcome! Just 
 
     ...
   ```
+# License
+
+Licensed under the [Apache License, Version 2.0](https://raw.githubusercontent.com/wavesoft/dot-dom/master/LICENSE)
