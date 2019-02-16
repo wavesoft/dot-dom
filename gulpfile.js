@@ -96,13 +96,13 @@ gulp.task("build:js", () => {
       .pipe(clone())
       .pipe(
         babel({
-          presets: ["babili"]
+          presets: ["minify"]
         })
       )
       .pipe(trimSemicolon())
       .pipe(
         rename({
-          suffix: "-babili"
+          suffix: "-minify"
         })
       )
   )
@@ -137,13 +137,13 @@ gulp.task("build:gz", () => {
       .pipe(clone())
       .pipe(
         babel({
-          presets: ["babili"]
+          presets: ["minify"]
         })
       )
       .pipe(trimSemicolon())
       .pipe(
         rename({
-          suffix: "-babili"
+          suffix: "-minify"
         })
       )
       .pipe(gzip({ gzipOptions: { level: 9 } }))
