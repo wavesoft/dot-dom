@@ -17,7 +17,8 @@ const path = require("path");
 const uglifyOptions = {
   ecma: 6,
   mangle: {
-    reserved: [ "µ" ]
+    reserved: [],
+    toplevel: true
   }
 };
 
