@@ -14,13 +14,19 @@ Why? Because with such library you can create powerful GUIs in tight space envir
 
 * _Tiny by design_ : The library should never exceed the 512 bytes in size. The goal is not to have yet another template engine, but to have as many features as possible in 512 bytes. If a new feature is needed, an other must be sacraficed or the scope must be reduced.
 
-* _Built for the future_ : The library is heavily exploiting the ES6 specifications, meaning that it's **not** supported by older browsers. Currently it's supported by the 70% of the browsers in the market, but expect this to be 90% within the next year.
+* _Built for the future_ : The library is heavily exploiting the ES6 specifications, meaning that it's **not** supported by older browsers. Currently it's supported by the 90% of the browsers in the market, but expect this to be close to 100% within the next year.
 
 * _Declarative_ : Describe your HTML DOM in a structured, natural manner, helping you create powerful yet readable user interfaces.
 
 * _Component-Oriented_ : Just like React.js, **.dom** promotes the use of functional components.
 
 * _"Write less" accelerators_ : The library API is designed specifically to have short function names and accelerators, allowing you to describe your views with less code.
+
+### Projects Using `.dom`
+
+* [Open Graph Image as a Service](https://github.com/styfle/og-image) - [demo](https://og-image.now.sh/)
+
+Are you using `.dom` in your project? Fork this repository and add yours on the list!
 
 
 ## Installation
