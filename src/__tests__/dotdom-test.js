@@ -111,6 +111,15 @@ describe('.dom', function () {
         expect(vdom.a.c[0]).toBe(dom);
       });
 
+      it('should accept `null` as an empty properties object', function () {
+        const vdom = dd.H('div', null, 'foo');
+
+        expect(vdom.$).toEqual('div');
+        expect(vdom.a).toEqual({
+          c: [ 'foo' ]
+        });
+      });
+
     });
 
     describe('Proxy', function () {
@@ -874,6 +883,36 @@ describe('.dom', function () {
         dom.firstChild.dispatchEvent(event);
         expect(dom.innerHTML).toEqual(
           '<button>2 clicks</button>'
+        );
+      });
+
+      it('should update stateful components, merging partial state', function () {
+        const dom = document.createElement('div');
+        const Component = function(props, {a='0', b='0'}, setState) {
+          return dd.H('button', {
+            onkeydown() { setState({ a: '1' }) },
+            onkeyup()   { setState({ b: '1' }) }
+          }, `${a}${b}`)
+        }
+        const vdom = dd.H(Component);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<button>00</button>'
+        );
+
+        const eKeydown = new window.MouseEvent('keydown');
+        const eKeyup = new window.MouseEvent('keyup');
+
+        dom.firstChild.dispatchEvent(eKeydown);
+        expect(dom.innerHTML).toEqual(
+          '<button>10</button>'
+        );
+
+        dom.firstChild.dispatchEvent(eKeyup);
+        expect(dom.innerHTML).toEqual(
+          '<button>11</button>'
         );
       });
 

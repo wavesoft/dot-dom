@@ -1,7 +1,7 @@
 /**
  * .dom - A Tiny VDom Template Engine
  *
- * Copyright 2017 Ioannis Charalampidis (wavesoft)
+ * Copyright 2017-2019 Ioannis Charalampidis (wavesoft)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,14 @@ module.exports = window;
       $: element,                                                     // '$' holds the name or function passed as
                                                                       // first argument
 
-      a: (props.$ || props.concat || props.removeChild)               // If the props argument is a renderable VNode,
-                                                                      // a string, an array (.concat exists on both
+      a: (!props || props.$ || props.concat || props.removeChild)     // If the props argument is false/null, a renderable
+                                                                      // VNode, a string, an array (.concat exists on both
                                                                       // strings and arrays), or a DOM element, then ...
 
-          ? {c: [].concat(props, ...children)}                        // ... prepend it to the children
-          : ((props.c = [].concat(...children)), props)               // ... otherwise append 'C' to the property
-                                                                      // the .concat ensures that arrays of children
-                                                                      // will be flattened into a single array.
+          ? {c: [].concat(props || [], ...children)}                  // ... create props just with children
+          : ((props.c = [].concat(...children)), props)               // ... otherwise append 'c' to the property set
+                                                                      // (the .concat ensures that arrays of children
+                                                                      // will be flattened into a single array).
     }
   )
 
