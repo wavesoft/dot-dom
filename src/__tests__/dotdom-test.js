@@ -824,6 +824,44 @@ describe('.dom', function () {
         );
       });
 
+      it('should render direct components', function () {
+        const dom = document.createElement('div');
+        const Component = function() {
+          return dd.H('div')
+        }
+        const HostComponent = function() {
+          return dd.H(Component);
+        }
+        const vdom = dd.H(HostComponent);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div></div>'
+        );
+      });
+
+      it('should pass children to components', function () {
+        const dom = document.createElement('div');
+        const Component = function(props) {
+          return dd.H('div', props.c)
+        }
+        const HostComponent = function() {
+          return dd.H(
+            Component,
+            dd.H('div', 'foo'),
+            dd.H('div', 'bar')
+          );
+        }
+        const vdom = dd.H(HostComponent);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><div>foo</div><div>bar</div></div>'
+        );
+      });
+
       it('should render component with props', function () {
         const dom = document.createElement('div');
         const Component = function(props) {
