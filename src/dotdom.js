@@ -44,7 +44,7 @@ module.exports = window;
       $: element,                                                     // '$' holds the name or function passed as
                                                                       // first argument
 
-      a: (!props || props.$ || props.concat || props.removeChild)     // If the props argument is false/null, a renderable
+      a: (!props || props.$ || props.concat)                          // If the props argument is false/null, a renderable
                                                                       // VNode, a string, an array (.concat exists on both
                                                                       // strings and arrays), or a DOM element, then ...
 
@@ -171,19 +171,15 @@ module.exports = window;
 
         /* Create new DOM element */
         _new_dom =
-          vnode.removeChild                                           // If this is a DOM element, pass it through ...
-            ? vnode                                                   // Otherwise we prepare the new DOM element in advance
-            : vnode.replace                                           // in order to save a few comparison bytes later.
-              ? document.createTextNode(vnode)
-              : document.createElement(vnode.$);
+          vnode.replace                                               // in order to save a few comparison bytes later.
+            ? document.createTextNode(vnode)
+            : document.createElement(vnode.$);
 
         /* Keep or replace the previous DOM element */
 
         _new_dom =
-          _child                                                      // If we have a previous child we do some reconciliation
-            ? (vnode.removeChild                                      // If it's a DOM element reference, check
-                ? _child != vnode
-                : (_child.$ != vnode.$ && _child.data != vnode))
+          _child                                                      // If we have a previous child, do some reconciliation
+            ? (_child.$ != vnode.$ && _child.data != vnode)           // Check if the node tag has changed.
               ? (
                   dom.replaceChild(                                   // - If not, we replace the old element with the
                     _new_dom,                                         //   new one.
@@ -233,30 +229,29 @@ module.exports = window;
                                                                       // individually.
 
         /* Apply properties to the DOM element */
-        vnode.removeChild ||                                          // If this is a DOM element, don't do anything
-          vnode.replace
-            ? _new_dom.data = vnode                                   // - String nodes update only the text
-            : Object.keys(vnode.a).map(                               // - Element nodes have properties
-                (
-                  key                                                 // 1. The property name
-                ) =>
+        vnode.replace
+          ? _new_dom.data = vnode                                   // - String nodes update only the text
+          : Object.keys(vnode.a).map(                               // - Element nodes have properties
+              (
+                key                                                 // 1. The property name
+              ) =>
 
-                  key == 'style' ?                                    // The 'style' property is an object and must be
-                                                                      // applied recursively.
-                    Object.assign(
-                      _new_dom[key],                                  // '[key]' is shorter than '.style'
-                      vnode.a[key]
-                    )
+                key == 'style' ?                                    // The 'style' property is an object and must be
+                                                                    // applied recursively.
+                  Object.assign(
+                    _new_dom[key],                                  // '[key]' is shorter than '.style'
+                    vnode.a[key]
+                  )
 
-                  : (_new_dom[key] !== vnode.a[key] &&                // All properties are applied directly to DOM, as
-                    (_new_dom[key] = vnode.a[key]))                   // long as they are different than ther value in the
-                                                                      // instance. This includes `onXXX` event handlers.
+                : (_new_dom[key] !== vnode.a[key] &&                // All properties are applied directly to DOM, as
+                  (_new_dom[key] = vnode.a[key]))                   // long as they are different than ther value in the
+                                                                    // instance. This includes `onXXX` event handlers.
 
-              ) &&
-              render(                                                 // Only if we have an element (and not text node)
-                vnode.a.c,                                            // we recursively continue rendering into it's
-                _new_dom                                              // child nodes.
-              )
+            ) &&
+            render(                                                 // Only if we have an element (and not text node)
+              vnode.a.c,                                            // we recursively continue rendering into it's
+              _new_dom                                              // child nodes.
+            )
 
         /* Call life-cycle methods */
 

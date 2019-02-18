@@ -103,13 +103,13 @@ describe('.dom', function () {
         });
       });
 
-      it('should create vnode with dom children', function () {
-        const dom = document.createElement('div');
-        const vdom = dd.H('div', dom);
+      // it('should create vnode with dom children', function () {
+      //   const dom = document.createElement('div');
+      //   const vdom = dd.H('div', dom);
 
-        expect(vdom.$).toEqual('div');
-        expect(vdom.a.c[0]).toBe(dom);
-      });
+      //   expect(vdom.$).toEqual('div');
+      //   expect(vdom.a.c[0]).toBe(dom);
+      // });
 
       it('should accept `null` as an empty properties object', function () {
         const vdom = dd.H('div', null, 'foo');
@@ -1353,135 +1353,135 @@ describe('.dom', function () {
       })
     });
 
-    describe('DOM Elements as VNodes', function () {
+    // describe('DOM Elements as VNodes', function () {
 
-      it(`should pass-through DOM element`, function () {
-        const vdom = document.createElement('span');
-        const dom = document.createElement('div');
+    //   it(`should pass-through DOM element`, function () {
+    //     const vdom = document.createElement('span');
+    //     const dom = document.createElement('div');
 
-        dd.R(vdom, dom)
+    //     dd.R(vdom, dom)
 
-        expect(dom.innerHTML).toEqual(
-          `<span></span>`
-        );
-      });
+    //     expect(dom.innerHTML).toEqual(
+    //       `<span></span>`
+    //     );
+    //   });
 
-      it(`should pass-through DOM element children`, function () {
-        const vdom = document.createElement('span');
-        const dom = document.createElement('div');
+    //   it(`should pass-through DOM element children`, function () {
+    //     const vdom = document.createElement('span');
+    //     const dom = document.createElement('div');
 
-        dd.R(dd.H('div', vdom), dom)
+    //     dd.R(dd.H('div', vdom), dom)
 
-        expect(dom.innerHTML).toEqual(
-          `<div><span></span></div>`
-        );
-      });
+    //     expect(dom.innerHTML).toEqual(
+    //       `<div><span></span></div>`
+    //     );
+    //   });
 
-      it(`should pass-through DOM element returned in components`, function () {
-        const dom = document.createElement('div');
+    //   it(`should pass-through DOM element returned in components`, function () {
+    //     const dom = document.createElement('div');
 
-        const Component = (props) => {
-          return document.createElement('span');
-        };
+    //     const Component = (props) => {
+    //       return document.createElement('span');
+    //     };
 
-        dd.R(dd.H('div', dd.H(Component)), dom)
+    //     dd.R(dd.H('div', dd.H(Component)), dom)
 
-        expect(dom.innerHTML).toEqual(
-          `<div><span></span></div>`
-        );
-      });
+    //     expect(dom.innerHTML).toEqual(
+    //       `<div><span></span></div>`
+    //     );
+    //   });
 
-      it(`should should not replace the DOM element if not changed`, function () {
-        const vdom = document.createElement('span');
-        const dom = document.createElement('div');
+    //   it(`should should not replace the DOM element if not changed`, function () {
+    //     const vdom = document.createElement('span');
+    //     const dom = document.createElement('div');
 
-        // Probe for calls to removeChild
-        dom.removeChild = jest.fn(dom.removeChild.bind(dom));
-        dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
+    //     // Probe for calls to removeChild
+    //     dom.removeChild = jest.fn(dom.removeChild.bind(dom));
+    //     dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
 
-        // First render
-        dd.R(vdom, dom);
-        expect(dom.innerHTML).toEqual(
-          `<span></span>`
-        );
-        expect(dom.firstChild).toStrictEqual(vdom);
+    //     // First render
+    //     dd.R(vdom, dom);
+    //     expect(dom.innerHTML).toEqual(
+    //       `<span></span>`
+    //     );
+    //     expect(dom.firstChild).toStrictEqual(vdom);
 
-        // Second render
-        dd.R(vdom, dom);
-        expect(dom.innerHTML).toEqual(
-          `<span></span>`
-        );
-        expect(dom.firstChild).toStrictEqual(vdom);
+    //     // Second render
+    //     dd.R(vdom, dom);
+    //     expect(dom.innerHTML).toEqual(
+    //       `<span></span>`
+    //     );
+    //     expect(dom.firstChild).toStrictEqual(vdom);
 
-        // Make sure we were not called
-        expect(dom.removeChild).not.toBeCalled();
-        expect(dom.replaceChild).not.toBeCalled();
-      });
+    //     // Make sure we were not called
+    //     expect(dom.removeChild).not.toBeCalled();
+    //     expect(dom.replaceChild).not.toBeCalled();
+    //   });
 
-      it(`should be replaced if reference changed`, function () {
-        const vdom1 = document.createElement('ol');
-        const vdom2 = document.createElement('ul');
-        const dom = document.createElement('div');
+    //   it(`should be replaced if reference changed`, function () {
+    //     const vdom1 = document.createElement('ol');
+    //     const vdom2 = document.createElement('ul');
+    //     const dom = document.createElement('div');
 
-        // Probe for calls to removeChild
-        dom.removeChild = jest.fn(dom.removeChild.bind(dom));
-        dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
+    //     // Probe for calls to removeChild
+    //     dom.removeChild = jest.fn(dom.removeChild.bind(dom));
+    //     dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
 
-        // First render
-        dd.R(vdom1, dom);
-        expect(dom.innerHTML).toEqual(
-          `<ol></ol>`
-        );
-        expect(dom.firstChild).toStrictEqual(vdom1);
+    //     // First render
+    //     dd.R(vdom1, dom);
+    //     expect(dom.innerHTML).toEqual(
+    //       `<ol></ol>`
+    //     );
+    //     expect(dom.firstChild).toStrictEqual(vdom1);
 
-        // Second render
-        dd.R(vdom2, dom);
-        expect(dom.innerHTML).toEqual(
-          `<ul></ul>`
-        );
-        expect(dom.firstChild).toStrictEqual(vdom2);
+    //     // Second render
+    //     dd.R(vdom2, dom);
+    //     expect(dom.innerHTML).toEqual(
+    //       `<ul></ul>`
+    //     );
+    //     expect(dom.firstChild).toStrictEqual(vdom2);
 
-        // Make sure we were not called
-        expect(dom.replaceChild).toBeCalled();
-        expect(dom.removeChild).not.toBeCalled();
-      });
+    //     // Make sure we were not called
+    //     expect(dom.replaceChild).toBeCalled();
+    //     expect(dom.removeChild).not.toBeCalled();
+    //   });
 
-      it(`should not replace the reference even after prop changes`, function () {
-        const vdom = document.createElement('span');
-        const dom = document.createElement('div');
+    //   it(`should not replace the reference even after prop changes`, function () {
+    //     const vdom = document.createElement('span');
+    //     const dom = document.createElement('div');
 
-        const v = {v: 0};
+    //     const v = {v: 0};
 
-        const AdvancedComponent = (props, state, setState, hooks) => {
-          if (v.v++ > 10) throw new TypeError('aborted');
+    //     const AdvancedComponent = (props, state, setState, hooks) => {
+    //       if (v.v++ > 10) throw new TypeError('aborted');
 
-          hooks.m.push(() => {
-            setState({dom: document.createElement('div')})
-            state.dom.innerHTML = `mount`;
-          });
-          hooks.d.push(() => {
-            state.dom.innerHTML = `change=${props.value}`;
-          })
-          return dd.H('div', state.dom);
-        };
+    //       hooks.m.push(() => {
+    //         setState({dom: document.createElement('div')})
+    //         state.dom.innerHTML = `mount`;
+    //       });
+    //       hooks.d.push(() => {
+    //         state.dom.innerHTML = `change=${props.value}`;
+    //       })
+    //       return dd.H('div', state.dom);
+    //     };
 
-        // First render
-        const vdom1 = dd.H(AdvancedComponent, {value :'foo'});
-        dd.R(vdom1, dom);
-        expect(dom.innerHTML).toEqual(
-          `<div><div>mount</div></div>`
-        );
+    //     // First render
+    //     const vdom1 = dd.H(AdvancedComponent, {value :'foo'});
+    //     dd.R(vdom1, dom);
+    //     expect(dom.innerHTML).toEqual(
+    //       `<div><div>mount</div></div>`
+    //     );
 
-        // Second render
-        const vdom2 = dd.H(AdvancedComponent, {value :'bar'});
-        dd.R(vdom2, dom)
-        expect(dom.innerHTML).toEqual(
-          `<div><div>change=bar</div></div>`
-        );
+    //     // Second render
+    //     const vdom2 = dd.H(AdvancedComponent, {value :'bar'});
+    //     dd.R(vdom2, dom)
+    //     expect(dom.innerHTML).toEqual(
+    //       `<div><div>change=bar</div></div>`
+    //     );
 
-      });
+    //   });
 
-    });
+    // });
   });
 
 });
