@@ -1300,6 +1300,64 @@ describe('.dom', function () {
 
       });
 
+      it('should   when re-ordering the same component', function () {
+        const dom = document.createElement('div');
+        const Child = function(props, {clicks=0}, setState) {
+          return dd.H('button',
+            {
+              onclick() {
+                setState({clicks: clicks+1})
+              }
+            },
+            `${clicks} clicks`
+          )
+        }
+        const Root = function(props, {swap}, setState) {
+          const { components } = props;
+
+          return dd.H('div',
+            {
+              onclick() { setState({swap: !swap}) }
+            },
+            swap
+              ? components.map((_, i) => components[components.length - i - 1])
+              : components
+          )
+        }
+
+        // Create the instances
+        const components = [ dd.H(Child), dd.H(Child), dd.H(Child)];
+        const vdom = dd.H(Root, { components });
+        const event = new window.MouseEvent('click');
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><button>0 clicks</button><button>0 clicks</button><button>0 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><button>0 clicks</button><button>0 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[2].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><button>0 clicks</button><button>1 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[2].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><button>0 clicks</button><button>2 clicks</button></div>'
+        );
+
+        dom.firstChild.dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>2 clicks</button><button>0 clicks</button><button>1 clicks</button></div>'
+        );
+
+      });
+
     });
 
     describe('Tag Shorthands', function () {
