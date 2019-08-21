@@ -30,7 +30,7 @@
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "babel-preset-minify": "^0.5.0",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-brotli": "^1.2.1",
     "gulp-cat": "^0.3.3",
@@ -42,15 +42,13 @@
     "gulp-strip-code": "^0.1.4",
     "gulp-uglify-es": "^1.0.4",
     "gulp-util": "^3.0.8",
-    "jest": "^24.1.0",
-    "mock-browser": "^0.92.12",
-    "through2": "^3.0.0",
-    "watch": "^1.0.1",
-    "minimatch": ">=3.0.2",
     "handlebars": ">=4.1.2",
-    "js-yaml": ">=3.13.1"
-  },
-  "dependencies": {
-    "npm-check-updates": "^2.15.0"
+    "jest": "^24.1.0",
+    "js-yaml": ">=3.13.1",
+    "minimatch": ">=3.0.2",
+    "mock-browser": "^0.92.12",
+    "npm-check-updates": "^2.15.0",
+    "through2": "^3.0.0",
+    "watch": "^1.0.1"
   }
 }
