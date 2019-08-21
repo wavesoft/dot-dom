@@ -122,10 +122,13 @@ module.exports = window;
                                                                       //    it as a variable where we are keeping the
                                                                       //    lifecycle method to call at the end.
         _child=_children[_c++],                                       // a. Get the next DOM child + increment counter
-        _state=(                                                      // b. Get the current state from the DOM child
+        _state=vnode.s = (                                            // b. Get the current state from the DOM child and keep
+                                                                      //    a copy in the vnode object.
             _child &&                                                 //    - If there is no child, bail
             (_child.a == vnode.$)                                     //    - If the element has changed, bail
-            && _child.s                                               //    - If the element has a state, use that
+            && (vnode.s                                               //    - If the vnode object has state, use that
+                || _child.s)                                          //    - If the DOM element has state, use that (this ensures that
+                                                                      //      stateless objects, without properties maintain their state)
           ) || {},                                                    //    - Default state value
         _hooks={                                                      // c. Prepare the hooks object that will be passed
                                                                       //    down to the functional component
