@@ -28,9 +28,12 @@
   },
   "homepage": "https://github.com/wavesoft/dotdom#readme",
   "devDependencies": {
+    "@babel/core": "^7.0.0",
     "babel-preset-minify": "^0.5.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^8.0.0",
+    "gulp-brotli": "^1.2.1",
+    "gulp-cat": "^0.3.3",
     "gulp-cli": "^2.0.1",
     "gulp-clone": "^2.0.1",
     "gulp-gzip": "^1.4.0",

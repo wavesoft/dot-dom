@@ -1,10 +1,11 @@
 const gulp = require("gulp");
-var gutil = require("gulp-util");
+const gutil = require("gulp-util");
 const through = require("through2");
 
 const strip = require("gulp-strip-code");
 const rename = require("gulp-rename");
 const gzip = require("gulp-gzip");
+const brotli = require("gulp-brotli");
 
 const babel = require("gulp-babel");
 const uglify = require("gulp-uglify-es").default;
@@ -13,6 +14,8 @@ const clone = require("gulp-clone");
 const gulpMerge = require("gulp-merge");
 
 const path = require("path");
+
+const useBrotli = process.env.ENABLE_BROTLI || false;
 
 const uglifyOptions = {
   ecma: 6,
@@ -76,35 +79,48 @@ const getBaseStream = () => {
   );
 };
 
+const getUglifyStream = baseStream =>
+  baseStream
+    .pipe(clone())
+    .pipe(uglify(uglifyOptions))
+    .on("error", function(err) {
+      gutil.log(gutil.colors.red("[Error]"), err.toString());
+    })
+    .pipe(trimSemicolon())
+    .pipe(
+      rename({
+        suffix: "-uglify"
+      })
+    );
+
+const getMinifyStream = baseStream =>
+  baseStream
+    .pipe(clone())
+    .pipe(
+      babel({
+        presets: ["minify"],
+        comments: false
+      })
+    )
+    .on("error", function(err) {
+      gutil.log(gutil.colors.red("[Error]"), err.toString());
+    })
+    .pipe(trimSemicolon())
+    .pipe(
+      rename({
+        suffix: "-minify"
+      })
+    );
+
 gulp.task("build:js", () => {
   const baseStream = getBaseStream();
+  const uglifyStream = getUglifyStream(baseStream);
+  const minifyStream = getMinifyStream(baseStream);
 
   return gulpMerge(
-    baseStream
-      .pipe(clone())
-      .pipe(uglify(uglifyOptions))
-      .on("error", function(err) {
-        gutil.log(gutil.colors.red("[Error]"), err.toString());
-      })
-      .pipe(trimSemicolon())
-      .pipe(
-        rename({
-          suffix: "-uglify"
-        })
-      ),
-    baseStream
-      .pipe(clone())
-      .pipe(
-        babel({
-          presets: ["minify"]
-        })
-      )
-      .pipe(trimSemicolon())
-      .pipe(
-        rename({
-          suffix: "-minify"
-        })
-      )
+    uglifyStream,
+    minifyStream,
+    null
   )
     .pipe(keepSmallest())
     .pipe(clone())
@@ -118,36 +134,22 @@ gulp.task("build:js", () => {
 
 gulp.task("build:gz", () => {
   const baseStream = getBaseStream();
+  const uglifyStream = getUglifyStream(baseStream);
+  const minifyStream = getMinifyStream(baseStream);
 
-  return gulpMerge(
-    baseStream
-      .pipe(clone())
-      .pipe(uglify(uglifyOptions))
-      .on("error", function(err) {
-        gutil.log(gutil.colors.red("[Error]"), err.toString());
-      })
-      .pipe(trimSemicolon())
-      .pipe(
-        rename({
-          suffix: "-uglify"
-        })
-      )
-      .pipe(gzip({ gzipOptions: { level: 9 } })),
-    baseStream
-      .pipe(clone())
-      .pipe(
-        babel({
-          presets: ["minify"]
-        })
-      )
-      .pipe(trimSemicolon())
-      .pipe(
-        rename({
-          suffix: "-minify"
-        })
-      )
-      .pipe(gzip({ gzipOptions: { level: 9 } }))
-  )
+  const streams = [
+    uglifyStream.pipe(clone()).pipe(gzip({ gzipOptions: { level: 9 } })),
+    minifyStream.pipe(clone()).pipe(gzip({ gzipOptions: { level: 9 } })),
+  ];
+  if (useBrotli) {
+    streams.push(
+      uglifyStream.pipe(clone()).pipe(brotli.compress()),
+      minifyStream.pipe(clone()).pipe(brotli.compress()),
+    );
+  }
+  streams.push(null);
+
+  return gulpMerge.apply(null, streams)
     .pipe(keepSmallest())
     .pipe(clone())
     .pipe(
