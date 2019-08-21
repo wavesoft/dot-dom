@@ -88,7 +88,7 @@ module.exports = window;
               (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
                                                                       // calling the wrapped factory function
 
-                .a.className = (_instance.a.className || '')          // And then we assign the class name,
+                .a.className = (_instance.a.className || ' ')         // And then we assign the class name,
                                + ' ' + className,                     // concatenating to the previous value
 
               _instance                                               // And finally we return the instance
@@ -124,23 +124,23 @@ module.exports = window;
                                                                       //    it as a variable where we are keeping the
                                                                       //    lifecycle method to call at the end.
         _child=_children[_c++],                                       // a. Get the next DOM child + increment counter
-        _state=vnode.s = (                                            // b. Get the current state from the DOM child and keep
+        _state=vnode.s=(                                              // b. Get the current state from the DOM child and keep
                                                                       //    a copy in the vnode object.
-            _child &&                                                 //    - If there is no child, bail
-            (_child.a == vnode.$)                                     //    - If the element has changed, bail
-            && (vnode.s                                               //    - If the vnode object has state, use that
-                || _child.s)                                          //    - If the DOM element has state, use that (this ensures that
-                                                                      //      stateless objects, without properties maintain their state)
-          ) || {},                                                    //    - Default state value
+          _child                                                      //    Separate comparison logic if there is a child or not
+            ? ((_child.a == vnode.$)                                  //    - If the element has changed, bail
+                && (vnode.s                                           //    - If there is a state in the VNode, prefer it
+                || _child.s))                                         //    - If there is a state in the DOM node, fall back to it
+            : vnode.s                                                 //    - If there is no element, use VNode state, if present
+        ) || {},                                                      //    - Default state value
         _hooks={                                                      // c. Prepare the hooks object that will be passed
                                                                       //    down to the functional component
-          s: _state,                                                  //    - The 's' property is keeping a reference to
-                                                                      //      the current element state. (Used above)
           a: vnode.$,                                                 //    - The 'a' property is keeping a reference
                                                                       //      to the element (property '$') and is used
                                                                       //      for space-optimal assignment of the tag to
                                                                       //      the DOM element through Object.assign in the
                                                                       //      Update Element phase later.
+          s: _state,                                                  //    - The 's' property is keeping a reference to
+                                                                      //      the current element state. (Used above)
           m: [],                                                      //    - The 'm' property contains the `mount` cb
           u: [],                                                      //    - The 'u' property contains the `unmount` cb
           d: []                                                       //    - The 'd' property contains the `update` cb
@@ -252,7 +252,10 @@ module.exports = window;
                   (_new_dom[key] = vnode.a[key]))                   // long as they are different than ther value in the
                                                                     // instance. This includes `onXXX` event handlers.
 
-            ) &&
+            ) && _hooks.r ||                                        // If the user has marked this element as 'raw', do not
+                                                                    // continue to it's children. Failing to do so, will damage
+                                                                    // the element contents
+
             render(                                                 // Only if we have an element (and not text node)
               vnode.a.c,                                            // we recursively continue rendering into it's
               _new_dom                                              // child nodes.
