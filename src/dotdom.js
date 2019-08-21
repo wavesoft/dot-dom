@@ -63,7 +63,9 @@ module.exports = window;
    * @param {Object} arg2 - An arbitrary second argument
    */
   , callLifecycleMethods = (methods = [], arg1, arg2) =>
-      methods.map(e => e(arg1, arg2))                                 // Detaching from stack is important, otherwise it
+      methods.map(e => e(arg1, arg2))                                 // Fan-out to the lifecycle methods, passing the
+                                                                      // maximum of 2 arguments (spread operator takes
+                                                                      // more space when compressed)
 
   /**
    * Helper function that wraps an element shorthand function with a proxy
@@ -99,7 +101,7 @@ module.exports = window;
    * Render a VNode in the DOM
    *
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
-   * @param {HTLDomElement}
+   * @param {HTMLDomElement}
    */
   , render = window.R = (
     vnodes,                                                           // 1. The vnode tree to render
