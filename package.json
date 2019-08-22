@@ -5,7 +5,11 @@
   "main": "src/dotdom.js",
   "files": [
     "src/dotdom.js",
-    "dotdom.min.js"
+    "src/plugins/keyed.js",
+    "dist/dotdom.min.js",
+    "dist/dotdom.min.js.gz",
+    "dist/plugin-keyed.min.js",
+    "dist/plugin-keyed.min.js.gz"
   ],
   "scripts": {
     "test": "./node_modules/.bin/jest",
