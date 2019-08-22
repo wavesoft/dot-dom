@@ -1,6 +1,6 @@
 {
   "name": "dot-dom",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
   "main": "src/dotdom.js",
   "files": [
