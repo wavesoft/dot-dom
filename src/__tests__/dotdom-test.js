@@ -103,12 +103,13 @@ describe('.dom', function () {
         });
       });
 
-      it('should create vnode with dom children', function () {
-        const dom = document.createElement('div');
-        const vdom = dd.H('div', dom);
+      it('should accept `null` as an empty properties object', function () {
+        const vdom = dd.H('div', null, 'foo');
 
         expect(vdom.$).toEqual('div');
-        expect(vdom.a.c[0]).toBe(dom);
+        expect(vdom.a).toEqual({
+          c: [ 'foo' ]
+        });
       });
 
     });
@@ -778,6 +779,86 @@ describe('.dom', function () {
 
 
       });
+
+      it('should not re-render contents of raw elements', function () {
+        const dom = document.createElement('div');
+        const RawComponent = function(props, state, setState, hooks) {
+          hooks.r = 1;
+          return dd.H('div', {
+            innerHTML: '<label>inner</label>'
+          })
+        }
+
+        const vdom = dd.H(RawComponent);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><label>inner</label></div>'
+        );
+
+        const refA = dom.firstChild.firstChild;
+
+        dd.R(vdom, dom)
+        expect(dom.innerHTML).toEqual(
+          '<div><label>inner</label></div>'
+        );
+
+        const refB = dom.firstChild.firstChild;
+
+        expect(refA).toBe(refB);
+
+      });
+
+      it('should not re-render contents of raw elements, if parent is updated', function () {
+        const dom = document.createElement('div');
+        const RawComponent = function(props, state, setState, hooks) {
+          hooks.r = 1;
+          return dd.H('div', {
+            innerHTML: '<label>inner</label>'
+          })
+        }
+        const DynamicParent = function(props, {clicks=0}, setState) {
+          return dd.H('button', {
+            onclick() {
+              setState({
+                clicks: clicks + 1
+              })
+            }
+          }, dd.H('span', `${clicks} clicks`), dd.H(RawComponent))
+        }
+
+        const vdom = dd.H(DynamicParent);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<button><span>0 clicks</span><div><label>inner</label></div></button>'
+        );
+
+        const refA = dom.firstChild.firstChild.nextSibling.firstChild;
+
+        dd.R(vdom, dom)
+        expect(dom.innerHTML).toEqual(
+          '<button><span>0 clicks</span><div><label>inner</label></div></button>'
+        );
+
+        const refB = dom.firstChild.firstChild.nextSibling.firstChild;
+
+        const event = new window.MouseEvent('click');
+        dom.firstChild.dispatchEvent(event);
+
+        expect(dom.innerHTML).toEqual(
+          '<button><span>1 clicks</span><div><label>inner</label></div></button>'
+        );
+
+        const refC = dom.firstChild.firstChild.nextSibling.firstChild;
+
+        expect(refA).toBe(refB);
+        expect(refA).toBe(refC);
+
+      });
+
     });
 
     describe('Components', function () {
@@ -812,6 +893,44 @@ describe('.dom', function () {
 
         expect(dom.innerHTML).toEqual(
           '<div><div></div><div></div></div>'
+        );
+      });
+
+      it('should render direct components', function () {
+        const dom = document.createElement('div');
+        const Component = function() {
+          return dd.H('div')
+        }
+        const HostComponent = function() {
+          return dd.H(Component);
+        }
+        const vdom = dd.H(HostComponent);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div></div>'
+        );
+      });
+
+      it('should pass children to components', function () {
+        const dom = document.createElement('div');
+        const Component = function(props) {
+          return dd.H('div', props.c)
+        }
+        const HostComponent = function() {
+          return dd.H(
+            Component,
+            dd.H('div', 'foo'),
+            dd.H('div', 'bar')
+          );
+        }
+        const vdom = dd.H(HostComponent);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><div>foo</div><div>bar</div></div>'
         );
       });
 
@@ -874,6 +993,36 @@ describe('.dom', function () {
         dom.firstChild.dispatchEvent(event);
         expect(dom.innerHTML).toEqual(
           '<button>2 clicks</button>'
+        );
+      });
+
+      it('should update stateful components, merging partial state', function () {
+        const dom = document.createElement('div');
+        const Component = function(props, {a='0', b='0'}, setState) {
+          return dd.H('button', {
+            onkeydown() { setState({ a: '1' }) },
+            onkeyup()   { setState({ b: '1' }) }
+          }, `${a}${b}`)
+        }
+        const vdom = dd.H(Component);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<button>00</button>'
+        );
+
+        const eKeydown = new window.MouseEvent('keydown');
+        const eKeyup = new window.MouseEvent('keyup');
+
+        dom.firstChild.dispatchEvent(eKeydown);
+        expect(dom.innerHTML).toEqual(
+          '<button>10</button>'
+        );
+
+        dom.firstChild.dispatchEvent(eKeyup);
+        expect(dom.innerHTML).toEqual(
+          '<button>11</button>'
         );
       });
 
@@ -1223,6 +1372,177 @@ describe('.dom', function () {
 
       });
 
+      it('should preserve state when re-ordering the same component', function () {
+        const dom = document.createElement('div');
+        const Child = function(props, {clicks=0}, setState) {
+          return dd.H('button',
+            {
+              onclick() {
+                setState({clicks: clicks+1})
+              }
+            },
+            `${clicks} clicks`
+          )
+        }
+        const Root = function(props, {swap}, setState) {
+          const { components } = props;
+
+          return dd.H('div',
+            {
+              onclick() { setState({swap: !swap}) }
+            },
+            swap
+              ? components.map((_, i) => components[components.length - i - 1])
+              : components
+          )
+        }
+
+        // Create the instances
+        const components = [ dd.H(Child), dd.H(Child), dd.H(Child)];
+        const vdom = dd.H(Root, { components });
+        const event = new window.MouseEvent('click');
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><button>0 clicks</button><button>0 clicks</button><button>0 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><button>0 clicks</button><button>0 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[2].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><button>0 clicks</button><button>1 clicks</button></div>'
+        );
+
+        dom.firstChild.childNodes[2].dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>1 clicks</button><button>0 clicks</button><button>2 clicks</button></div>'
+        );
+
+        dom.firstChild.dispatchEvent(event);
+        expect(dom.innerHTML).toEqual(
+          '<div><button>2 clicks</button><button>0 clicks</button><button>1 clicks</button></div>'
+        );
+
+      });
+
+      it('should be able to manipulate ordered list of stateful items', function () {
+        const dom = document.createElement('div');
+        const StatefulChild = function({id=''}, state, setState) {
+          let {clicks=0} = state;
+          return dd.H('button',
+            {
+              onclick() {
+                setState({clicks: clicks+1})
+              }
+            },
+            `id=${id}, clicks=${clicks}`
+          )
+        }
+        const StatefulList = function(props, {items=[], ofs=0}, setState) {
+          const share = {};
+          Object.assign(share,{ofs});
+
+          return dd.H('div',
+            dd.H('div',
+              dd.H('button', { onclick: () => {
+                e = dd.H(StatefulChild, {id: items.length});
+                e.s = {};
+                items.unshift(e);
+                setState({items});
+              }}, 'Add Head'),
+              dd.H('button', { onclick: () => {
+                items.push(dd.H(StatefulChild, {id: items.length}));
+                setState({items});
+              }}, 'Add Tail'),
+              dd.H('button', { onclick: () => {
+                items.shift();
+                setState({items});
+              }}, 'Rm Head'),
+              dd.H('button', { onclick: () => {
+                items.pop();
+                setState({items});
+              }}, 'Rm Tail')
+            ),
+            dd.H('div', items),
+          )
+        }
+
+        const vdom = dd.H(StatefulList);
+        const event = new window.MouseEvent('click');
+
+        dd.R(vdom, dom)
+
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div></div>'
+        );
+
+        //
+        // Condition some items
+        //
+        dom.firstChild.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div><button>id=0, clicks=0</button></div>'
+        );
+
+        dom.firstChild.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div><button>id=1, clicks=0</button><button>id=0, clicks=0</button></div>'
+        );
+
+        dom.firstChild.firstChild.nextSibling.childNodes[0].dispatchEvent(event);
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div><button>id=1, clicks=1</button><button>id=0, clicks=0</button></div>'
+        );
+
+        dom.firstChild.firstChild.nextSibling.childNodes[1].dispatchEvent(event);
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div><button>id=1, clicks=1</button><button>id=0, clicks=1</button></div>'
+        );
+
+        dom.firstChild.firstChild.nextSibling.childNodes[1].dispatchEvent(event);
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div><button>id=1, clicks=1</button><button>id=0, clicks=2</button></div>'
+        );
+
+        //    DO : Add an item on top of the list
+        // EXPECT: State of the child items correctly shifted to the right
+        //
+        dom.firstChild.firstChild.childNodes[0].dispatchEvent(event);
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div><button>id=2, clicks=0</button><button>id=1, clicks=1</button><button>id=0, clicks=2</button></div>'
+        );
+
+        //    DO : Add an item on bottom of the list
+        // EXPECT: No side-effects
+        //
+        dom.firstChild.firstChild.childNodes[1].dispatchEvent(event);
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div><button>id=2, clicks=0</button><button>id=1, clicks=1</button><button>id=0, clicks=2</button><button>id=3, clicks=0</button></div>'
+        );
+
+        //    DO : Remove an item from the top of the list
+        // EXPECT: State of the child items correctly shifted to the left
+        //
+        dom.firstChild.firstChild.childNodes[2].dispatchEvent(event);
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div><button>id=1, clicks=1</button><button>id=0, clicks=2</button><button>id=3, clicks=0</button></div>'
+        );
+
+        //    DO : Remove an item from the bottom of the list
+        // EXPECT: No side-effects
+        //
+        dom.firstChild.firstChild.childNodes[3].dispatchEvent(event);
+        expect(dom.firstChild.firstChild.nextSibling.outerHTML).toEqual(
+          '<div><button>id=1, clicks=1</button><button>id=0, clicks=2</button></div>'
+        );
+
+      });
+
     });
 
     describe('Tag Shorthands', function () {
@@ -1247,7 +1567,7 @@ describe('.dom', function () {
         dd.R(vdom, dom)
 
         expect(dom.innerHTML).toEqual(
-          '<div class=" class1"></div>'
+          '<div class="  class1"></div>'
         );
       })
 
@@ -1259,7 +1579,7 @@ describe('.dom', function () {
         dd.R(vdom, dom)
 
         expect(dom.innerHTML).toEqual(
-          '<div class=" class1 class2 class3"></div>'
+          '<div class="  class1 class2 class3"></div>'
         );
       })
 
@@ -1274,136 +1594,6 @@ describe('.dom', function () {
           '<div class="foo class1 class2 class3"></div>'
         );
       })
-    });
-
-    describe('DOM Elements as VNodes', function () {
-
-      it(`should pass-through DOM element`, function () {
-        const vdom = document.createElement('span');
-        const dom = document.createElement('div');
-
-        dd.R(vdom, dom)
-
-        expect(dom.innerHTML).toEqual(
-          `<span></span>`
-        );
-      });
-
-      it(`should pass-through DOM element children`, function () {
-        const vdom = document.createElement('span');
-        const dom = document.createElement('div');
-
-        dd.R(dd.H('div', vdom), dom)
-
-        expect(dom.innerHTML).toEqual(
-          `<div><span></span></div>`
-        );
-      });
-
-      it(`should pass-through DOM element returned in components`, function () {
-        const dom = document.createElement('div');
-
-        const Component = (props) => {
-          return document.createElement('span');
-        };
-
-        dd.R(dd.H('div', dd.H(Component)), dom)
-
-        expect(dom.innerHTML).toEqual(
-          `<div><span></span></div>`
-        );
-      });
-
-      it(`should should not replace the DOM element if not changed`, function () {
-        const vdom = document.createElement('span');
-        const dom = document.createElement('div');
-
-        // Probe for calls to removeChild
-        dom.removeChild = jest.fn(dom.removeChild.bind(dom));
-        dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
-
-        // First render
-        dd.R(vdom, dom);
-        expect(dom.innerHTML).toEqual(
-          `<span></span>`
-        );
-        expect(dom.firstChild).toStrictEqual(vdom);
-
-        // Second render
-        dd.R(vdom, dom);
-        expect(dom.innerHTML).toEqual(
-          `<span></span>`
-        );
-        expect(dom.firstChild).toStrictEqual(vdom);
-
-        // Make sure we were not called
-        expect(dom.removeChild).not.toBeCalled();
-        expect(dom.replaceChild).not.toBeCalled();
-      });
-
-      it(`should be replaced if reference changed`, function () {
-        const vdom1 = document.createElement('ol');
-        const vdom2 = document.createElement('ul');
-        const dom = document.createElement('div');
-
-        // Probe for calls to removeChild
-        dom.removeChild = jest.fn(dom.removeChild.bind(dom));
-        dom.replaceChild = jest.fn(dom.replaceChild.bind(dom));
-
-        // First render
-        dd.R(vdom1, dom);
-        expect(dom.innerHTML).toEqual(
-          `<ol></ol>`
-        );
-        expect(dom.firstChild).toStrictEqual(vdom1);
-
-        // Second render
-        dd.R(vdom2, dom);
-        expect(dom.innerHTML).toEqual(
-          `<ul></ul>`
-        );
-        expect(dom.firstChild).toStrictEqual(vdom2);
-
-        // Make sure we were not called
-        expect(dom.replaceChild).toBeCalled();
-        expect(dom.removeChild).not.toBeCalled();
-      });
-
-      it(`should not replace the reference even after prop changes`, function () {
-        const vdom = document.createElement('span');
-        const dom = document.createElement('div');
-
-        const v = {v: 0};
-
-        const AdvancedComponent = (props, state, setState, hooks) => {
-          if (v.v++ > 10) throw new TypeError('aborted');
-
-          hooks.m.push(() => {
-            setState({dom: document.createElement('div')})
-            state.dom.innerHTML = `mount`;
-          });
-          hooks.d.push(() => {
-            state.dom.innerHTML = `change=${props.value}`;
-          })
-          return dd.H('div', state.dom);
-        };
-
-        // First render
-        const vdom1 = dd.H(AdvancedComponent, {value :'foo'});
-        dd.R(vdom1, dom);
-        expect(dom.innerHTML).toEqual(
-          `<div><div>mount</div></div>`
-        );
-
-        // Second render
-        const vdom2 = dd.H(AdvancedComponent, {value :'bar'});
-        dd.R(vdom2, dom)
-        expect(dom.innerHTML).toEqual(
-          `<div><div>change=bar</div></div>`
-        );
-
-      });
-
     });
   });
 

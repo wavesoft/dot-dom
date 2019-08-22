@@ -1,11 +1,15 @@
 {
   "name": "dot-dom",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A tiny (less than 512 byte) template engine that uses virtual DOM and some of react principles",
   "main": "src/dotdom.js",
   "files": [
     "src/dotdom.js",
-    "dotdom.min.js"
+    "src/plugins/keyed.js",
+    "dist/dotdom.min.js",
+    "dist/dotdom.min.js.gz",
+    "dist/plugin-keyed.min.js",
+    "dist/plugin-keyed.min.js.gz"
   ],
   "scripts": {
     "test": "./node_modules/.bin/jest",
@@ -28,9 +32,12 @@
   },
   "homepage": "https://github.com/wavesoft/dotdom#readme",
   "devDependencies": {
+    "@babel/core": "^7.0.0",
     "babel-preset-minify": "^0.5.0",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
+    "gulp-brotli": "^1.2.1",
+    "gulp-cat": "^0.3.3",
     "gulp-cli": "^2.0.1",
     "gulp-clone": "^2.0.1",
     "gulp-gzip": "^1.4.0",
@@ -39,12 +46,13 @@
     "gulp-strip-code": "^0.1.4",
     "gulp-uglify-es": "^1.0.4",
     "gulp-util": "^3.0.8",
+    "handlebars": ">=4.1.2",
     "jest": "^24.1.0",
+    "js-yaml": ">=3.13.1",
+    "minimatch": ">=3.0.2",
     "mock-browser": "^0.92.12",
+    "npm-check-updates": "^2.15.0",
     "through2": "^3.0.0",
     "watch": "^1.0.1"
-  },
-  "dependencies": {
-    "npm-check-updates": "^2.15.0"
   }
 }

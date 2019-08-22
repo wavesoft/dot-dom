@@ -1,10 +1,11 @@
 const gulp = require("gulp");
-var gutil = require("gulp-util");
+const gutil = require("gulp-util");
 const through = require("through2");
 
 const strip = require("gulp-strip-code");
 const rename = require("gulp-rename");
 const gzip = require("gulp-gzip");
+const brotli = require("gulp-brotli");
 
 const babel = require("gulp-babel");
 const uglify = require("gulp-uglify-es").default;
@@ -14,6 +15,8 @@ const gulpMerge = require("gulp-merge");
 
 const path = require("path");
 
+const useBrotli = process.env.ENABLE_BROTLI || false;
+
 const uglifyOptions = {
   ecma: 6,
   mangle: {
@@ -21,6 +24,10 @@ const uglifyOptions = {
     toplevel: true
   }
 };
+
+const plugins = [
+  "keyed"
+];
 
 /**
  * a gulp transformer that keeps the smallest file and discard the rest
@@ -67,8 +74,11 @@ const trimSemicolon = () => {
   return through.obj(filter);
 };
 
-const getBaseStream = () => {
-  return gulp.src("src/dotdom.js").pipe(
+/**
+ * Strips out the NPM-GLUE armor from the given source file
+ */
+const getBaseStream = (src) => {
+  return gulp.src(src).pipe(
     strip({
       start_comment: "BEGIN NPM-GLUE",
       end_comment: "END NPM-GLUE"
@@ -76,89 +86,136 @@ const getBaseStream = () => {
   );
 };
 
-gulp.task("build:js", () => {
-  const baseStream = getBaseStream();
+/**
+ * Wraps the input stream with uglify
+ */
+const getUglifyStream = baseStream =>
+  baseStream
+    .pipe(clone())
+    .pipe(uglify(uglifyOptions))
+    .on("error", function(err) {
+      gutil.log(gutil.colors.red("[Error]"), err.toString());
+    })
+    .pipe(trimSemicolon())
+    .pipe(
+      rename({
+        suffix: "-uglify"
+      })
+    );
+
+/**
+ * Wraps the input stream with minify
+ */
+const getMinifyStream = baseStream =>
+  baseStream
+    .pipe(clone())
+    .pipe(
+      babel({
+        presets: ["minify"],
+        comments: false
+      })
+    )
+    .on("error", function(err) {
+      gutil.log(gutil.colors.red("[Error]"), err.toString());
+    })
+    .pipe(trimSemicolon())
+    .pipe(
+      rename({
+        suffix: "-minify"
+      })
+    );
+
+/**
+ * Builds the given source file to the specified destination as a source stream
+ */
+const getBuildSource = (srcName, dstName) => {
+  const baseStream = getBaseStream(srcName);
+  const uglifyStream = getUglifyStream(baseStream);
+  const minifyStream = getMinifyStream(baseStream);
 
   return gulpMerge(
-    baseStream
-      .pipe(clone())
-      .pipe(uglify(uglifyOptions))
-      .on("error", function(err) {
-        gutil.log(gutil.colors.red("[Error]"), err.toString());
-      })
-      .pipe(trimSemicolon())
-      .pipe(
-        rename({
-          suffix: "-uglify"
-        })
-      ),
-    baseStream
-      .pipe(clone())
-      .pipe(
-        babel({
-          presets: ["minify"]
-        })
-      )
-      .pipe(trimSemicolon())
-      .pipe(
-        rename({
-          suffix: "-minify"
-        })
-      )
+    uglifyStream,
+    minifyStream,
+    null
   )
     .pipe(keepSmallest())
     .pipe(clone())
     .pipe(
       rename({
-        basename: "dotdom.min"
+        basename: dstName
       })
     )
-    .pipe(gulp.dest("./"));
+    .pipe(gulp.dest("./dist"));
+}
+
+/**
+ * Builds the given source file to the specified destination as a compressed stream,
+ * picking the best out of the compression matrix available.
+ */
+const getBuildCompressed = (srcName, dstName, gzipOptions={level: 9}) => {
+  const baseStream = getBaseStream(srcName);
+  const uglifyStream = getUglifyStream(baseStream);
+  const minifyStream = getMinifyStream(baseStream);
+
+  const streams = [
+    uglifyStream.pipe(clone()).pipe(gzip({ gzipOptions })),
+    minifyStream.pipe(clone()).pipe(gzip({ gzipOptions })),
+  ];
+  if (useBrotli) {
+    streams.push(
+      uglifyStream.pipe(clone()).pipe(brotli.compress()),
+      minifyStream.pipe(clone()).pipe(brotli.compress()),
+    );
+  }
+  streams.push(null);
+
+  return gulpMerge.apply(null, streams)
+    .pipe(keepSmallest())
+    .pipe(clone())
+    .pipe(
+      rename({
+        basename: dstName
+      })
+    )
+    .pipe(gulp.dest("./dist"));
+}
+
+gulp.task("build:plugins:js", () => {
+  const args = plugins.map(name => getBuildSource(
+    "src/plugins/" + name + ".js",
+    "plugin-" + name + ".min"
+  ));
+
+  args.push(null);
+  return gulpMerge.apply(null, args);
+});
+
+gulp.task("build:plugins:gz", () => {
+  const args = plugins.map(name => getBuildCompressed(
+    "src/plugins/" + name + ".js",
+    "plugin-" + name + ".min"
+  ));
+
+  args.push(null);
+  return gulpMerge.apply(null, args);
+});
+
+gulp.task("build:js", () => {
+  return getBuildSource(
+    "src/dotdom.js",
+    "dotdom.min"
+  );
 });
 
 gulp.task("build:gz", () => {
-  const baseStream = getBaseStream();
-
-  return gulpMerge(
-    baseStream
-      .pipe(clone())
-      .pipe(uglify(uglifyOptions))
-      .on("error", function(err) {
-        gutil.log(gutil.colors.red("[Error]"), err.toString());
-      })
-      .pipe(trimSemicolon())
-      .pipe(
-        rename({
-          suffix: "-uglify"
-        })
-      )
-      .pipe(gzip({ gzipOptions: { level: 9 } })),
-    baseStream
-      .pipe(clone())
-      .pipe(
-        babel({
-          presets: ["minify"]
-        })
-      )
-      .pipe(trimSemicolon())
-      .pipe(
-        rename({
-          suffix: "-minify"
-        })
-      )
-      .pipe(gzip({ gzipOptions: { level: 9 } }))
-  )
-    .pipe(keepSmallest())
-    .pipe(clone())
-    .pipe(
-      rename({
-        basename: "dotdom.min.js"
-      })
-    )
-    .pipe(gulp.dest("./"));
+  return getBuildCompressed(
+    "src/dotdom.js",
+    "dotdom.min"
+  );
 });
 
-gulp.task("build", ["build:js", "build:gz"]);
+gulp.task("build:plugins", ["build:plugins:js", "build:plugins:gz"]);
+gulp.task("build", ["build:js", "build:gz", "build:plugins"]);
 
 gulp.task("watch", () => {
   const watcher = gulp.watch("./src/**/*.js", ["build:js"]);

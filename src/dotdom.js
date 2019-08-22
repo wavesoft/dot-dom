@@ -1,7 +1,7 @@
 /**
  * .dom - A Tiny VDom Template Engine
  *
- * Copyright 2017 Ioannis Charalampidis (wavesoft)
+ * Copyright 2017-2019 Ioannis Charalampidis (wavesoft)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,14 @@ module.exports = window;
       $: element,                                                     // '$' holds the name or function passed as
                                                                       // first argument
 
-      a: (props.$ || props.concat || props.removeChild)               // If the props argument is a renderable VNode,
-                                                                      // a string, an array (.concat exists on both
+      a: (!props || props.$ || props.concat)                          // If the props argument is false/null, a renderable
+                                                                      // VNode, a string, an array (.concat exists on both
                                                                       // strings and arrays), or a DOM element, then ...
 
-          ? {c: [].concat(props, ...children)}                        // ... prepend it to the children
-          : ((props.c = [].concat(...children)), props)               // ... otherwise append 'C' to the property
-                                                                      // the .concat ensures that arrays of children
-                                                                      // will be flattened into a single array.
+          ? {c: [].concat(props || [], ...children)}                  // ... create props just with children
+          : ((props.c = [].concat(...children)), props)               // ... otherwise append 'c' to the property set
+                                                                      // (the .concat ensures that arrays of children
+                                                                      // will be flattened into a single array).
     }
   )
 
@@ -63,7 +63,9 @@ module.exports = window;
    * @param {Object} arg2 - An arbitrary second argument
    */
   , callLifecycleMethods = (methods = [], arg1, arg2) =>
-      methods.map(e => e(arg1, arg2))                                 // Detaching from stack is important, otherwise it
+      methods.map(e => e(arg1, arg2))                                 // Fan-out to the lifecycle methods, passing the
+                                                                      // maximum of 2 arguments (spread operator takes
+                                                                      // more space when compressed)
 
   /**
    * Helper function that wraps an element shorthand function with a proxy
@@ -86,7 +88,7 @@ module.exports = window;
               (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
                                                                       // calling the wrapped factory function
 
-                .a.className = (_instance.a.className || '')          // And then we assign the class name,
+                .a.className = (_instance.a.className || ' ')         // And then we assign the class name,
                                + ' ' + className,                     // concatenating to the previous value
 
               _instance                                               // And finally we return the instance
@@ -99,7 +101,7 @@ module.exports = window;
    * Render a VNode in the DOM
    *
    * @param {VNode|Array<VNode>} vnodes - The node on an array of nodes to render
-   * @param {HTLDomElement}
+   * @param {HTMLDomElement}
    */
   , render = window.R = (
     vnodes,                                                           // 1. The vnode tree to render
@@ -122,20 +124,23 @@ module.exports = window;
                                                                       //    it as a variable where we are keeping the
                                                                       //    lifecycle method to call at the end.
         _child=_children[_c++],                                       // a. Get the next DOM child + increment counter
-        _state=(                                                      // b. Get the current state from the DOM child
-            _child &&                                                 //    - If there is no child, bail
-            (_child.a == vnode.$)                                     //    - If the element has changed, bail
-            && _child.s                                               //    - If the element has a state, use that
-          ) || {},                                                    //    - Default state value
+        _state=vnode.s=(                                              // b. Get the current state from the DOM child and keep
+                                                                      //    a copy in the vnode object.
+          _child                                                      //    Separate comparison logic if there is a child or not
+            ? ((_child.a == vnode.$)                                  //    - If the element has changed, bail
+                && (vnode.s                                           //    - If there is a state in the VNode, prefer it
+                || _child.s))                                         //    - If there is a state in the DOM node, fall back to it
+            : vnode.s                                                 //    - If there is no element, use VNode state, if present
+        ) || {},                                                      //    - Default state value
         _hooks={                                                      // c. Prepare the hooks object that will be passed
                                                                       //    down to the functional component
-          s: _state,                                                  //    - The 's' property is keeping a reference to
-                                                                      //      the current element state. (Used above)
           a: vnode.$,                                                 //    - The 'a' property is keeping a reference
                                                                       //      to the element (property '$') and is used
                                                                       //      for space-optimal assignment of the tag to
                                                                       //      the DOM element through Object.assign in the
                                                                       //      Update Element phase later.
+          s: _state,                                                  //    - The 's' property is keeping a reference to
+                                                                      //      the current element state. (Used above)
           m: [],                                                      //    - The 'm' property contains the `mount` cb
           u: [],                                                      //    - The 'u' property contains the `unmount` cb
           d: []                                                       //    - The 'd' property contains the `update` cb
@@ -171,19 +176,15 @@ module.exports = window;
 
         /* Create new DOM element */
         _new_dom =
-          vnode.removeChild                                           // If this is a DOM element, pass it through ...
-            ? vnode                                                   // Otherwise we prepare the new DOM element in advance
-            : vnode.replace                                           // in order to save a few comparison bytes later.
-              ? document.createTextNode(vnode)
-              : document.createElement(vnode.$);
+          vnode.replace                                               // in order to save a few comparison bytes later.
+            ? document.createTextNode(vnode)
+            : document.createElement(vnode.$);
 
         /* Keep or replace the previous DOM element */
 
         _new_dom =
-          _child                                                      // If we have a previous child we do some reconciliation
-            ? (vnode.removeChild                                      // If it's a DOM element reference, check
-                ? _child != vnode
-                : (_child.$ != vnode.$ && _child.data != vnode))
+          _child                                                      // If we have a previous child, do some reconciliation
+            ? (_child.$ != vnode.$ && _child.data != vnode)           // Check if the node tag has changed.
               ? (
                   dom.replaceChild(                                   // - If not, we replace the old element with the
                     _new_dom,                                         //   new one.
@@ -233,30 +234,32 @@ module.exports = window;
                                                                       // individually.
 
         /* Apply properties to the DOM element */
-        vnode.removeChild ||                                          // If this is a DOM element, don't do anything
-          vnode.replace
-            ? _new_dom.data = vnode                                   // - String nodes update only the text
-            : Object.keys(vnode.a).map(                               // - Element nodes have properties
-                (
-                  key                                                 // 1. The property name
-                ) =>
+        vnode.replace
+          ? _new_dom.data = vnode                                   // - String nodes update only the text
+          : Object.keys(vnode.a).map(                               // - Element nodes have properties
+              (
+                key                                                 // 1. The property name
+              ) =>
 
-                  key == 'style' ?                                    // The 'style' property is an object and must be
-                                                                      // applied recursively.
-                    Object.assign(
-                      _new_dom[key],                                  // '[key]' is shorter than '.style'
-                      vnode.a[key]
-                    )
+                key == 'style' ?                                    // The 'style' property is an object and must be
+                                                                    // applied recursively.
+                  Object.assign(
+                    _new_dom[key],                                  // '[key]' is shorter than '.style'
+                    vnode.a[key]
+                  )
 
-                  : (_new_dom[key] !== vnode.a[key] &&                // All properties are applied directly to DOM, as
-                    (_new_dom[key] = vnode.a[key]))                   // long as they are different than ther value in the
-                                                                      // instance. This includes `onXXX` event handlers.
+                : (_new_dom[key] !== vnode.a[key] &&                // All properties are applied directly to DOM, as
+                  (_new_dom[key] = vnode.a[key]))                   // long as they are different than ther value in the
+                                                                    // instance. This includes `onXXX` event handlers.
 
-              ) &&
-              render(                                                 // Only if we have an element (and not text node)
-                vnode.a.c,                                            // we recursively continue rendering into it's
-                _new_dom                                              // child nodes.
-              )
+            ) && _hooks.r ||                                        // If the user has marked this element as 'raw', do not
+                                                                    // continue to it's children. Failing to do so, will damage
+                                                                    // the element contents
+
+            render(                                                 // Only if we have an element (and not text node)
+              vnode.a.c,                                            // we recursively continue rendering into it's
+              _new_dom                                              // child nodes.
+            )
 
         /* Call life-cycle methods */
 
