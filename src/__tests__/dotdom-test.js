@@ -1443,7 +1443,9 @@ describe('.dom', function () {
             `id=${id}, clicks=${clicks}`
           )
         }
-        const StatefulList = function(props, {items=[]}, setState) {
+        const StatefulList = function(props, {items=[], ofs=0}, setState) {
+          const share = {};
+          Object.assign(share,{ofs});
 
           return dd.H('div',
             dd.H('div',
@@ -1452,19 +1454,19 @@ describe('.dom', function () {
                 e.s = {};
                 items.unshift(e);
                 setState({items});
-              }}, 'Add H'),
+              }}, 'Add Head'),
               dd.H('button', { onclick: () => {
                 items.push(dd.H(StatefulChild, {id: items.length}));
                 setState({items});
-              }}, 'Add T'),
+              }}, 'Add Tail'),
               dd.H('button', { onclick: () => {
                 items.shift();
                 setState({items});
-              }}, 'Rm H'),
+              }}, 'Rm Head'),
               dd.H('button', { onclick: () => {
                 items.pop();
                 setState({items});
-              }}, 'Rm T')
+              }}, 'Rm Tail')
             ),
             dd.H('div', items),
           )
