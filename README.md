@@ -246,6 +246,117 @@ R(
   </tr>
 </table>
 
+#### 5. Keyed Updates
+
+Keyed updates is a useful [reconciliation](https://reactjs.org/docs/reconciliation.html) feature from React that enables the rendering engine to take smart decisions on which elements to update.
+
+A particularly useful case is when you are rendering a dynamic list of elements. Since the rendering engine does not understand _which_ element has changed, it ends-up with wrong updates.
+
+To solve this issue, the VDOM engines use a `key` property that uniquely identifies an element in the tree. However **.dom** solves it, by keeping a copy of the element state in the VDom element instance itself.
+
+This means that you don't need any `key` property, just make sure you return the same VDom instance as before.
+
+If you are creating dynamic elements (eg. an array of vdom elements), **.dom** might have trouble detecting the correct update order. 
+
+<table width="100%">
+  <tr>
+    <th>React</th>
+    <th>.dom</th>
+  </tr>
+  <tr>
+    <td valign="top">
+<pre lang="javascript">
+class Clickable extends React.Component {
+  constructor() {
+    super(...arguments);
+    this.state = {
+      clicks: 0
+    };
+  }
+<br />
+  render() {
+    const {clicks} = this.state;
+    const {ket} = this.props;
+<br />
+    return React.createElement(
+      'button', {
+        onClick() {
+          this.setState({clicks: clicks+1})
+        }
+      }, `clicks=${clicks}, key=${key}`
+    );
+  }
+}
+<br />
+const list = ["first", "second", "third"];
+const components = list.map(key => 
+  React.createElement(Clickable, {key}, null);
+<br />
+ReactDOM.render(
+  React.createElement('div', null,
+    components
+  ),
+  document.body
+);
+</pre>
+    </td>
+    <td valign="top">
+<pre lang="javascript">
+function Clickable(props, state, setState) {
+  const {clicks=0} = state;
+  const {key} = props;
+<br />
+  return H('button',
+    {
+      onclick() {
+        setState({clicks: clicks+1})
+      }
+    },
+    `clicks=${clicks}, key=${key}`
+  );
+}
+<br />
+const list = ["first", "second", "third"];
+const components = list.map(key => 
+  H(Clickable, {key});
+<br />
+R(
+  H('div', components),
+  document.body
+)
+</pre>
+    </td>
+  </tr>
+</table>
+
+Note that the solution above will correctly update the stateful components, even if their order has changed. However, if you want the complete, React-Like functionality that updates individual keys, you can use the `Keyed` plug-in.
+
+```js
+function Container(props, state) {
+  const {components} = props;
+  // The function `K` accepts the component state and an array of components that
+  // contain the `key` property, and returns the same array of components, with their
+  // state correctly manipulated.
+  return H("div", K(state, components));
+}
+```
+
+#### 6. Raw (Unreconciled) Nodes
+
+You can create raw (unreconciled) VDom nodes (eg. that carry an arbitrary HTML content) by setting the `.r` property of the hooks object to any truthy value.
+
+This will disable further reconciliation to the child nodes, and therefore keep your contents intact.
+
+```js
+function Description(props, state, setState, hooks) {
+  const { html } = props;
+  hooks.r = 1; // Enable raw mode
+  return H('div', {
+    innerHTML: html
+  })
+}
+```
+
 ## API Reference
 
 ### Render `R( VNode, DOMElement )`
@@ -380,6 +491,33 @@ Since the project's focus is the small size, it is lacking sanity checks. This m
   // *NEVER* do this!
   R(H(MyComponent, {$: 'Foo'}), document.body)
   ```
+
+## Plugin Reference
+
+### Keyed Update List `K(state, components)`
+
+> In `plugin-keyed.min.js`
+
+Ensures the state of the components in the list is synchronized, according to their `key` property. This enables you to do react-like keyed updates like so:
+
+```js
+function ValueRenderer(...) { 
+  ...
+}
+
+function MyComponent(props, state) {
+  const { values } = props;
+  const components = values.map(value => {
+    H(ValueRenderer, {
+      key: value,
+      value: value
+    });
+  })
+
+  // Synchronize state of components, based on their key
+  return H('div', K(state, components))
+}
+```
 
 ## Contribution
 
