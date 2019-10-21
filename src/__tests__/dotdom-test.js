@@ -112,6 +112,15 @@ describe('.dom', function () {
         });
       });
 
+      it('should accept integers as children', function () {
+        const vdom = dd.H('div', null, 1, 2);
+
+        expect(vdom.$).toEqual('div');
+        expect(vdom.a).toEqual({
+          c: [ 1, 2 ]
+        });
+      });
+
     });
 
     describe('Proxy', function () {
@@ -197,6 +206,17 @@ describe('.dom', function () {
 
         expect(dom.innerHTML).toEqual(
           '<div>foo</div>'
+        );
+      });
+
+      it('should render integer children', function () {
+        const dom = document.createElement('div');
+        const vdom = dd.H('div', null, [1, 2, 3]);
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div>123</div>'
         );
       });
 
