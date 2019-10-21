@@ -8,7 +8,7 @@ const gzip = require("gulp-gzip");
 const brotli = require("gulp-brotli");
 
 const babel = require("gulp-babel");
-const uglify = require("gulp-uglify-es").default;
+const uglify = require("gulp-terser");
 
 const clone = require("gulp-clone");
 const gulpMerge = require("gulp-merge");
@@ -19,6 +19,9 @@ const useBrotli = process.env.ENABLE_BROTLI || false;
 
 const uglifyOptions = {
   ecma: 6,
+  compress: {
+    passes: 2,
+  },
   mangle: {
     reserved: [],
     toplevel: true
@@ -85,6 +88,18 @@ const getBaseStream = (src) => {
     })
   );
 };
+
+// /**
+//  * Trims the tailing ';' to save an extra byte
+//  */
+// const pprint = (what) => {
+//   function filter(file, enc, cb) {
+//     console.log(what);
+//     cb(null, file);
+//   }
+
+//   return through.obj(filter);
+// };
 
 /**
  * Wraps the input stream with uglify
@@ -187,7 +202,7 @@ gulp.task("build:plugins:js", () => {
   ));
 
   args.push(null);
-  return gulpMerge.apply(null, args);
+  return Promise.resolve(gulpMerge.apply(null, args));
 });
 
 gulp.task("build:plugins:gz", () => {
@@ -197,37 +212,37 @@ gulp.task("build:plugins:gz", () => {
   ));
 
   args.push(null);
-  return gulpMerge.apply(null, args);
+  return Promise.resolve(gulpMerge.apply(null, args));
 });
 
 gulp.task("build:js", () => {
-  return getBuildSource(
+  return Promise.resolve(getBuildSource(
     "src/dotdom.js",
     "dotdom.min"
-  );
+  ));
 });
 
 gulp.task("build:gz", () => {
-  return getBuildCompressed(
+  return Promise.resolve(getBuildCompressed(
     "src/dotdom.js",
     "dotdom.min"
-  );
+  ));
 });
 
-gulp.task("build:plugins", ["build:plugins:js", "build:plugins:gz"]);
-gulp.task("build", ["build:js", "build:gz", "build:plugins"]);
+gulp.task("build:plugins", gulp.series("build:plugins:js", "build:plugins:gz"));
+gulp.task("build", gulp.series("build:js", "build:gz", "build:plugins"));
 
-gulp.task("watch", () => {
-  const watcher = gulp.watch("./src/**/*.js", ["build:js"]);
-  watcher.on("change", function(event) {
-    gutil.log(
-      "File",
-      gutil.colors.magenta(event.path),
-      "was",
-      gutil.colors.cyan(event.type)
-    );
-  });
-  return watcher;
-});
+// gulp.task("watch", () => {
+//   const watcher = gulp.watch("./src/**/*.js", ["build:js"]);
+//   watcher.on("change", function(event) {
+//     gutil.log(
+//       "File",
+//       gutil.colors.magenta(event.path),
+//       "was",
+//       gutil.colors.cyan(event.type)
+//     );
+//   });
+//   return watcher;
+// });
 
-gulp.task("default", ["build", "watch"]);
+gulp.task("default", gulp.series("build"));
