@@ -104,11 +104,15 @@ module.exports = window;
   let render = window.R = (
     vnodes,
     dom,
-    _old_index = dom.e || {},
-    _new_index = (dom.e = {}),
+
+    // Keep a reference to the previous element cache and create
+    // a new one where we are going to keep track of the newly created
+    // DOM elements.
+    _old_cache = dom.e || {},
+    _new_cache = (dom.e = {}),
 
     /**
-     * Recursively expand stateful components
+     * Recursively expands stateful components
      *
      * @param {VDom} vnode - The virtual node that might or might not be a component
      * @param {Object} hooks - The hooks and node meta-data
@@ -174,11 +178,11 @@ module.exports = window;
           render(                                                       // Only if we have an element (and not text node)
             vnode.a.c,                                                  // we recursively continue rendering into it"s
             node                                                        // child nodes.
-          )) || callLifecycleMethods(hooks.d)
+          ))
         : (node.data != vnode) &&                                       // - String nodes update only the text content is changed
           (node.data = vnode),
       Object.assign(node, hooks),
-      _new_index[hooks.k] = node
+      _new_cache[hooks.k] = node
     ),
 
     _index = {},
@@ -199,7 +203,7 @@ module.exports = window;
           )                                                           // (Note that text nodes intentionally get the
         ),                                                            // implicit key "undefined")
 
-        _prevnode = _old_index[_key],
+        _prevnode = _old_cache[_key],
 
         _hooks = {                                                    // Prepare the hooks array that is going to be passed
                                                                       // as an argument to the stateful components as argument.
@@ -229,14 +233,14 @@ module.exports = window;
                                                                       // current function call.
 
               (_reorder_flag |=                                       // If the node is correctly ordered, then the key of the
-                ((dom.childNodes[vnode] || _xvnode).k != _key)          // previous node should be the expected.
+                ((dom.childNodes[idx] || _xvnode).k != _key)          // previous node should be the expected.
               )
                 ? dom.insertBefore(                                   // a. If the node should be re-ordered, place it right after
                     _prevnode ||                                      //    the last known item.
                       (_xvnode.$
                         ? document.createElement(_xvnode.$)
                         : document.createTextNode(_xvnode)),
-                    dom.childNodes[vnode]
+                    dom.childNodes[idx]
                   )
                 : _prevnode                                           // b. Otherwise keep the reference
             ),
@@ -249,15 +253,15 @@ module.exports = window;
         )
 
     ) &&
-    Object.keys(_old_index).map(
-      (key) => _new_index[key] || (
+    Object.keys(_old_cache).map(
+      (key) => _new_cache[key] || (
         callLifecycleMethods(
-          _old_index[key].u,
-          _old_index[key]
+          _old_cache[key].u,
+          _old_cache[key]
         ) &&
         render(
           [],
-          dom.removeChild(_old_index[key])
+          dom.removeChild(_old_cache[key])
         )
       )
     )
