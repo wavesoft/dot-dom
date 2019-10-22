@@ -43,9 +43,9 @@ module.exports = window;
         $: element,                                                   // "$" holds the name or function passed as
                                                                       // first argument
 
-        a: (!props || props.$ || props.concat)                        // If the props argument is false/null, a renderable
+        a: (!props || props.$ || props.concat || props.toFixed)       // If the props argument is false/null, a renderable
                                                                       // VNode, a string, an array (.concat exists on both
-                                                                      // strings and arrays), or a DOM element, then ...
+                                                                      // strings and arrays), or a number ...
 
             ? {c: [].concat(props || [], ...children)}                // ... create props just with children
             : ((props.c = [].concat(...children)), props)             // ... otherwise append "c" to the property set
