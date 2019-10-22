@@ -112,7 +112,6 @@ const P = (what, v) => {
     _index = {},
     _old_index = dom.e || {},
     _new_index = (dom.e = {}),
-    _lastNode = dom.childNodes[0],
     _reorder_flag,
 
     /**
@@ -213,7 +212,7 @@ const P = (what, v) => {
                                                                       // meta-data in the instance of the VNode itself
                                                                       //
           k: _key,                                                    //    - The 'k' property keeps the reconciliation key
-          s: (_prevnode || _reserved).s || {},                        //    - The 's' property keeps the state of the object
+          s: (_prevnode || vnode).s || {},                            //    - The 's' property keeps the state of the object
           m: [],                                                      //    - The 'm' property contains the `mount` cb
           u: [],                                                      //    - The 'u' property contains the `unmount` cb
           d: []                                                       //    - The 'd' property contains the `update` cb
@@ -227,7 +226,7 @@ const P = (what, v) => {
       ) =>
         callLifecycleMethods(
           updateDom(
-            (_lastNode =                                               // Keep track of the node we just added because we will need
+            (_reserved =                                              // Keep track of the node we just added because we will need
                                                                       // it for the next iteration and for the last part of the
                                                                       // current function call.
 
@@ -239,7 +238,7 @@ const P = (what, v) => {
                       (_xvnode.$
                         ? document.createElement(_xvnode.$)
                         : document.createTextNode(_xvnode)),
-                    _lastNode && _lastNode.nextSibling
+                    dom.childNodes[idx]
                   )
                 : _prevnode                                           // b. Otherwise keep the reference
             ),
@@ -248,7 +247,7 @@ const P = (what, v) => {
           ) == _prevnode
             ? _hooks.d                                                // .d - Update if it's an old node
             : _hooks.m,                                               // .m - Otherwise this is a new node, call mount
-          _lastNode
+          _reserved
         )
 
     ) &&
