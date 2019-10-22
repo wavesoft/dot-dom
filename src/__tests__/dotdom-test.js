@@ -121,6 +121,15 @@ describe('.dom', function () {
         });
       });
 
+      it('should accept integer as first child', function () {
+        const vdom = dd.H('div', 1);
+
+        expect(vdom.$).toEqual('div');
+        expect(vdom.a).toEqual({
+          c: [ 1 ]
+        });
+      });
+
     });
 
     describe('Proxy', function () {

@@ -65,6 +65,7 @@ module.exports = window;
   let callLifecycleMethods = (methods = [], arg1) =>
       methods.map(e => e(arg1))                                       // Fan-out to the lifecycle methods
 
+
   /**
    * Helper function that wraps an element shorthand function with a proxy
    * that can be used to append class names to the instance.
@@ -94,6 +95,7 @@ module.exports = window;
           )
       }
     );
+
 
   /**
    * Main render function
@@ -265,6 +267,7 @@ module.exports = window;
         )
       )
     )
+
 
   /**
    * Expose as `H` a proxy around the createElement function that can either be used
