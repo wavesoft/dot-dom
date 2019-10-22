@@ -109,9 +109,9 @@ const P = (what, v) => {
   let render = window.R = (
     vnodes,
     dom,
-    _index = {},
     _old_index = dom.e || {},
     _new_index = (dom.e = {}),
+    _index = {},
     _reorder_flag,
 
     /**
@@ -199,7 +199,7 @@ const P = (what, v) => {
         _key = (                                                      // Calculate the node reconciliation key
           (vnode.a || vnode).k ||                                     // a. Either use the user-given value
           ('' + vnode.$                                               // b. Or compose an ID using the node type
-              + (_index[vnode.$] = 0|_index[vnode.$] + 1)             //    and a monotonically incrementing number
+              + (_index[vnode.$] = _index[vnode.$] | 0 + 1)             //    and a monotonically incrementing number
           )                                                           // (Note that text nodes intentionally get the
         ),                                                            // implicit key 'undefined')
 
@@ -226,7 +226,9 @@ const P = (what, v) => {
       ) =>
         callLifecycleMethods(
           updateDom(
-            (_reserved =                                              // Keep track of the node we just added because we will need
+            // (We are recycling the no-longer used `idx` property
+            //  as a gzip optimization)
+            (idx =                                                    // Keep track of the node we just added because we will need
                                                                       // it for the next iteration and for the last part of the
                                                                       // current function call.
 
@@ -247,7 +249,7 @@ const P = (what, v) => {
           ) == _prevnode
             ? _hooks.d                                                // .d - Update if it's an old node
             : _hooks.m,                                               // .m - Otherwise this is a new node, call mount
-          _reserved
+          idx
         )
 
     ) &&
@@ -270,11 +272,11 @@ const P = (what, v) => {
     createElement,
     {
       get: (targetFn, tagName) =>
-        targetFn[tagName] ||                                          // Make sure we don't override any native
+        createElement[tagName] ||                                          // Make sure we don't override any native
                                                                       // property or method from the base function
 
         wrapClassProxy(                                               // Otherwise, for every tag we extract a
-          createElement.bind(targetFn, tagName)                       // class-wrapped crateElement method, bound to the
+          createElement.bind(createElement, tagName)                       // class-wrapped crateElement method, bound to the
         )                                                             // tag named as the property requested. We are not
                                                                       // using 'this', therefore we are using any reference
     }                                                                 // that could lead on reduced code footprint.
