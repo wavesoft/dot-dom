@@ -25,11 +25,6 @@
 var window = typeof window !== "undefined" && window || {};
 module.exports = window;
 
-const P = (what, v) => {
-  console.log(what, v);
-  return v;
-}
-
 /* END NPM-GLUE */
 
 ((window) => {
@@ -45,7 +40,7 @@ const P = (what, v) => {
   let createElement = (element, props={}, ...children) => (
       {
 
-        $: element,                                                   // '$' holds the name or function passed as
+        $: element,                                                   // "$" holds the name or function passed as
                                                                       // first argument
 
         a: (!props || props.$ || props.concat)                        // If the props argument is false/null, a renderable
@@ -53,7 +48,7 @@ const P = (what, v) => {
                                                                       // strings and arrays), or a DOM element, then ...
 
             ? {c: [].concat(props || [], ...children)}                // ... create props just with children
-            : ((props.c = [].concat(...children)), props)             // ... otherwise append 'c' to the property set
+            : ((props.c = [].concat(...children)), props)             // ... otherwise append "c" to the property set
                                                                       // (the .concat ensures that arrays of children
                                                                       // will be flattened into a single array).
       }
@@ -91,8 +86,8 @@ const P = (what, v) => {
               (_instance=targetFn(...args))                           // We first create the Virtual DOM instance by
                                                                       // calling the wrapped factory function
 
-                .a.className = (_instance.a.className || ' ')         // And then we assign the class name,
-                               + ' ' + className,                     // concatenating to the previous value
+                .a.className = (_instance.a.className || " ")         // And then we assign the class name,
+                               + " " + className,                     // concatenating to the previous value
 
               _instance                                               // And finally we return the instance
             )
@@ -111,8 +106,6 @@ const P = (what, v) => {
     dom,
     _old_index = dom.e || {},
     _new_index = (dom.e = {}),
-    _index = {},
-    _reorder_flag,
 
     /**
      * Recursively expand stateful components
@@ -122,7 +115,7 @@ const P = (what, v) => {
      * @return {VDom} Returns the VDom element
      */
     expandStateful = (vnode, hooks) =>
-      (vnode.$ || hooks).bind                                           // Avoid 'undefined' case when resolving bind
+      (vnode.$ || hooks).bind                                           // Avoid "undefined" case when resolving bind
         ? expandStateful(
             vnode.$(
               vnode.a,                                                  // 1. The component properties
@@ -158,10 +151,10 @@ const P = (what, v) => {
               key                                                       // 1. The property name
             ) =>
 
-              key == 'style' ?                                          // The 'style' property is an object and must be
+              key == "style" ?                                          // The "style" property is an object and must be
                                                                         // applied recursively.
                 Object.assign(
-                  node[key],                                            // '[key]' is shorter than '.style'
+                  node[key],                                            // "[key]" is shorter than ".style"
                   vnode.a[key]
                 )
 
@@ -174,19 +167,22 @@ const P = (what, v) => {
                                                                         // in order to enable dynamic re-ordering when re-ordering
                                                                         // the VDom instance
 
-          (hooks.r ||                                                   // If the user has marked this element as 'raw', do not
-                                                                        // continue to it's children. Failing to do so, will damage
+          (hooks.r ||                                                   // If the user has marked this element as "raw", do not
+                                                                        // continue to it"s children. Failing to do so, will damage
                                                                         // the element contents
 
           render(                                                       // Only if we have an element (and not text node)
-            vnode.a.c,                                                  // we recursively continue rendering into it's
+            vnode.a.c,                                                  // we recursively continue rendering into it"s
             node                                                        // child nodes.
           )) || callLifecycleMethods(hooks.d)
         : (node.data != vnode) &&                                       // - String nodes update only the text content is changed
           (node.data = vnode),
       Object.assign(node, hooks),
       _new_index[hooks.k] = node
-    )
+    ),
+
+    _index = {},
+    _reorder_flag
 
   ) =>
 
@@ -198,10 +194,10 @@ const P = (what, v) => {
 
         _key = (                                                      // Calculate the node reconciliation key
           (vnode.a || vnode).k ||                                     // a. Either use the user-given value
-          ('' + vnode.$                                               // b. Or compose an ID using the node type
-              + (_index[vnode.$] = _index[vnode.$] | 0 + 1)             //    and a monotonically incrementing number
+          (" " + vnode.$                                              // b. Or compose an ID using the node type
+               + (_index[vnode.$] = (_index[vnode.$] || 1) + 1)       //    and a monotonically incrementing number
           )                                                           // (Note that text nodes intentionally get the
-        ),                                                            // implicit key 'undefined')
+        ),                                                            // implicit key "undefined")
 
         _prevnode = _old_index[_key],
 
@@ -211,11 +207,11 @@ const P = (what, v) => {
                                                                       // We are also exploiting this object to perserve imporarnt
                                                                       // meta-data in the instance of the VNode itself
                                                                       //
-          k: _key,                                                    //    - The 'k' property keeps the reconciliation key
-          s: (_prevnode || vnode).s || {},                            //    - The 's' property keeps the state of the object
-          m: [],                                                      //    - The 'm' property contains the `mount` cb
-          u: [],                                                      //    - The 'u' property contains the `unmount` cb
-          d: []                                                       //    - The 'd' property contains the `update` cb
+          k: _key,                                                    //    - The "k" property keeps the reconciliation key
+          s: (_prevnode || vnode).s || {},                            //    - The "s" property keeps the state of the object
+          m: [],                                                      //    - The "m" property contains the `mount` cb
+          u: [],                                                      //    - The "u" property contains the `unmount` cb
+          d: []                                                       //    - The "d" property contains the `update` cb
         },
 
         _xvnode = expandStateful(                                     // Recursively expand the stateful component functions until
@@ -226,36 +222,39 @@ const P = (what, v) => {
       ) =>
         callLifecycleMethods(
           updateDom(
-            // (We are recycling the no-longer used `idx` property
-            //  as a gzip optimization)
-            (idx =                                                    // Keep track of the node we just added because we will need
+            // (We are recycling the no-longer used `vnode` property
+            //  as a compression optimization)
+            (vnode =                                                    // Keep track of the node we just added because we will need
                                                                       // it for the next iteration and for the last part of the
                                                                       // current function call.
 
               (_reorder_flag |=                                       // If the node is correctly ordered, then the key of the
-                ((dom.childNodes[idx] || _xvnode).k != _key)          // previous node should be the expected.
+                ((dom.childNodes[vnode] || _xvnode).k != _key)          // previous node should be the expected.
               )
                 ? dom.insertBefore(                                   // a. If the node should be re-ordered, place it right after
                     _prevnode ||                                      //    the last known item.
                       (_xvnode.$
                         ? document.createElement(_xvnode.$)
                         : document.createTextNode(_xvnode)),
-                    dom.childNodes[idx]
+                    dom.childNodes[vnode]
                   )
                 : _prevnode                                           // b. Otherwise keep the reference
             ),
             _xvnode,
             _hooks
           ) == _prevnode
-            ? _hooks.d                                                // .d - Update if it's an old node
+            ? _hooks.d                                                // .d - Update if it"s an old node
             : _hooks.m,                                               // .m - Otherwise this is a new node, call mount
-          idx
+          vnode
         )
 
     ) &&
     Object.keys(_old_index).map(
       (key) => _new_index[key] || (
-        callLifecycleMethods(_old_index[key].u, _old_index[key]) &&
+        callLifecycleMethods(
+          _old_index[key].u,
+          _old_index[key]
+        ) &&
         render(
           [],
           dom.removeChild(_old_index[key])
@@ -265,20 +264,20 @@ const P = (what, v) => {
 
   /**
    * Expose as `H` a proxy around the createElement function that can either be used
-   * either as a function (ex. `H('div')`, or as a proxied method `H.div()` for creating
+   * either as a function (ex. `H("div")`, or as a proxied method `H.div()` for creating
    * virtual DOM elements.
    */
   window.H = new Proxy(
     createElement,
     {
       get: (targetFn, tagName) =>
-        createElement[tagName] ||                                          // Make sure we don't override any native
+        createElement[tagName] ||                                          // Make sure we don"t override any native
                                                                       // property or method from the base function
 
         wrapClassProxy(                                               // Otherwise, for every tag we extract a
           createElement.bind(createElement, tagName)                       // class-wrapped crateElement method, bound to the
         )                                                             // tag named as the property requested. We are not
-                                                                      // using 'this', therefore we are using any reference
+                                                                      // using "this", therefore we are using any reference
     }                                                                 // that could lead on reduced code footprint.
   )
 

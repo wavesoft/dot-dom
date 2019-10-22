@@ -1622,6 +1622,26 @@ describe('.dom', function () {
 
       });
 
+      it('should correctly update cache index', function () {
+        const dom = document.createElement('div');
+        const {div} = dd.H;
+        const vdom = [
+          div(), div(), div()
+        ]
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div></div><div></div><div></div>'
+        );
+
+        expect(dom.e).toEqual({
+          ' div2': dom.childNodes[0],
+          ' div3': dom.childNodes[1],
+          ' div4': dom.childNodes[2],
+        });
+      })
+
     });
 
     describe('Tag Shorthands', function () {
@@ -1673,30 +1693,6 @@ describe('.dom', function () {
           '<div class="foo class1 class2 class3"></div>'
         );
       })
-    });
-
-    describe('Internals', function () {
-
-      it('should correctly update cache index', function () {
-        const dom = document.createElement('div');
-        const {div} = dd.H;
-        const vdom = [
-          div(), div(), div()
-        ]
-
-        dd.R(vdom, dom)
-
-        expect(dom.innerHTML).toEqual(
-          '<div></div><div></div><div></div>'
-        );
-
-        expect(dom.e).toEqual({
-          'div0': dom.childNodes[0],
-          'div1': dom.childNodes[1],
-          'div2': dom.childNodes[2],
-        });
-      })
-
     });
 
   });
