@@ -1,0 +1,22 @@
+<div class="topic-nav">
+    {{ if .Get 1 }}
+    <div>
+      <div>Previous Topic</div>
+      <div>
+        <a href="{{ .Get 1 | ref . }}" class="book-btn">
+          &larr; {{  with .Get 1 | .Site.GetPage }}{{ .Title }}{{ end }}
+        </a>
+      </div>
+    </div>
+    {{ end }}
+    {{ if .Get 0 }}
+    <div class="right">
+      <div>Next Topic</div>
+      <div>
+        <a href="{{ .Get 0 | ref . }}" class="book-btn">
+          {{  with .Get 0 | .Site.GetPage }}{{ .Title }}{{ end }} &rarr;
+        </a>
+      </div>
+    </div>
+    {{ end }}
+</div>

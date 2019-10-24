@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Installation on .dom Documentation</title>
+    <link>http://example.org/docs/install/</link>
+    <description>Recent content in Installation on .dom Documentation</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="http://example.org/docs/install/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Getting Started</title>
+      <link>http://example.org/docs/install/getting-started/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/install/getting-started/</guid>
+      <description> Getting Started Welcome to the exciting world of .dom.
+There are various ways you can experiment or integrate .dom in your use case.
+ You can use the on-line playground You can integrate .dom in your website You can create a web-app with it  Or you can keep reading to learn more about it.
+Next Topic  Adding .dom in your website &amp;rarr;     </description>
+    </item>
+    
+    <item>
+      <title>Adding .dom in your website</title>
+      <link>http://example.org/docs/install/add-to-website/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/install/add-to-website/</guid>
+      <description>Adding .dom in your website Use it according to your needs.
+The .dom library is quite agile and can be used either in existing websites, where you just want to add some interactivity, or in a modern single-page app.
+Boilerplate If you want to start from scratch, you can use the following HTML boilerplate:
+&amp;lt;!DOCTYPE html&amp;gt; &amp;lt;html lang=&amp;#34;en&amp;#34;&amp;gt; &amp;lt;head&amp;gt; &amp;lt;title&amp;gt;My .dom App&amp;lt;/title&amp;gt; &amp;lt;!-- The .dom library sources --&amp;gt; &amp;lt;script src=&amp;#34;https://cdn.</description>
+    </item>
+    
+    <item>
+      <title>Creating a WebApp</title>
+      <link>http://example.org/docs/install/create-web-app/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/docs/install/create-web-app/</guid>
+      <description>Creating a WebApp Since .dom natively supports JSX integration you can use a similar tooling like React to create a single-page application.
+In this page we are describing step-by-step the process you should follow in order to create a single-page application using webpack and babel.
+Starting a node project First we should start by creating a blank new node.js project:
+mkdir my-dotdom-app; cd my-dotdom-app yarn init -y Setting-up Dependencies We are going to use webpack as our main build tool.</description>
+    </item>
+    
+  </channel>
+</rss>

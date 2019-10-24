@@ -1,0 +1,10 @@
+baseURL = "http://example.org/"
+languageCode = "en-us"
+title = ".dom Documentation"
+theme = "book"
+pygmentsCodeFences = true
+
+[params]
+  dotdomVersion = "0.4.0"
+  dotdomCDNLink = "https://cdn.jsdelivr.net/gh/wavesoft/dot-dom/dotdom.min.js"
+  dotdomCDNIntegrity = "sha384-iYmnbr5e65SuCt6QZydA+bdS7Lojxq0yNp0S/c68OsYQa8bklHnsBiWC9bE6GhJW"
