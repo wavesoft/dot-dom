@@ -1,4 +1,4 @@
-baseURL = "http://example.org/"
+baseURL = "wavesoft.github.io/dot-dom/"
 languageCode = "en-us"
 title = ".dom Documentation"
 theme = "book"

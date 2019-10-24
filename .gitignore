@@ -38,3 +38,7 @@ jspm_packages
 
 # index.html -- used for user testing
 index.html
+
+# Generated docs
+docs/public
+docs/**/_gen
