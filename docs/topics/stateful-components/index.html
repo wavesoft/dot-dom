@@ -1,0 +1,143 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta property="og:title" content="Stateful Components"><meta property="og:description" content="Stateful Components Components can only carry properties given, but can also maintain their own state.
+For example, consider the case of a spinner widget, where the user has two buttons : one to increment the value and one to decrement, like so:
+const { div, button } = H; function Spinner(props) { return div.rowflex( button(&#34;-&#34;), div(`${props.value}`), button(&#34;&#43;&#34;) ); } R(H(Spinner, {value: 0}), document.body); But what should happen when the user clicks the &ldquo;&#43;&rdquo; or the &ldquo;-&rdquo; button?"><meta property="og:type" content="article"><meta property="og:url" content="wavesoft.github.io/dot-dom/docs/topics/stateful-components/"><title>Stateful Components | .dom Documentation</title><link rel=icon href=/wavesoft.github.io/dot-dom/favicon.png type=image/x-icon><link rel=stylesheet href=/wavesoft.github.io/dot-dom/book.min.1b994bd28c6ce2255f069b6bf6837b4d396307637fc48d61dcb2a6caac26e031.css integrity="sha256-G5lL0oxs4iVfBptr9oN7TTljB2N/xI1h3LKmyqwm4DE="><script defer src=/wavesoft.github.io/dot-dom/search.min.454b1741c56c3d63e17429d6af709553147b98dbbef62470b4675f3df1baf44b.js integrity="sha256-RUsXQcVsPWPhdCnWr3CVUxR7mNu&#43;9iRwtGdfPfG69Es="></script><script src=https://pagecdn.io/lib/ace/1.4.6/ace.js integrity="sha256-CVkji/u32aj2TeC+D13f7scFSIfphw2pmu4LaKWMSY8=" crossorigin=anonymous></script><script src=/dot-dom/js/dotdom.min.js></script><script src=/dot-dom/js/dotdom-example.js></script><link rel=stylesheet href=/dot-dom/css/styles.css></head><body><input type=checkbox class=hidden id=menu-control><main class="flex container"><aside class="book-menu fixed"><nav><h2 class=book-brand><a href=wavesoft.github.io/dot-dom/><span>.dom Documentation</span></a></h2><div class=book-search><input type=text placeholder=Search id=book-search-input maxlength=64><div class="book-search-spinner spinner hidden"></div><ul id=book-search-results></ul></div><ul><li><span>Installation</span><ul><li><a href=wavesoft.github.io/dot-dom/docs/install/getting-started/>Getting Started</a></li><li><a href=wavesoft.github.io/dot-dom/docs/install/add-to-website/>Adding .dom in your website</a></li><li><a href=wavesoft.github.io/dot-dom/docs/install/create-web-app/>Creating a WebApp</a></li><li><a href=wavesoft.github.io/dot-dom/docs/install/serving-compressed/>Serving GZ version of .dom</a></li></ul></li><li><span>Topics</span><ul><li><a href=wavesoft.github.io/dot-dom/docs/topics/quick-start/>Quick Start</a></li><li><a href=wavesoft.github.io/dot-dom/docs/topics/declarative/>Declarative DOM</a></li><li><a href=wavesoft.github.io/dot-dom/docs/topics/components/>Components</a></li><li><a href=wavesoft.github.io/dot-dom/docs/topics/stateful-components/ class=active>Stateful Components</a></li><li><a href=wavesoft.github.io/dot-dom/docs/topics/component-lifecycle/>Component Lifecycle</a></li><li><a href=wavesoft.github.io/dot-dom/docs/topics/raw/>Raw Components</a></li><li><a href=wavesoft.github.io/dot-dom/docs/topics/keyed-updates/>Keyed Updates</a></li></ul></li><li><span>API Reference</span><ul><li><a href=wavesoft.github.io/dot-dom/docs/api/globals/>Globals</a></li><li><a href=wavesoft.github.io/dot-dom/docs/api/component-functions/>Component Functions</a></li></ul></li></ul></nav><script>(function(){var menu=document.querySelector("aside.book-menu nav");addEventListener("beforeunload",function(event){localStorage.setItem("menu.scrollTop",menu.scrollTop);});menu.scrollTop=localStorage.getItem("menu.scrollTop");})();</script></aside><div class=book-page><header class="flex align-center justify-between book-header"><label for=menu-control><img src=/wavesoft.github.io/dot-dom/svg/menu.svg alt=Menu></label>
+<strong>Stateful Components</strong></header><article class=markdown><h1 id=stateful-components>Stateful Components</h1><p>Components can only carry properties given, but can also maintain their own state.</p><p>For example, consider the case of a spinner widget, where the user has two buttons : one to increment the value and one to decrement, like so:</p><div class=dot-dom-example><div class=editor><div>const { div, button } = H;
+function Spinner(props) {
+return div.rowflex(
+button(&#34;-&#34;),
+div(`${props.value}`),
+button(&#34;&#43;&#34;)
+);
+}
+R(H(Spinner, {value: 0}), document.body);</div></div><div class=preview><div></div></div></div><p>But what should happen when the user clicks the &ldquo;+&rdquo; or the &ldquo;-&rdquo; button? To answer this question we will introduce you to the <em>Component State</em></p><hr><h2 id=component-state>Component State</h2><p>Every component is created with an empty <em>state</em> object, initialized to <code>{ }</code>. This object persists throughout the life-cycle of the component and is disposed when unmounted.</p><p>The component can update it&rsquo;s state by calling the <code>setState</code> method, giving the new values for the state properties. This will cause the element to re-render in order to apply the new values.</p><p>The <code>state</code> and <code>setState</code> variables are passed as arguments to the component function, right after the <code>props</code> object:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>Welcome</span>(<span style=color:#a6e22e>props</span>, <span style=color:#a6e22e>state</span>, <span style=color:#a6e22e>setState</span>) {
+    <span style=color:#75715e>// ...    
+</span><span style=color:#75715e></span>}
+</code></pre></div><p>This means that we can now re-write our spinner widget using the state object like so:</p><div class=dot-dom-example><div class=editor><div>const { div, button } = H;
+function Spinner(
+props,
+{value=props.value},
+setState
+) {
+return div.rowflex(
+// Decrement button
+button({
+onclick() {
+setState({ value: value - 1 })
+}
+}, &#34;-&#34;),
+// Value label
+div(`${value}`),
+// Increment button
+button({
+onclick() {
+setState({ value: value &#43; 1 })
+}
+}, &#34;&#43;&#34;)
+);
+}
+R(H(Spinner, {value: 0}), document.body);</div></div><div class=preview><div></div></div></div><hr><h2 id=state-propagation>State Propagation</h2><p>When designing stateful components, it&rsquo;s important to find out where the state of your application will be. It is a good practice to keep the state to the <strong>top-most component</strong> and pass down portions of it, to stateless components.</p><p>As an exception of this rule, it is also acceptable to use stateful components that maintain a temporary state of a user-interfacing component.</p><h3 id=example>Example</h3><p>Consider the more complicated example of a <em>ToDo List</em> App. In this example, we are using three kinds of components:</p><ul><li>The <code>TodoList</code> component that renders the items and the input field</li><li>The <code>TodoItem</code> component that renders a single item and allows the user to mark it as completed.</li><li>The <code>InputField</code> where the user enters the new item text</li></ul><p>In such cases it&rsquo;s important to find out where the state is going to be maintained. It is typically a good practice to keep the state to the root component and pass down portions of it to stateless components.</p><p>Let&rsquo;s start designing our leaf components. First the <strong>TodoItem</strong> component:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>TodoItem</span>({ <span style=color:#a6e22e>text</span>, <span style=color:#a6e22e>completed</span>, <span style=color:#a6e22e>oncomplete</span> }) {
+  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>div</span>.<span style=color:#a6e22e>rowflex</span>(
+    <span style=color:#a6e22e>button</span>(
+      { <span style=color:#a6e22e>onclick</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>oncomplete</span>}, 
+      <span style=color:#e6db74>&#34;✔︎&#34;</span>
+    ),
+    <span style=color:#a6e22e>div</span>[<span style=color:#a6e22e>completed</span> <span style=color:#f92672>?</span> <span style=color:#e6db74>&#34;strike&#34;</span> <span style=color:#f92672>:</span> <span style=color:#e6db74>&#34;&#34;</span>](<span style=color:#a6e22e>text</span>)
+  );
+}
+</code></pre></div><p>This stateless component accepts the following properties:</p><ul><li><code>text</code> : The text of the eleemtn</li><li><code>completed</code> : A boolean flag that indicates if the item is completed</li><li><code>oncomplete</code> : A callback function to call when the user completes the item</li></ul><p>Then let&rsquo;s design the <strong>InputField</strong> component:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>InputField</span>({ <span style=color:#a6e22e>oncreate</span> }, {<span style=color:#a6e22e>text</span><span style=color:#f92672>=</span><span style=color:#e6db74>&#34;&#34;</span>}, <span style=color:#a6e22e>setState</span>) {
+  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>div</span>.<span style=color:#a6e22e>rowflex</span>(
+    <span style=color:#a6e22e>input</span>({
+      <span style=color:#a6e22e>type</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#39;text&#39;</span>,
+      <span style=color:#a6e22e>value</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>text</span>,
+      <span style=color:#a6e22e>onchange</span>(<span style=color:#a6e22e>e</span>) {
+        <span style=color:#a6e22e>setState</span>({ <span style=color:#a6e22e>text</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>e</span>.<span style=color:#a6e22e>target</span>.<span style=color:#a6e22e>value</span> })
+      }
+    }),
+    <span style=color:#a6e22e>button</span>({
+      <span style=color:#a6e22e>onclick</span>() {
+        <span style=color:#a6e22e>setState</span>({ <span style=color:#a6e22e>text</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#34;&#34;</span> });
+        <span style=color:#a6e22e>oncreate</span>(<span style=color:#a6e22e>text</span>);
+      }
+    }, <span style=color:#e6db74>&#34;Create&#34;</span>)
+  )
+}
+</code></pre></div><blockquote class="book-hint danger"><strong>Important!</strong>
+When in the same handler you call <code>setState</code> and <strong>also</strong> call a handler function that you received as property, make sure to call <code>setState</code> <strong>first</strong> and <strong>then</strong> call-out to the handler.</blockquote><p>This is a stateful component, that uses it&rsquo;s local state <em>only</em> for keeping track of the user input. It still forwards the important events to the parent.</p><p>It accepts the following properties:</p><ul><li><code>oncreate</code> : A callback function that will be called when the user clicks the &ldquo;Create&rdquo; button, passing down the value the user has entered.</li></ul><p>And finally, let&rsquo;s design the <strong>TodoList</strong> component:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>TodoList</span>(<span style=color:#a6e22e>props</span>, {<span style=color:#a6e22e>items</span><span style=color:#f92672>=</span>[]}, <span style=color:#a6e22e>setState</span>) {
+  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>addItem</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>text</span> =&gt; {
+    <span style=color:#a6e22e>setState</span>({
+      <span style=color:#a6e22e>items</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>items</span>.<span style=color:#a6e22e>concat</span>({
+        <span style=color:#a6e22e>text</span>,
+        <span style=color:#a6e22e>completed</span><span style=color:#f92672>:</span> <span style=color:#66d9ef>false</span>
+      })
+    })
+  };
+  <span style=color:#66d9ef>const</span> <span style=color:#a6e22e>checkItem</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>index</span> =&gt; {
+    <span style=color:#a6e22e>items</span>[<span style=color:#a6e22e>index</span>].<span style=color:#a6e22e>completed</span> <span style=color:#f92672>=</span> 
+      <span style=color:#f92672>!</span><span style=color:#a6e22e>items</span>[<span style=color:#a6e22e>index</span>].<span style=color:#a6e22e>completed</span>;
+    <span style=color:#a6e22e>setState</span>({ <span style=color:#a6e22e>items</span> });
+  };
+
+  <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>div</span>(
+    <span style=color:#a6e22e>items</span>.<span style=color:#a6e22e>map</span>((<span style=color:#a6e22e>item</span>, <span style=color:#a6e22e>index</span>) =&gt; <span style=color:#a6e22e>H</span>(<span style=color:#a6e22e>TodoItem</span>, {
+      <span style=color:#a6e22e>text</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>item</span>.<span style=color:#a6e22e>text</span>,
+      <span style=color:#a6e22e>completed</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>item</span>.<span style=color:#a6e22e>completed</span>,
+      <span style=color:#a6e22e>oncomplete</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>checkItem</span>.<span style=color:#a6e22e>bind</span>(<span style=color:#a6e22e>index</span>)
+    })),
+    <span style=color:#a6e22e>H</span>(<span style=color:#a6e22e>InputField</span>, {
+      <span style=color:#a6e22e>oncreate</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>addItem</span>
+    })
+  );
+}
+</code></pre></div><p>And here is what the full example looks like:</p><div class=dot-dom-example><div class=editor><div>const { div, button, input } = H;
+function TodoItem({ text, completed, oncomplete }) {
+return div.rowflex(
+button(
+{ onclick: oncomplete},
+&#34;✔︎&#34;
+),
+div[completed ? &#34;strike&#34; : &#34;&#34;](text)
+);
+}
+function InputField({ oncreate }, {text=&#34;&#34;}, setState) {
+return div.rowflex(
+input({
+type: &#39;text&#39;,
+value: text,
+onchange(e) {
+setState({ text: e.target.value })
+}
+}),
+button({
+onclick() {
+setState({ text: &#34;&#34; });
+oncreate(text);
+}
+}, &#34;Create&#34;)
+)
+}
+function TodoList(props, state, setState) {
+const addItem = text =&gt; {
+setState({
+items: (state.items || []).concat({
+text,
+completed: false
+})
+})
+};
+const checkItem = index =&gt; {
+state.items[index].completed =
+!state.items[index].completed;
+setState({ });
+};
+console.log(state.items);
+return div(
+H(InputField, { oncreate: addItem }),
+(state.items || []).map((item, index) =&gt; H(TodoItem, {
+k: index,
+text: item.text,
+completed: item.completed,
+oncomplete: checkItem.bind(this, index)
+})),
+);
+}
+R(H(TodoList), document.body);</div></div><div class=preview><div></div></div></div><hr><div class=topic-nav><div><div>Previous Topic</div><div><a href=wavesoft.github.io/dot-dom/docs/topics/components/ class=book-btn>&larr; Components</a></div></div><div class=right><div>Next Topic</div><div><a href=wavesoft.github.io/dot-dom/docs/topics/component-lifecycle/ class=book-btn>Component Lifecycle &rarr;</a></div></div></div></article></div><aside class="book-toc level-6 fixed"><nav id=TableOfContents><ul><li><a href=#stateful-components>Stateful Components</a><ul><li><a href=#component-state>Component State</a></li><li><a href=#state-propagation>State Propagation</a><ul><li><a href=#example>Example</a></li></ul></li></ul></li></ul></nav></aside></main></body></html>
