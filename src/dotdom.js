@@ -30,6 +30,16 @@ module.exports = window;
 ((window) => {
 
   /**
+   * Helper method that calls all methods in an array of functions
+   *
+   * @param {Array} methods - The array of methods to call
+   * @param {Object} arg1 - An arbitrary first argument
+   * @param {Object} arg2 - An arbitrary second argument
+   */
+  let callLifecycleMethods = (methods = [], arg1) =>
+      methods.map(e => e(arg1))                                       // Fan-out to the lifecycle methods
+
+  /**
    * Helper for creating new Virtual DOM element
    *
    * @param {String|Function}  element - The element or the component function
@@ -53,18 +63,6 @@ module.exports = window;
                                                                       // will be flattened into a single array).
       }
     )
-
-
-  /**
-   * Helper method that calls all methods in an array of functions
-   *
-   * @param {Array} methods - The array of methods to call
-   * @param {Object} arg1 - An arbitrary first argument
-   * @param {Object} arg2 - An arbitrary second argument
-   */
-  let callLifecycleMethods = (methods = [], arg1) =>
-      methods.map(e => e(arg1))                                       // Fan-out to the lifecycle methods
-
 
   /**
    * Helper function that wraps an element shorthand function with a proxy
@@ -153,10 +151,7 @@ module.exports = window;
     updateDom = (node, vnode, hooks) => (
       vnode.$
         ? Object.keys(vnode.a).map(                                     // - Element nodes have properties
-            (
-              key                                                       // 1. The property name
-            ) =>
-
+            (key) =>                                                    // 1. The property name
               key == "style" ?                                          // The "style" property is an object and must be
                                                                         // applied recursively.
                 Object.assign(
@@ -164,8 +159,8 @@ module.exports = window;
                   vnode.a[key]
                 )
 
-              : (node[key] != vnode.a[key] &&                           // All properties are applied directly to DOM, as
-                (node[key] = vnode.a[key]))                             // long as they are different than ther value in the
+              : (node[key] == vnode.a[key]                              // All properties are applied directly to DOM, as
+                ? node : (node[key] = vnode.a[key]))                    // long as they are different than ther value in the
                                                                         // instance. This includes `onXXX` event handlers.
 
           ) &&
@@ -181,8 +176,8 @@ module.exports = window;
             vnode.a.c,                                                  // we recursively continue rendering into it"s
             node                                                        // child nodes.
           ))
-        : (node.data != vnode) &&                                       // - String nodes update only the text content is changed
-          (node.data = vnode),
+        : (node.data == vnode)                                          // - String nodes update only the text content is changed
+            ? node : (node.data = vnode),
       Object.assign(node, hooks),
       _new_cache[hooks.k] = node
     ),
