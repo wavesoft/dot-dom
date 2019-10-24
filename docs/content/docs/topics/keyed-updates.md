@@ -8,8 +8,7 @@ weight: 10
 
 # Keyed Updates
 
-When reconciling the children of a Virtual Node, `.dom` is using string keys to resolve their order.
-
+Due to it's declarative design, `.dom` can easily calculate the differences between the virtual and the real DOM. However on large sets of elements 
 
 ---
 

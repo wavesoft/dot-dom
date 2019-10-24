@@ -21,7 +21,7 @@ Content-Encoding: gzip
 {{< hint "warning" >}}
 According to HTML standards you should always check the `Accept-Encoding` request header, and proceed with sending the compressed version of the library only if supported.
 
-However, based on recent analytics, more than 99% of the browsers in the market natively support the `gzip` encoding, making this a safe assumption.
+However *all* the browsers in the market natively support the `gzip` encoding, making this a safe assumption.
 {{< /hint >}}
 
 ---
