@@ -531,7 +531,7 @@ describe('.dom', function () {
 
       });
 
-      it('should correctly call `.u.` after setState', function () {
+      it('should correctly call `.d.` after setState', function () {
         const dom = document.createElement('div');
         const dHandler = jest.fn();
         const guardCounter = { c:0 };
