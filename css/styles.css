@@ -30,6 +30,18 @@
   margin: 10px;
 }
 
+.dot-dom-example .__f1 {
+  background-color: #f4b3ff !important;
+}
+
+.dot-dom-example .__f1.__f2 {
+  transition: background-color ease-out 1s !important;
+}
+
+.dot-dom-example .__f1.__f3 {
+  background-color: #fff !important;
+}
+
 .highlight > pre {
   border-radius: 10px;
 }
