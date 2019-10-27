@@ -51,6 +51,8 @@
     const aceDiv = editorDiv.firstChild;
     aceDiv.id = 'example-editor-' + (++lastId);
 
+    aceDiv.innerHTML = atob(aceDiv.innerText);
+
     const editor = ace.edit(aceDiv.id, {
       theme: "ace/theme/monokai",
       mode: "ace/mode/javascript",
