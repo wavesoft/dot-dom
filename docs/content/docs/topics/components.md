@@ -80,9 +80,9 @@ function Welcome(props) {
 // Define the app
 function App(props) {
   return div(
-    H(Welcome, {name: "Foo"}),
-    H(Welcome, {name: "Bar"}),
-    H(Welcome, {name: "Baz"})
+    H(Welcome, {name: "Alice"}),
+    H(Welcome, {name: "Bob"}),
+    H(Welcome, {name: "Charline"})
   );
 }
 

@@ -2,14 +2,38 @@
 
 .dot-dom-example {
   box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-  display: flex;
   border-radius: 10px;
   overflow: hidden;
+}
+
+.dot-dom-example .view {
+  display: flex;
+}
+
+.dot-dom-example .view > div {
+  flex: 1;
 }
 
 .dot-dom-example .editor {
   font-family: monospace;
 }
+
+.dot-dom-example .console {
+  border-top: solid 1px #CCC;
+  background: #EEE;
+  padding: 0 10px;
+  font-size: 0.8em;
+}
+
+.dot-dom-example .console.warn {
+  background-color: #fffacc;
+  color: #9c7500;
+}
+.dot-dom-example .console.error {
+  background-color: #ffdfdd;
+  color: #630700;
+}
+
 
 .dot-dom-example .ace_editor {
   position: relative;
@@ -17,16 +41,12 @@
   width: 100%;
 }
 
-.dot-dom-example > div {
-  flex: 1;
-}
-
-.dot-dom-example > .preview {
+.dot-dom-example .view > .preview {
   height: 220px;
   overflow: auto;
 }
 
-.dot-dom-example > .preview > div {
+.dot-dom-example .view > .preview > div {
   margin: 10px;
 }
 

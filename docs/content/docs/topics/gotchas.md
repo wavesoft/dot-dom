@@ -53,6 +53,19 @@ R(
 );
 {{</ dotdom-example >}}
 
+## First `setState` locally, then propagate
+
+When in the same handler you call `setState` and **also** call a handler function that you received as property, make sure to call `setState` **first** and **then** call-out to the handler.
+
+```js
+    // First call setState
+    setState({ value: newValue });
+    // And **then** call-out to handlers
+    if (props.onChange) props.onChange();
+```
+
+That's due to a limitation in the internals of the `.dom` engine, that could lead into invalid state updates if the parent element updates **before** the child element!
+
 ---
 
 {{< topicnav "" "reconciliation" >}}

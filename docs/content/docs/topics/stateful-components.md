@@ -100,7 +100,7 @@ function TodoItem({ text, completed, oncomplete }) {
   return div.rowflex(
     button(
       { onclick: oncomplete}, 
-      "✔︎"
+      "Ok"
     ),
     div[completed ? "strike" : ""](text)
   );
@@ -186,7 +186,7 @@ function TodoItem({ text, completed, oncomplete }) {
   return div.rowflex(
     button(
       { onclick: oncomplete}, 
-      "✔︎"
+      "Ok"
     ),
     div[completed ? "strike" : ""](text)
   );
@@ -213,10 +213,10 @@ function InputField({ oncreate }, {text=""}, setState) {
 function TodoList(props, state, setState) {
   const addItem = text => {
     setState({
-      items: (state.items || []).concat({
+      items: [].concat({
         text,
         completed: false
-      })
+      }, (state.items || []))
     })
   };
   const checkItem = index => {
@@ -225,11 +225,10 @@ function TodoList(props, state, setState) {
     setState({ });
   };
 
-  console.log(state.items);
   return div(
     H(InputField, { oncreate: addItem }),
     (state.items || []).map((item, index) => H(TodoItem, {
-      k: index,
+      k: item.text,
       text: item.text,
       completed: item.completed,
       oncomplete: checkItem.bind(this, index)

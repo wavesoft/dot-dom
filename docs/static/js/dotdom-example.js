@@ -1,7 +1,8 @@
 (() => {
   let lastId = 0;
 
-  const execSnippet = (source, dom) => {
+  const execSnippet = (source, dom, cns) => {
+    cns.log("Compiled as declarative DOM");
     let m;
     const rx = /(\w+)([\.\[][^[]+?)?\(/g;
     const tags = [];
@@ -10,16 +11,17 @@
       if (tags.indexOf(tag) == -1) tags.push(tag);
     }
 
-    const argNames = tags.slice().concat("H", "window", "document");
-    const argValues = tags.map(tag => window.H[tag]).concat(window.H, {}, {});
+    const argNames = tags.slice().concat("H", "window", "document", "console");
+    const argValues = tags.map(tag => window.H[tag]).concat(window.H, {}, {}, cns);
 
-    argNames.push("return (" + source + ")");
+    argNames.push("return " + source);
     const fn = new Function(...argNames);
 
     R(fn(...argValues), dom);
   };
 
-  const execFull = (source, dom) => {
+  const execFull = (source, dom, fakeConsole) => {
+    fakeConsole.log("Compiled without errors");
     const fn = new Function(
       "H",
       "R",
@@ -36,23 +38,28 @@
     const fakeWin = {
       document: fakeDoc
     };
-    const fakeConsole = console;
     return fn(window.H, window.R, dom, fakeWin, fakeDoc, fakeConsole);
   };
 
-  const updatePreview = (source, dom) => {
+  const updatePreview = (source, dom, cns) => {
+
     try {
-      execSnippet(source, dom);
+      execSnippet(source, dom, cns);
     } catch (e) {
       try {
-        execFull(source, dom);
+        execFull(source, dom, cns);
       } catch (e2) {
-        console.warn(e, e2);
+        cns.error(e2.toString());
       }
     }
   };
 
   const flash = dom => {
+
+    if (dom instanceof Text) {
+      dom = dom.parentElement;
+    }
+
     if (dom._timer) {
       clearInterval(dom._timer);
       dom.style.backgroundColor = dom._bc;
@@ -65,7 +72,7 @@
     dom._bc = dom.style.backgroundColor;
     dom._timer = setInterval(() => {
       state.v -= (1.0 / (duration / fps));
-      if (state.v < 0) {
+      if (state.v <= 0) {
         dom.style.backgroundColor = dom._bc;
         clearInterval(dom._timer);
       } else {
@@ -78,16 +85,24 @@
     const callback = function(mutationsList, observer) {
       mutationsList.forEach(mutation => {
         const { target, type, attributeName, oldValue } = mutation;
+
+        // Ignore mutations caused while animating the flash
         if (type == "attributes") {
           if (attributeName == "style" && target._timer) {
             return;
           }
         }
 
-        if (type == "characterData") {
-          flash(target.parentElement);
-        } else {
-          flash(target);
+        switch (type) {
+          case "characterData":
+            flash(target);
+            break;
+          case "attributes":
+            flash(target);
+            break;
+          case "childList":
+            mutation.addedNodes.forEach(flash);
+            break;
         }
       });
     };
@@ -104,13 +119,40 @@
     });
   };
 
+  const createConsole = dom => {
+    const write = (cls, ...args) => {
+      let text = args.map(x => ''+x).join(" ");
+      dom.className = "console " + cls;
+
+      if (cls == "error") {
+        text = "🛑 " + text;
+      } else if (cls == "warn") {
+        text = "⚠️ " + text;
+      }
+      dom.innerText = text;
+    }
+
+    return {
+      log: write.bind(this, ""),
+      warn: write.bind(this, "warn"),
+      warning: write.bind(this, "warn"),
+      error: write.bind(this, "error"),
+      debug: write.bind(this, "debug")
+    };
+  };
+
   const createEditor = dom => {
-    const editorDiv = dom.firstChild;
-    const previewDiv = editorDiv.nextSibling.firstChild;
+    const editorDiv = dom.querySelector(".editor");
+    const previewDiv = dom.querySelector(".preview");
+    const consoleDiv = dom.querySelector(".console");
 
-    const aceDiv = editorDiv.firstChild;
+    let renderDiv = document.createElement("div");
+    previewDiv.appendChild(renderDiv);
+
+    const cns = createConsole(consoleDiv);
+
+    const aceDiv = editorDiv.firstElementChild;
     aceDiv.id = "example-editor-" + ++lastId;
-
     aceDiv.innerHTML = atob(aceDiv.innerText);
 
     const editor = ace.edit(aceDiv.id, {
@@ -125,15 +167,19 @@
     const debounceUpdate = () => {
       clearTimeout(timer);
       timer = setTimeout(
-        () => updatePreview(editor.session.getValue(), previewDiv),
-        500
+        () => {
+          // previewDiv.removeChild(renderDiv);
+          // renderDiv = document.createElement("div");
+          // previewDiv.appendChild(renderDiv);
+          updatePreview(editor.session.getValue(), renderDiv, cns);
+        }, 500
       );
     };
 
     editor.on("change", debounceUpdate);
-    updatePreview(editor.session.getValue(), previewDiv);
+    updatePreview(editor.session.getValue(), renderDiv, cns);
     setTimeout(() => {
-      addMutationHighlights(previewDiv);
+      addMutationHighlights(renderDiv);
     }, 500);
   };
 
