@@ -1015,6 +1015,47 @@ describe('.dom', function () {
         );
       });
 
+      it('should change stateful root component without loosing state', function () {
+        const dom = document.createElement('div');
+        const Component = function(props, {clicks=0}, setState) {
+          return dd.H(
+            ((clicks % 2) == 0)
+              ? "div"
+              : "span",
+            dd.H("button", {
+              onclick() {
+                setState({
+                  clicks: clicks + 1
+                })
+              }
+            }, `${clicks} clicks`)
+          )
+        }
+        const vdom = dd.H(Component);
+
+        console.log('-- pre --');
+
+        dd.R(vdom, dom)
+
+        expect(dom.innerHTML).toEqual(
+          '<div><button>0 clicks</button></div>'
+        );
+
+        const event = new window.MouseEvent('click');
+
+        dom.firstChild.dispatchEvent(event);
+        console.log('-- post --');
+        expect(dom.innerHTML).toEqual(
+          '<span><button>1 clicks</button></span>'
+        );
+
+        dom.firstChild.dispatchEvent(event);
+        console.log('-- done --');
+        expect(dom.innerHTML).toEqual(
+          '<div><button>2 clicks</button></div>'
+        );
+      });
+
       it('should not destroy stateful component DOM elements at update', function () {
         const dom = document.createElement('div');
         const Component = function(props, {clicks=0}, setState) {
