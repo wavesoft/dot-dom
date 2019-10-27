@@ -14,7 +14,8 @@ The `.dom` library comes with a built-in accelerators that makes it possible to 
 
 This is achieved through Proxy methods built on top of the `.H` (create element) function, creating a native Javascript syntactic sugar:
 
-{{< dotdom-example >}}div(
+{{< dotdom-example >}}
+div(
   div.underline(
     "Welcome!"
   ),

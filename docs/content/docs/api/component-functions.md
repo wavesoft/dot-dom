@@ -31,6 +31,18 @@ Note that the `state` object instance remains untouched throughout the life-cycl
 
 ---
 
+## Special Properties
+
+There are some properties that the `.dom` engine uses for a specific uses. You should not use properties with these names in your application, but some of them can be used for their intended purpose.
+
+### `k:` - Key
+
+The `k` property specifies the indexing key for the VDom element. This key is used during reconciliation, in order to preserve the instance of the DOM element when re-ordering.
+
+This is particularly useful when you are rendering an array of items whose order is important. Using a unique key for each item will reduce the number of elements affected during an update and will improve the rendering performance.
+
+For more information refer to the [Reconciliation]({{< relref "reconciliation" >}}) section.
+
 ## setState()
 
 ```js

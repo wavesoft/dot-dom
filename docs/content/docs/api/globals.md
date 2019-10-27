@@ -22,9 +22,17 @@ H( 'tag', {prop: "value"}, H( 'child' ))
 H( Component, {prop: "value"} )
 ```
 
-Create and return a new VDom element of the given type. The type argument can be either a tag name string (such as 'div' or 'span') or a Component function.
+Create and return a new [VDom element]({{< relref "vdom-element" >}}) of the given type. The type argument can be either a tag name string (such as 'div' or 'span') or a Component function.
 
 If you are using JSX, your code will be converted to use the `H()` function. You will not typically invoke `H()` directly. Refer to the [JSX Integration]({{< ref "create-web-app" >}}) for more details.
+
+{{< hint "danger" >}}
+**Important!**
+You should never use the following property names, since it will lead to unexpected behaviour or run-time errors:
+
+* `$` - Used to differentiate VNode instances from regular objects
+* `c` - Reserved internally for keeping the children of a VDom element
+{{</ hint >}}
 
 ### Tag Shorthands
 
@@ -43,9 +51,13 @@ This feature is the foundation of the [Declarative DOM Composition]({{< ref "doc
 ## `.R` - Render
 
 ```js
-R( VirtualDOM, HTLDomElement  )
-R( [VirtualDOM, ...], HTLDomElement  )
+R( VNode, HTMLDomElement  )
+R( [VNode, ...], HTMLDomElement  )
+R( "String", HTMLDomElement )
 ```
 
-Renders the given VDom tree as children of the given HTML DOM element. The first argument can either be a single VDom element or an array of VDom elements.
+Renders the given VDom tree as children of the given HTML DOM element. The first argument can either be a single [VDom element]({{< relref "vdom-element" >}}) or an array of VDom elements.
+
+Note that [string is a valid VNode element]({{< relref "vdom-element#vdom-types" >}}) representing a `#text` node.
+
 
