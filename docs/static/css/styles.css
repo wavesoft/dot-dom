@@ -4,6 +4,7 @@
   box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
   border-radius: 10px;
   overflow: hidden;
+  margin-bottom: 1em;
 }
 
 .dot-dom-example .view {

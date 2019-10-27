@@ -14,7 +14,7 @@
     const argNames = tags.slice().concat("H", "window", "document", "console");
     const argValues = tags.map(tag => window.H[tag]).concat(window.H, {}, {}, cns);
 
-    argNames.push("return " + source);
+    argNames.push("return (" + source + ")");
     const fn = new Function(...argNames);
 
     R(fn(...argValues), dom);
