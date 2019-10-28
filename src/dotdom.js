@@ -47,13 +47,13 @@ module.exports = window;
    * @param {Array} children - The virtual DOM children
    * @return {VDom} Returns the VDom element
    */
-  let createElement = (element, props={}, ...children) => (
+  let createElement = (element, props, ...children) => (
       {
 
         $: element,                                                   // "$" holds the name or function passed as
                                                                       // first argument
 
-        a: (!props || props.$ || props.concat || props.toFixed)       // If the props argument is false/null, a renderable
+        a: (!props || props.$ || props.concat || props.toFixed)       // If the props argument is false/null/0, a renderable
                                                                       // VNode, a string, an array (.concat exists on both
                                                                       // strings and arrays), or a number ...
 
@@ -151,7 +151,7 @@ module.exports = window;
     updateDom = (node, vnode, hooks) => (
       vnode.$
         ? Object.keys(vnode.a).map(                                   // - Element nodes have properties
-            (key) =>                                                  // 1. The property name
+            (key) =>
               key == "style" ?                                        // The "style" property is an object and must be
                                                                       // applied recursively.
                 Object.assign(
@@ -160,7 +160,7 @@ module.exports = window;
                 )
 
               : (node[key] == vnode.a[key]                            // All properties are applied directly to DOM, as
-                ? node : (node[key] = vnode.a[key]))                  // long as they are different than ther value in the
+                ? node : (node[key] = vnode.a[key]))                  // long as they are different than their value in the
                                                                       // instance. This includes `onXXX` event handlers.
 
           ) &&
@@ -176,8 +176,8 @@ module.exports = window;
             vnode.a.c,                                                // we recursively continue rendering into it"s
             node                                                      // child nodes.
           ))
-        : (node.data == vnode)                                        // - String nodes update only the text content is changed
-            ? node : (node.data = vnode),
+        : (node.data == vnode)                                        // - String nodes update only if the text content
+            ? node : (node.data = vnode),                             //   has changed.
       Object.assign(node, hooks),
       _new_cache[hooks.k] = node
     ),
@@ -215,20 +215,23 @@ module.exports = window;
         },
 
         _xvnode = expandStateful(                                     // Recursively expand the stateful component functions until
-          vnode,                                                      // we have reached the
+          vnode,                                                      // we have reached a VDom child.
           _hooks
         )
 
       ) =>
-        callLifecycleMethods(
-          updateDom(
-            // (We are recycling the no-longer used `vnode` property
-            //  as a compression optimization)
-            (vnode =                                                  // Keep track of the node we just added because we will need
+                                                                      // Note that the following set of actions happen in reverse:
+        callLifecycleMethods(                                         // 3. Call-out to the appropriate lifecycle method
+          updateDom(                                                  // 2. Update the DOM properties
+            // (We are recycling the no-longer used `vnode`
+            //  property as a compression optimization)               // 1. Create a new and replace, or re-use previous DOM element:
+                                                                      //
+            (vnode =                                                  // (Keep track of the node we just added because we will need
                                                                       // it for the next iteration and for the last part of the
-                                                                      // current function call.
+                                                                      // current function call)
 
-              (((dom.childNodes[idx] || _xvnode).k) != _key)          // previous node should be the expected.
+              (((dom.childNodes[idx] || _xvnode).k) != _key)          // If the nodes appear in the expected order, do not perform
+                                                                      // any DOM re-ordering.
                 ? dom.insertBefore(                                   // a. If the node should be re-ordered, place it right after
                     _prevnode ||                                      //    the last known item.
                       (_xvnode.$
@@ -236,12 +239,12 @@ module.exports = window;
                         : document.createTextNode(_xvnode)),
                     dom.childNodes[idx]
                   )
-                : _prevnode                                           // b. Otherwise keep the reference
+                : _prevnode                                           // b. Otherwise keep the previous reference
             ),
-            _xvnode,
+            _xvnode,                                                  // Arguments to `updateDom`
             _hooks
-          ) == _prevnode
-            ? _hooks.d                                                // .d - Update if it"s an old node
+          ) == _prevnode                                              // If the node we just updated was the previous node,
+            ? _hooks.d                                                // .d - Call the update lifecycle method
             : _hooks.m,                                               // .m - Otherwise this is a new node, call mount
           vnode
         )
