@@ -24,7 +24,7 @@ H( Component, {prop: "value"} )
 
 Create and return a new [VDom element]({{< relref "vdom-element" >}}) of the given type. The type argument can be either a tag name string (such as 'div' or 'span') or a Component function.
 
-If you are using JSX, your code will be converted to use the `H()` function. You will not typically invoke `H()` directly. Refer to the [JSX Integration]({{< ref "create-web-app" >}}) for more details.
+If you are using JSX, your code will be converted to use the `H()` function. You will not typically invoke `H()` directly. Refer to the [JSX Integration]({{< ref "create-webapp" >}}) for more details.
 
 {{< hint "danger" >}}
 **Important!**

@@ -1,17 +1,17 @@
 ---
-title: "Adding .dom in your website"
+title: "Website with Declarative DOM"
 type: docs
 weight: 2
 # bookFlatSection: false
 # bookShowToC: true
 ---
 
-# Adding .dom in your website
+# Creating a Website with Declarative DOM
 
-Use it according to your needs.
+In the most simple case, you can use `.dom` as an external library to your website and you can design your layout using the built-in [declarative DOM]({{< relref "declarative" >}}) syntax.
 
-The `.dom` library is quite agile and can be used either in existing websites, where you just want to add some interactivity, or in a modern single-page app.
-
+The `.dom` library is quite agile and can be used without any external dependencies, such as code transipler (eg babel), packagers (eg. webpack) or other pre-processing tools. In this page we are presenting this simplest use case.
+ 
 ---
 
 ## Boilerplate
@@ -90,4 +90,4 @@ You are now ready to define your components and render your app. You can do this
 
 ---
 
-{{< topicnav "create-web-app" "getting-started" >}}
+{{< topicnav "create-webapp" "getting-started" >}}
