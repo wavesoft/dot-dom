@@ -53,7 +53,7 @@ R(
 );
 {{</ dotdom-example >}}
 
-## First `setState` locally, then propagate
+## First `setState`, then propagate
 
 When in the same handler you call `setState` and **also** call a handler function that you received as property, make sure to call `setState` **first** and **then** call-out to the handler.
 
