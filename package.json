@@ -44,7 +44,7 @@
     "gulp-merge": "^0.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-strip-code": "^0.1.4",
-    "gulp-uglify-es": "^1.0.4",
+    "gulp-terser": "^1.2.0",
     "gulp-util": "^3.0.8",
     "handlebars": ">=4.1.2",
     "jest": "^24.1.0",
