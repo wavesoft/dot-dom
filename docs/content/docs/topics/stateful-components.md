@@ -152,10 +152,10 @@ And finally, let's design the **TodoList** component:
 function TodoList(props, {items=[]}, setState) {
   const addItem = text => {
     setState({
-      items: items.concat({
+      items: [].concat({
         text,
         completed: false
-      })
+      }, (state.items || []))
     })
   };
   const checkItem = index => {

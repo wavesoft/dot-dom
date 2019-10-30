@@ -10,6 +10,11 @@ weight: 12
 
 Since `.dom` is optimized for _size_ and not for performance nor developer friendliness, you should be aware that there are few rough edges.
 
+This document presents some of the well-known issues of the library that are intentionally remain unsolved because:
+
+1. They are not obstructing the typical application development.
+2. If solved, the library footprint will exceed the 512 bytes.
+
 ---
 
 ## Component roots cannot change

@@ -19,12 +19,11 @@ type: docs
 
 The .dom ("dot dom") is the worlds smallest, most feature-packed Virtual DOM template library. This makes it ideal for _embedded UIs_, _browser extensions_, or wherever saving a single byte actually matters!
 
-In just **512 bytes** (compressed) it provides:
+In just **512 bytes** (compressed) it offers:
 
 - _Virtual DOM_ reconciliation
-- _Declarative_ composition using native js accelerators
+- _Declarative_ template language using native js primitives
 - _Stateful Components_, including higher-order component composition
 - _Component Life-Cycle_ methods (mount, unmount, update)
 - _Keyed Updates_ and high-performance optimization 
 - _JSX_ integration compatibility
-

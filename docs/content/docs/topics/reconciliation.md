@@ -32,14 +32,14 @@ This includes switching from one tag to another (eg. `<span>` to `<div>`), switc
 
 Note that the state of a component is bound to it's root element. This means that if it's parent element is removed and re-created, the component state will also be lost. For example:
 
-```html
-<div>
-  <Counter />
-</div>
+```js
+div(
+  H(Counter)
+)
 
-<span>
-  <Counter />
-</span>
+span(
+  H(Counter)
+)
 ```
 
 ### Elements Of Same Types
@@ -54,41 +54,41 @@ By default, when recursing on the children of a DOM node, `.dom` just iterates o
 
 For example, when adding an element at the end of the children, converting between these two trees works well:
 
-```html
-<ul>
-  <li>first</li>
-  <li>second</li>
-</ul>
+```js
+ul(
+  li("First"),
+  li("Second")
+)
 
-<ul>
-  <li>first</li>
-  <li>second</li>
-  <li>third</li>
-</ul>
+ul(
+  li("First"),
+  li("Second"),
+  li("Third")
+)
 ```
 
 The diffing algorithm will match the two `<li>first</li>` trees, match the two `<li>second</li>` trees, and then insert the `<li>third</li>` tree.
 
 If you implement it naively, inserting an element at the beginning has worse performance. For example, converting between these two trees works poorly:
 
-```html
-<ul>
-  <li>Foo</li>
-  <li>Bar</li>
-</ul>
+```js
+ul(
+  li("Foo"),
+  li("Bar")
+)
 
-<ul>
-  <li>Baz</li>
-  <li>Foo</li>
-  <li>Bar</li>
-</ul>
+ul(
+  li("Baz"),
+  li("Foo"),
+  li("Bar"),
+)
 ```
 
 This will mutate every child instead of realizing it can keep the `<li>Foo</li>` and `<li>Bar</li>` subtrees intact. This inefficiency can be a problem.
 
 ### Keys
 
-In order to solve this issue, `.dom` supports a key attribute. When children have keys, `.dom` uses the key to match children in the original tree with children in the subsequent tree. For example, adding a key to our inefficient example above can make the tree conversion efficient:
+In order to solve this issue, `.dom` supports a key attribute. When children have keys, `.dom` uses the key to match children in the original tree with children in the subsequent tree. For example, adding a `k` property to our inefficient example above can make the tree conversion efficient:
 
 ```js
 ul(
@@ -107,8 +107,8 @@ Now `.dom` knows that the element with key `'2014'` is the new one, and the elem
 
 In practice, finding a key is usually not hard. The element you are going to display may already have a unique ID, so the key can just come from your data:
 
-```html
-<li key={item.id}>{item.name}</li>
+```js
+li({k: item.id}, item.name)
 ```
 
 When that’s not the case, you can add a new ID property to your model or hash some parts of the content to generate a key. The key only has to be unique among its siblings, not globally unique.

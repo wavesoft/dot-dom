@@ -18,13 +18,29 @@ This is achieved simply by setting the correct encoding response header while st
 Content-Encoding: gzip
 ```
 
-{{< hint "warning" >}}
+{{< hint "info" >}}
 According to HTML standards you should always check the `Accept-Encoding` request header, and proceed with sending the compressed version of the library only if supported.
 
 However *all* the browsers in the market natively support the `gzip` encoding, making this a safe assumption.
 {{< /hint >}}
 
 ---
+
+## Serving the `.br` version
+
+The latest version of the library is compressed using the [brotli](https://github.com/google/brotli) compression instead of GZip. This is a more efficient compression algorithm, giving us space to pack more features.
+
+Similar to `.gz` version, you can serve the brotli-compressed file using the header:
+
+```
+Content-Encoding: br
+```
+
+{{< hint "warning" >}}
+In contrast to GZip that has been a standard for long time, _brotli_ is a fairly new compression standard. And in this case you _should_ check if the client supports this encoding via the `Accept-Encoding` header.
+
+Nonetheless, [more than 90%](https://caniuse.com/#feat=brotli) of the browsers in the market is currently supporting this feature, making the assumption that the clients support it by default. also quite safe.
+{{</ hint >}}
 
 ## ESP32 Example
 
