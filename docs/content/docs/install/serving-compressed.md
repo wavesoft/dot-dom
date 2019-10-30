@@ -37,9 +37,9 @@ Content-Encoding: br
 ```
 
 {{< hint "warning" >}}
-In contrast to GZip that has been a standard for long time, _brotli_ is a fairly new compression standard. And in this case you _should_ check if the client supports this encoding via the `Accept-Encoding` header.
+In contrast to GZip that has been a standardized a long time ago, _brotli_ is a fairly new compression standard. And in this case you should typically check if the client supports this encoding via the `Accept-Encoding` header.
 
-Nonetheless, [more than 90%](https://caniuse.com/#feat=brotli) of the browsers in the market is currently supporting this feature, making the assumption that the clients support it by default. also quite safe.
+Nonetheless, [more than 90%](https://caniuse.com/#feat=brotli) of the browsers in the market is currently supporting this feature, making the assumption that the clients support it by default a quite safe one.
 {{</ hint >}}
 
 ## ESP32 Example
