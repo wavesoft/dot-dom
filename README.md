@@ -37,7 +37,7 @@ For minimum footprint, include `dotdom.min.js.gz` (512b) to your project.
 <script src="dotdom.min.js.gz" />
 ```
 
-Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the [minified code](https://raw.githubusercontent.com/wavesoft/dot-dom/master/dotdom.min.js).
+Alternatively you can just include the minified version of the library directly before your script. Just copy-paste the [minified code](https://raw.githubusercontent.com/wavesoft/dot-dom/master/dist/dotdom.min.js).
 
 ## Examples
 
