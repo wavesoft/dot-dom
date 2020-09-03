@@ -276,7 +276,7 @@ class Clickable extends React.Component {
 <br />
   render() {
     const {clicks} = this.state;
-    const {ket} = this.props;
+    const {key} = this.props;
 <br />
     return React.createElement(
       'button', {
